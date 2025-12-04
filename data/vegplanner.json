@@ -1,0 +1,73 @@
+{
+  "frostWindow": {
+    "id": "default-frost",
+    "lastSpringFrost": "2025-04-20",
+    "firstFallFrost": "2025-10-15"
+  },
+  "cultivars": [
+    {
+      "id": "tomato-sungold",
+      "crop": "Tomato",
+      "variety": "Sungold",
+      "vendor": "Johnny's",
+      "germDaysMin": 6,
+      "germDaysMax": 10,
+      "maturityDays": 57,
+      "maturityBasis": "from_transplant",
+      "sowMethod": "transplant",
+      "indoorLeadWeeksMin": 6,
+      "indoorLeadWeeksMax": 8,
+      "transplantAfterLsfDays": 7,
+      "notes": "Indeterminate, F1, prune to single leader if desired."
+    },
+    {
+      "id": "beet-avalanche",
+      "crop": "Beet",
+      "variety": "Avalanche",
+      "vendor": "High Mowing",
+      "germDaysMin": 5,
+      "germDaysMax": 10,
+      "maturityDays": 55,
+      "maturityBasis": "from_sow",
+      "sowMethod": "direct",
+      "directAfterLsfDays": -14,
+      "notes": "White beet, sweet flavor; cold-tolerant so ok before LSF."
+    },
+    {
+      "id": "bean-provider",
+      "crop": "Bush Bean",
+      "variety": "Provider",
+      "vendor": "Various",
+      "germDaysMin": 7,
+      "germDaysMax": 10,
+      "maturityDays": 50,
+      "maturityBasis": "from_sow",
+      "sowMethod": "direct",
+      "directAfterLsfDays": 7,
+      "notes": "Reliable early bush bean; do not plant in cold soil."
+    }
+  ],
+  "plans": [
+    {
+      "id": "plan-1",
+      "cultivarId": "tomato-sungold",
+      "frostWindowId": "default-frost",
+      "season": "spring",
+      "successionOffsetsDays": [0]
+    },
+    {
+      "id": "plan-2",
+      "cultivarId": "beet-avalanche",
+      "frostWindowId": "default-frost",
+      "season": "spring",
+      "successionOffsetsDays": [0]
+    },
+    {
+      "id": "plan-3",
+      "cultivarId": "bean-provider",
+      "frostWindowId": "default-frost",
+      "season": "spring",
+      "successionOffsetsDays": [0]
+    }
+  ]
+}
