@@ -1,0 +1,5 @@
+{
+  "sandbox_mode": "workspace-write",
+  "network_access": "enabled",
+  "approval_policy": "on-request"
+}
