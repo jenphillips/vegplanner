@@ -30,6 +30,9 @@ This document captures the initial requirements, data model, and scheduling logi
   - `direct_after_lsf_days` (days after LSF for first safe direct sow; can be negative for cold-hardy crops)
   - `transplant_after_lsf_days` (days after LSF for safe transplant; often 0–14)
   - `fall_buffer_days` (days before FFF you want harvest to finish; e.g., 14)
+  - `harvest_style` (`single` | `continuous`)
+  - `harvest_duration_days` (optional window length; for `continuous` defaults to frost-bounded)
+  - `frost_sensitive` (bool; if true and `continuous`, harvest ends at first fall frost)
   - `notes`
 - `PlantingPlan`
   - `cultivar_id`
@@ -85,6 +88,10 @@ Given `LSF`, `FFF`, and a `PlantingPlan` for a `Cultivar`:
   - Adjust by cultivar cold tolerance (not modeled yet; use `direct_after_lsf_days` as a correction if negative to indicate cold-hardy).
 - Succession planting:
   - For each `offset` in `succession_offsets_days`, duplicate the chosen method schedule with `+ offset` days applied to sow and transplant dates.
+- Harvest window logic:
+  - `harvest_start = maturity anchor` (from sow or transplant per `maturity_basis`)
+  - If `harvest_style == single`: `harvest_end = harvest_start + max(harvest_duration_days-1,0)` (defaults to 1 day)
+  - If `harvest_style == continuous`: `harvest_end = min(first_fall_frost, harvest_start + harvest_duration_days)` when `frost_sensitive`; otherwise use the duration. If duration missing, default to frost-bounded.
 
 All generated dates should include the assumptions used (basis, lead times, buffers) so gardeners can tweak inputs.
 

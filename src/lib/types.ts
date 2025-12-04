@@ -7,6 +7,7 @@ export type FrostWindow = {
 export type SowMethod = 'direct' | 'transplant' | 'either';
 export type MaturityBasis = 'from_sow' | 'from_transplant';
 export type Season = 'spring' | 'fall';
+export type HarvestStyle = 'single' | 'continuous';
 
 export type Cultivar = {
   id: string;
@@ -23,6 +24,9 @@ export type Cultivar = {
   directAfterLsfDays?: number | null;
   transplantAfterLsfDays?: number | null;
   fallBufferDays?: number | null;
+  harvestStyle?: HarvestStyle;
+  harvestDurationDays?: number | null; // window length; for continuous, fallback to frost end
+  frostSensitive?: boolean; // if true, continuous harvest ends at first fall frost
   notes?: string;
 };
 
@@ -58,6 +62,6 @@ export type ScheduleResult = {
   sowDates: ScheduleEntry[];
   germinationWindow?: DateRange;
   transplantDate?: ScheduleEntry;
-  harvestDate?: ScheduleEntry;
+  harvestWindow?: DateRange;
   assumptions: Record<string, string | number | null | undefined>;
 };

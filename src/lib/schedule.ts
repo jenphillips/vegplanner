@@ -34,7 +34,7 @@ export const buildSchedule = ({ frostWindow, cultivar, plan }: ScheduleInput): S
   let sowDates: ScheduleResult['sowDates'] = [];
   let transplantDate: ScheduleResult['transplantDate'];
   let germinationWindow: ScheduleResult['germinationWindow'];
-  let harvestDate: ScheduleResult['harvestDate'];
+  let harvestWindow: ScheduleResult['harvestWindow'];
 
   if (season === 'spring' && method === 'direct') {
     const offset = ensureNumber(cultivar.directAfterLsfDays, 0);
@@ -45,10 +45,8 @@ export const buildSchedule = ({ frostWindow, cultivar, plan }: ScheduleInput): S
       end: addDays(sowDate, cultivar.germDaysMax),
     };
     if (cultivar.maturityBasis === 'from_sow') {
-      harvestDate = {
-        label: 'Harvest (from sow)',
-        date: addDays(sowDate, cultivar.maturityDays),
-      };
+      const start = addDays(sowDate, cultivar.maturityDays);
+      harvestWindow = buildHarvestWindow(start, fallAnchor, cultivar);
     }
   }
 
@@ -70,17 +68,11 @@ export const buildSchedule = ({ frostWindow, cultivar, plan }: ScheduleInput): S
       end: addDays(indoorEarly, cultivar.germDaysMax),
     };
 
-    if (cultivar.maturityBasis === 'from_transplant') {
-      harvestDate = {
-        label: 'Harvest (from transplant)',
-        date: addDays(transplant, cultivar.maturityDays),
-      };
-    } else {
-      harvestDate = {
-        label: 'Harvest (from sow)',
-        date: addDays(indoorEarly, cultivar.maturityDays),
-      };
-    }
+    const start =
+      cultivar.maturityBasis === 'from_transplant'
+        ? addDays(transplant, cultivar.maturityDays)
+        : addDays(indoorEarly, cultivar.maturityDays);
+    harvestWindow = buildHarvestWindow(start, fallAnchor, cultivar);
   }
 
   if (season === 'fall') {
@@ -92,7 +84,8 @@ export const buildSchedule = ({ frostWindow, cultivar, plan }: ScheduleInput): S
       start: addDays(sowDate, cultivar.germDaysMin),
       end: addDays(sowDate, cultivar.germDaysMax),
     };
-    harvestDate = { label: 'Harvest (fall, pre-frost)', date: fallAnchor };
+    const start = addDays(sowDate, cultivar.maturityDays);
+    harvestWindow = buildHarvestWindow(start, fallAnchor, cultivar);
     assumptions.fallAnchor = fallAnchor;
   }
 
@@ -102,7 +95,18 @@ export const buildSchedule = ({ frostWindow, cultivar, plan }: ScheduleInput): S
     sowDates,
     germinationWindow,
     transplantDate,
-    harvestDate,
+    harvestWindow,
     assumptions,
   };
 };
+
+function buildHarvestWindow(start: string, fallAnchor: string, cultivar: Cultivar) {
+  const style = cultivar.harvestStyle ?? 'single';
+  const duration = ensureNumber(cultivar.harvestDurationDays, style === 'continuous' ? 999 : 1);
+  if (style === 'continuous') {
+    const end = cultivar.frostSensitive ? fallAnchor : addDays(start, duration);
+    return { start, end };
+  }
+  const end = addDays(start, Math.max(duration - 1, 0));
+  return { start, end };
+}
