@@ -1,0 +1,30 @@
+.header {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 0 10px;
+}
+
+.spacer {
+  flex-shrink: 0;
+  width: 200px;
+}
+
+.labels {
+  flex: 1;
+  position: relative;
+  height: 16px;
+  font-size: 10px;
+  color: var(--muted, #5f6653);
+}
+
+.monthLabel {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.deletespacer {
+  flex-shrink: 0;
+  width: 24px;
+}

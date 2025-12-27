@@ -1,181 +1,7 @@
-.page {
-  --background: #f5f5f0;
-  --panel: #ffffff;
-  --border: #e5e5de;
-  --text: #1f2614;
-  --muted: #5f6653;
-  --accent: #2f6f4e;
-  --accent-strong: #1f4a33;
-
-  min-height: 100vh;
-  background: radial-gradient(120% 120% at 10% 20%, #eef5ea 0%, #f5f5f0 45%, #f5f5f0 100%);
-  font-family: var(--font-geist-sans);
-  color: var(--text);
-}
-
-.main {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 64px 24px 96px;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.eyebrow {
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  margin: 0 0 6px;
-}
-
-.heading {
-  margin: 0;
-  font-size: 34px;
-  line-height: 1.1;
-  letter-spacing: -0.04em;
-}
-
-.lede {
-  margin: 8px 0 0;
-  color: var(--muted);
-  max-width: 640px;
-  line-height: 1.5;
-}
-
-.button {
-  background: linear-gradient(120deg, var(--accent), var(--accent-strong));
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.2s ease;
-  box-shadow: 0 8px 20px rgba(31, 74, 51, 0.25);
-}
-
-.button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(31, 74, 51, 0.28);
-}
-
-.card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 18px 20px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
-}
-
-.card h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-}
-
-.card p,
-.card li {
-  margin: 4px 0;
-  color: var(--muted);
-}
-
-.card ul {
-  padding-left: 18px;
-  margin: 8px 0;
-}
-
-.infoPanel {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 20px;
-  align-items: center;
-  padding: 12px 16px;
-  background: #f0f3ed;
-  border: 1px dashed var(--border);
-  border-radius: 12px;
-}
-
-.infoItem {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 6px;
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.label {
-  font-weight: 600;
-  color: var(--text);
-}
-
-.section {
-  margin-top: 8px;
-}
-
-.sectionHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.sectionTitle {
-  margin: 0 0 6px;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.sectionDesc {
-  margin: 0;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.expandButton {
-  flex-shrink: 0;
-  padding: 8px 14px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--panel);
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.expandButton:hover {
-  background: #f0f3ed;
-  border-color: var(--accent);
-}
-
-.cultivarGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
 .timelineCard {
   margin-top: 12px;
-  background: var(--panel);
-  border: 1px solid var(--border);
+  background: var(--panel, #ffffff);
+  border: 1px solid var(--border, #e5e5de);
   border-radius: 16px;
   padding: 20px 20px 28px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
@@ -189,9 +15,14 @@
   margin-bottom: 12px;
 }
 
+.timelineHeader h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
 .muted {
   margin: 4px 0 0;
-  color: var(--muted);
+  color: var(--muted, #5f6653);
 }
 
 .legend {
@@ -199,7 +30,7 @@
   flex-wrap: wrap;
   gap: 10px;
   font-size: 13px;
-  color: var(--muted);
+  color: var(--muted, #5f6653);
 }
 
 .legendItem {
@@ -240,14 +71,25 @@
 }
 
 .swatchFrostRange {
-  background: linear-gradient(90deg, rgba(51, 181, 229, 0.15), rgba(51, 181, 229, 0.5), rgba(51, 181, 229, 0.15));
+  width: 14px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    rgba(51, 181, 229, 0.15),
+    rgba(51, 181, 229, 0.5),
+    rgba(51, 181, 229, 0.15)
+  );
   border: 1px solid rgba(51, 181, 229, 0.4);
 }
 
 .swatchFrostTypical {
+  width: 4px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
   background: #33b5e5;
-  width: 4px !important;
-  border-radius: 2px !important;
 }
 
 .timelineRow {
@@ -260,6 +102,7 @@
 
 .timelineLabel {
   font-weight: 600;
+  color: var(--text, #1f2614);
 }
 
 .tickRow {
@@ -289,7 +132,7 @@
   position: relative;
   height: 32px;
   background: #f7f8f5;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border, #e5e5de);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -356,7 +199,6 @@
   background: #1e88b8;
 }
 
-/* Frost range bands - show probability gradient */
 .frostRangeSpring,
 .frostRangeFall {
   position: absolute;
@@ -367,7 +209,8 @@
 }
 
 .frostRangeSpring {
-  background: linear-gradient(90deg,
+  background: linear-gradient(
+    90deg,
     rgba(51, 181, 229, 0.08) 0%,
     rgba(51, 181, 229, 0.35) 50%,
     rgba(51, 181, 229, 0.08) 100%
@@ -377,7 +220,8 @@
 }
 
 .frostRangeFall {
-  background: linear-gradient(90deg,
+  background: linear-gradient(
+    90deg,
     rgba(30, 136, 184, 0.08) 0%,
     rgba(30, 136, 184, 0.35) 50%,
     rgba(30, 136, 184, 0.08) 100%
@@ -386,7 +230,6 @@
   border-right: 1px dashed rgba(30, 136, 184, 0.4);
 }
 
-/* Typical frost date marker - solid line within the range */
 .frostTypicalMarker {
   position: absolute;
   top: 2px;
@@ -398,24 +241,18 @@
   z-index: 2;
 }
 
-.timelineFooter {
-  position: relative;
-  height: 32px;
-  margin-top: 6px;
-}
-
 .tick {
   position: absolute;
   transform: translateX(-50%);
   text-align: center;
-  color: var(--muted);
+  color: var(--muted, #5f6653);
   font-size: 12px;
 }
 
 .tickMark {
   width: 1px;
   height: 12px;
-  background: var(--border);
+  background: var(--border, #e5e5de);
   margin: 0 auto 4px;
 }
 
@@ -432,7 +269,7 @@
   gap: 2px;
   flex-direction: column;
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted, #5f6653);
 }
 
 .tempBadge {
@@ -446,25 +283,12 @@
 }
 
 @media (max-width: 700px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .heading {
-    font-size: 28px;
-  }
-
   .timelineRow {
     grid-template-columns: 1fr;
   }
 
   .timelineLabel {
     margin-bottom: 6px;
-  }
-
-  .infoPanel {
-    gap: 8px 14px;
   }
 
   .tickRow,

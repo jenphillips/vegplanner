@@ -1,0 +1,140 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.track {
+  position: relative;
+  height: 20px;
+  background: #f7f8f5;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Week bands (zebra striping) */
+.weekBands {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.weekBand {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.weekBandLight {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.weekBandDark {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Month tick marks */
+.monthTick {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Frost range */
+.frostRange {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(51, 181, 229, 0.08) 0%,
+    rgba(51, 181, 229, 0.25) 50%,
+    rgba(51, 181, 229, 0.08) 100%
+  );
+  border-left: 1px dashed rgba(51, 181, 229, 0.4);
+  border-right: 1px dashed rgba(51, 181, 229, 0.4);
+  pointer-events: none;
+}
+
+.frostTypical {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #33b5e5;
+  z-index: 1;
+}
+
+.frostMarker {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #33b5e5;
+}
+
+/* Sow bar (indoor period for transplants) */
+.barSow {
+  position: absolute;
+  top: 4px;
+  height: 12px;
+  background: linear-gradient(90deg, #2d5a40, #3b7a57);
+  border-radius: 3px;
+  z-index: 2;
+}
+
+/* Growing period bar */
+.barGrowing {
+  position: absolute;
+  top: 4px;
+  height: 12px;
+  background: linear-gradient(90deg, #4e9b71, #6ab889);
+  border-radius: 3px;
+  z-index: 2;
+}
+
+/* Harvest bar */
+.barHarvest {
+  position: absolute;
+  top: 4px;
+  height: 12px;
+  background: linear-gradient(90deg, #d07a00, #e8a030);
+  border-radius: 3px;
+  z-index: 2;
+}
+
+/* Transplant marker */
+.markerTransplant {
+  position: absolute;
+  top: 2px;
+  width: 3px;
+  height: 16px;
+  background: #7a3dc0;
+  border-radius: 2px;
+  z-index: 3;
+  transform: translateX(-50%);
+}
+
+/* Month labels - hidden in compact mode, shown when expanded */
+.labels {
+  display: none;
+}
+
+.labelsVisible {
+  display: block;
+  position: relative;
+  height: 14px;
+  font-size: 9px;
+  color: var(--muted, #5f6653);
+}
+
+.monthLabel {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}

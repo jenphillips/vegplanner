@@ -27,6 +27,11 @@ export type Cultivar = {
   harvestStyle?: HarvestStyle;
   harvestDurationDays?: number | null; // window length; for continuous, fallback to frost end
   frostSensitive?: boolean; // if true, continuous harvest ends at first fall frost
+  // Temperature tolerance for succession planning
+  minGrowingTempC?: number | null; // Below this, don't plant (e.g., 5 for tomatoes)
+  maxGrowingTempC?: number | null; // Above this, skip succession (e.g., 24 for spinach)
+  optimalTempMinC?: number | null; // Optimal growing range low
+  optimalTempMaxC?: number | null; // Optimal growing range high
   notes?: string;
 };
 
@@ -64,4 +69,110 @@ export type ScheduleResult = {
   transplantDate?: ScheduleEntry;
   harvestWindow?: DateRange;
   assumptions: Record<string, string | number | null | undefined>;
+};
+
+// Climate data types for historical weather reference
+export type MonthlyTemperature = {
+  tavg_c: number; // Average air temperature (°C)
+  tmin_c: number; // Average daily minimum (°C)
+  tmax_c: number; // Average daily maximum (°C)
+  soil_avg_c: number; // Estimated average soil temperature at 10cm depth (°C)
+  gdd_base5: number; // Growing degree days (base 5°C) accumulated by end of month
+};
+
+export type FrostProbability = {
+  date: string; // ISO date (MM-DD format)
+  probability: number; // Percentage chance of frost (0-100)
+};
+
+export type FrostDateRange = {
+  earliest: string; // Earliest recorded date (MM-DD)
+  typical: string; // Most common/median date (MM-DD)
+  latest: string; // Latest recorded date (MM-DD)
+  probability10: string; // 10% probability date (MM-DD)
+  probability50: string; // 50% probability date (MM-DD)
+  probability90: string; // 90% probability date (MM-DD)
+};
+
+export type Climate = {
+  location: string;
+  coordinates: { lat: number; lon: number };
+  elevation_m: number;
+  source: string;
+  monthlyAvgC: Record<string, MonthlyTemperature>; // Keys are month numbers 1-12
+  lastSpringFrost: FrostDateRange;
+  firstFallFrost: FrostDateRange;
+  growingSeasonDays: number; // Average frost-free days
+  annualGDD: number; // Total growing degree days (base 5°C)
+  notes: string;
+};
+
+// ============================================
+// Planting & Task Types (for succession planning)
+// ============================================
+
+export type PlantingStatus =
+  | 'planned'
+  | 'sowing'
+  | 'growing'
+  | 'transplanting'
+  | 'harvesting'
+  | 'completed'
+  | 'failed';
+
+export type Planting = {
+  id: string;
+  cultivarId: string;
+  label: string; // "Spinach #1", "Tomato - Early"
+  quantity: number; // Number of plants/seeds
+  sowDate: string; // Calculated ISO date
+  transplantDate?: string; // If transplant method
+  harvestStart: string;
+  harvestEnd: string;
+  method: SowMethod;
+  status: PlantingStatus;
+  successionNumber: number; // 1, 2, 3... for ordering
+  notes?: string;
+  createdAt: string;
+};
+
+export type TaskType =
+  | 'sow_indoor'
+  | 'sow_direct'
+  | 'harden_off'
+  | 'transplant'
+  | 'harvest_start';
+
+export type Task = {
+  id: string;
+  plantingId: string;
+  cultivarId: string;
+  type: TaskType;
+  date: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  completedAt?: string;
+};
+
+// ============================================
+// Garden Bed Types (Phase 3)
+// ============================================
+
+export type GardenBed = {
+  id: string;
+  name: string;
+  widthCm: number;
+  lengthCm: number;
+  sunExposure: 'full' | 'partial' | 'shade';
+  notes?: string;
+};
+
+export type PlantingPlacement = {
+  id: string;
+  plantingId: string;
+  bedId: string;
+  xCm: number;
+  yCm: number;
+  spacingCm: number;
 };

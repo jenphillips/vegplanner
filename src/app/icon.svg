@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Carrot body -->
+  <path d="M16 8 L20 28 L16 30 L12 28 Z" fill="#FF6B35"/>
+  <!-- Carrot stripes -->
+  <line x1="14" y1="12" x2="18" y2="12" stroke="#E55A2B" stroke-width="1"/>
+  <line x1="13.5" y1="16" x2="18.5" y2="16" stroke="#E55A2B" stroke-width="1"/>
+  <line x1="13" y1="20" x2="19" y2="20" stroke="#E55A2B" stroke-width="1"/>
+  <line x1="14" y1="24" x2="18" y2="24" stroke="#E55A2B" stroke-width="1"/>
+  <!-- Carrot greens -->
+  <path d="M16 8 Q12 4 10 2" stroke="#228B22" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M16 8 Q16 3 16 1" stroke="#228B22" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M16 8 Q20 4 22 2" stroke="#228B22" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>

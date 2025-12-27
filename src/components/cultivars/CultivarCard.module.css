@@ -1,0 +1,207 @@
+.card {
+  background: var(--panel, #ffffff);
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+
+.header:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text, #1f2614);
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.countBadge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.harvestBadge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.meta {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--muted, #5f6653);
+  flex-wrap: wrap;
+}
+
+.chevron {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+}
+
+.content {
+  border-top: 1px solid var(--border, #e5e5de);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quantityRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.quantityRow label {
+  color: var(--muted, #5f6653);
+}
+
+.quantityInput {
+  width: 70px;
+  padding: 6px 10px;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.quantityInput:focus {
+  outline: none;
+  border-color: var(--accent, #2f6f4e);
+  box-shadow: 0 0 0 2px rgba(47, 111, 78, 0.15);
+}
+
+.buttonRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryButton {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.primaryButton {
+  background: linear-gradient(120deg, var(--accent, #2f6f4e), var(--accent-strong, #1f4a33));
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(31, 74, 51, 0.2);
+}
+
+.primaryButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(31, 74, 51, 0.25);
+}
+
+.secondaryButton {
+  background: #f5f5f0;
+  color: var(--text, #1f2614);
+  border: 1px solid var(--border, #e5e5de);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: #eef5ea;
+  border-color: var(--accent, #2f6f4e);
+}
+
+.secondaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.skippedInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+  padding: 8px 12px;
+  background: #fff8e1;
+  border-radius: 6px;
+}
+
+.skippedLabel {
+  font-weight: 600;
+  color: #f57c00;
+}
+
+.skippedPeriod {
+  padding: 2px 6px;
+  background: #ffe0b2;
+  border-radius: 4px;
+  color: #e65100;
+}
+
+.hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted, #5f6653);
+}
+
+.notes {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted, #5f6653);
+  font-style: italic;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border, #e5e5de);
+}

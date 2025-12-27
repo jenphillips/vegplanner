@@ -5,18 +5,43 @@
     "firstFallFrost": "2025-10-05"
   },
   "climate": {
-    "location": "Quispamsis, NB (approx)",
+    "location": "Sussex, NB",
+    "coordinates": { "lat": 45.722, "lon": -65.507 },
+    "elevation_m": 55,
+    "source": "WeatherSpark/Environment Canada 1991-2020 Climate Normals",
     "monthlyAvgC": {
-      "3": { "tavg_c": -2.21, "tmin_c": -7.57, "tmax_c": 2.91 },
-      "4": { "tavg_c": 3.9, "tmin_c": -1.54, "tmax_c": 9.28 },
-      "5": { "tavg_c": 9.53, "tmin_c": 3.44, "tmax_c": 15.54 },
-      "6": { "tavg_c": 14.0, "tmin_c": 7.91, "tmax_c": 20.04 },
-      "7": { "tavg_c": 17.79, "tmin_c": 11.69, "tmax_c": 23.85 },
-      "8": { "tavg_c": 17.48, "tmin_c": 11.19, "tmax_c": 23.59 },
-      "9": { "tavg_c": 13.77, "tmin_c": 7.76, "tmax_c": 19.68 },
-      "10": { "tavg_c": 8.42, "tmin_c": 2.94, "tmax_c": 13.66 }
+      "1":  { "tavg_c": -8,  "tmin_c": -12, "tmax_c": -3,  "soil_avg_c": -1,  "gdd_base5": 0 },
+      "2":  { "tavg_c": -7,  "tmin_c": -11, "tmax_c": -2,  "soil_avg_c": -1,  "gdd_base5": 0 },
+      "3":  { "tavg_c": -2,  "tmin_c": -6,  "tmax_c": 3,   "soil_avg_c": 0,   "gdd_base5": 0 },
+      "4":  { "tavg_c": 5,   "tmin_c": 1,   "tmax_c": 10,  "soil_avg_c": 4,   "gdd_base5": 15 },
+      "5":  { "tavg_c": 11,  "tmin_c": 6,   "tmax_c": 17,  "soil_avg_c": 10,  "gdd_base5": 200 },
+      "6":  { "tavg_c": 16,  "tmin_c": 12,  "tmax_c": 21,  "soil_avg_c": 16,  "gdd_base5": 530 },
+      "7":  { "tavg_c": 19,  "tmin_c": 15,  "tmax_c": 24,  "soil_avg_c": 19,  "gdd_base5": 965 },
+      "8":  { "tavg_c": 19,  "tmin_c": 14,  "tmax_c": 24,  "soil_avg_c": 19,  "gdd_base5": 1400 },
+      "9":  { "tavg_c": 15,  "tmin_c": 10,  "tmax_c": 19,  "soil_avg_c": 15,  "gdd_base5": 1700 },
+      "10": { "tavg_c": 8,   "tmin_c": 4,   "tmax_c": 13,  "soil_avg_c": 9,   "gdd_base5": 1800 },
+      "11": { "tavg_c": 2,   "tmin_c": -1,  "tmax_c": 6,   "soil_avg_c": 4,   "gdd_base5": 1810 },
+      "12": { "tavg_c": -4,  "tmin_c": -8,  "tmax_c": 0,   "soil_avg_c": 1,   "gdd_base5": 1810 }
     },
-    "notes": "Derived from Meteostat daily data 2010–2020 near Quispamsis (45.389, -65.949)."
+    "lastSpringFrost": {
+      "earliest": "04-19",
+      "typical": "05-06",
+      "latest": "05-24",
+      "probability10": "04-22",
+      "probability50": "05-06",
+      "probability90": "05-20"
+    },
+    "firstFallFrost": {
+      "earliest": "09-26",
+      "typical": "10-11",
+      "latest": "10-26",
+      "probability10": "09-28",
+      "probability50": "10-11",
+      "probability90": "10-23"
+    },
+    "growingSeasonDays": 159,
+    "annualGDD": 1810,
+    "notes": "Data derived from WeatherSpark and Environment Canada climate normals. Soil temperatures are estimates based on air temperature with ~2 week lag. GDD calculated with base 5°C, cumulative by month end. Growing season averages 159 days (May 6 - Oct 11). Zone 5a."
   },
   "cultivars": [
     {
@@ -35,6 +60,10 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": null,
       "frostSensitive": true,
+      "minGrowingTempC": 10,
+      "maxGrowingTempC": 35,
+      "optimalTempMinC": 21,
+      "optimalTempMaxC": 27,
       "notes": "Indeterminate, F1, prune to single leader if desired."
     },
     {
@@ -51,6 +80,10 @@
       "harvestStyle": "single",
       "harvestDurationDays": 7,
       "frostSensitive": false,
+      "minGrowingTempC": 4,
+      "maxGrowingTempC": 30,
+      "optimalTempMinC": 15,
+      "optimalTempMaxC": 21,
       "notes": "White beet, sweet flavor; cold-tolerant so ok before LSF."
     },
     {
@@ -67,6 +100,10 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": 21,
       "frostSensitive": true,
+      "minGrowingTempC": 15,
+      "maxGrowingTempC": 32,
+      "optimalTempMinC": 18,
+      "optimalTempMaxC": 26,
       "notes": "Reliable early bush bean; do not plant in cold soil."
     },
     {
@@ -83,6 +120,10 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": 14,
       "frostSensitive": false,
+      "minGrowingTempC": 4,
+      "maxGrowingTempC": 24,
+      "optimalTempMinC": 15,
+      "optimalTempMaxC": 20,
       "notes": "Mini romaine; succession-friendly. Shade/row cover in heat; tolerates light frost."
     },
     {
@@ -99,7 +140,11 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": 21,
       "frostSensitive": false,
-      "notes": "Smooth leaf, bolt-tolerant. Cold hardy; good for early/late plantings."
+      "minGrowingTempC": 2,
+      "maxGrowingTempC": 21,
+      "optimalTempMinC": 10,
+      "optimalTempMaxC": 18,
+      "notes": "Smooth leaf, bolt-tolerant. Cold hardy; good for early/late plantings. Bolts above 21°C."
     },
     {
       "id": "gailan-green",
@@ -117,6 +162,10 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": 21,
       "frostSensitive": true,
+      "minGrowingTempC": 10,
+      "maxGrowingTempC": 25,
+      "optimalTempMinC": 15,
+      "optimalTempMaxC": 21,
       "notes": "Chinese broccoli; tender stems/shoots. Prefers cool weather; avoid heat stress."
     }
   ],

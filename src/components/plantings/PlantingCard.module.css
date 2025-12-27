@@ -1,0 +1,87 @@
+.card {
+  background: #fafafa;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 6px;
+  padding: 6px 10px;
+  transition: border-color 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--accent, #2f6f4e);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 200px;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text, #1f2614);
+  white-space: nowrap;
+}
+
+.quantity {
+  font-size: 11px;
+  color: var(--muted, #5f6653);
+  background: #e8e8e4;
+  padding: 1px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.dateRange {
+  font-size: 11px;
+  color: var(--muted, #5f6653);
+  white-space: nowrap;
+}
+
+.deleteButton {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #999;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.deleteButton:hover {
+  background: #ffebee;
+  color: #c62828;
+  border-color: #ffcdd2;
+}
+
+.deleteConfirm {
+  background: #c62828;
+  color: #fff;
+  border-color: #c62828;
+}
+
+.deleteConfirm:hover {
+  background: #b71c1c;
+}
+
+.notes {
+  margin: 4px 0 0;
+  padding-left: 212px;
+  font-size: 11px;
+  color: var(--muted, #5f6653);
+  font-style: italic;
+}
