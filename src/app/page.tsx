@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import plannerData from '@/../data/vegplanner.json';
-import { Timeline } from '@/components/timeline/Timeline';
+import { BaselineTimeline } from '@/components/timeline/BaselineTimeline';
 import { CultivarCard } from '@/components/cultivars/CultivarCard';
 import { usePlantings } from '@/hooks/usePlantings';
 import type { Cultivar, FrostWindow, PlantingPlan, Climate } from '@/lib/types';
@@ -173,15 +173,11 @@ export default function Home() {
           </section>
         )}
 
-        {/* Visual Timeline */}
+        {/* Seasonal Planting Reference (Baseline Vegetables) */}
         {ready && (
-          <Timeline
-            frost={data.frost}
-            cultivars={data.cultivars}
-            plans={data.plans}
-            climate={data.climate}
-          />
+          <BaselineTimeline frost={data.frost} climate={data.climate} />
         )}
+
       </main>
     </div>
   );

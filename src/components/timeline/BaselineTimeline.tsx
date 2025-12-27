@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type {
   Cultivar,
   FrostWindow,
@@ -10,6 +10,7 @@ import type {
   Climate,
 } from '@/lib/types';
 import { buildSchedule } from '@/lib/schedule';
+import baselineData from '@/../data/baseline-cultivars.json';
 import styles from './Timeline.module.css';
 
 // ============================================
@@ -45,6 +46,38 @@ const tempColor = (celsius: number) => {
   }
   const t = Math.min(1, Math.max(0, Math.abs(celsius) / 25));
   return lerpColor('e2f5ff', '6aa1d8', t);
+};
+
+// Format crop name: "Pole Bean" -> "Bean - Pole", "Tomato (Determinate)" -> "Tomato - Determinate"
+const formatCropLabel = (crop: string): string => {
+  // Handle parenthetical variants: "Tomato (Determinate)" -> "Tomato - Determinate"
+  const parenMatch = crop.match(/^(.+?)\s*\((.+?)\)$/);
+  if (parenMatch) {
+    return `${parenMatch[1]} - ${parenMatch[2]}`;
+  }
+
+  // Handle prefix variants: "Pole Bean" -> "Bean - Pole", "Bush Bean" -> "Bean - Bush"
+  const prefixPatterns = [
+    { prefix: 'Pole ', base: 'Bean' },
+    { prefix: 'Bush ', base: 'Bean' },
+    { prefix: 'Shelling ', base: 'Pea' },
+    { prefix: 'Sugar Snap ', base: 'Pea' },
+    { prefix: 'Snow ', base: 'Pea' },
+    { prefix: 'Winter ', base: 'Squash' },
+    { prefix: 'Summer ', base: 'Squash' },
+    { prefix: 'Bell ', base: 'Pepper' },
+    { prefix: 'Jalapeño ', base: 'Pepper' },
+    { prefix: 'Sprouting ', base: 'Broccoli' },
+  ];
+
+  for (const { prefix, base } of prefixPatterns) {
+    if (crop.startsWith(prefix) && crop.includes(base)) {
+      const variant = prefix.trim();
+      return `${base} - ${variant}`;
+    }
+  }
+
+  return crop;
 };
 
 // ============================================
@@ -83,38 +116,70 @@ type ScheduleRow = {
   plan: PlantingPlan;
   cultivar: Cultivar;
   schedule: ScheduleResult;
+  displayLabel: string;
+  sowDate: string;
 };
 
-type TimelineProps = {
+type SortOption = 'alphabetical' | 'sow-date';
+
+type BaselineTimelineProps = {
   frost: FrostWindow;
-  cultivars: Cultivar[];
-  plans: PlantingPlan[];
   climate?: Climate;
 };
 
 // ============================================
-// Timeline Component
+// BaselineTimeline Component
 // ============================================
 
-export function Timeline({ frost, cultivars, plans, climate }: TimelineProps) {
+export function BaselineTimeline({ frost, climate }: BaselineTimelineProps) {
+  const [sortBy, setSortBy] = useState<SortOption>('sow-date');
+
+  // Convert baseline cultivars to Cultivar type and generate plans
+  const { cultivars, plans }: { cultivars: Cultivar[]; plans: PlantingPlan[] } =
+    useMemo(() => {
+      const rawCultivars = baselineData.cultivars as Cultivar[];
+      const generatedPlans: PlantingPlan[] = rawCultivars.map((c) => ({
+        id: `baseline-plan-${c.id}`,
+        cultivarId: c.id,
+        season: 'spring' as const,
+        frostWindowId: frost.id,
+        successionOffsetsDays: [0],
+        // For "either" method, default to transplant for baseline reference
+        methodOverride: c.sowMethod === 'either' ? 'transplant' : undefined,
+      }));
+      return { cultivars: rawCultivars, plans: generatedPlans };
+    }, [frost.id]);
+
   const scheduleRows = useMemo(() => {
     const byCultivar = new Map(cultivars.map((c) => [c.id, c]));
-    return plans
+    const rows = plans
       .map((plan) => {
         const cultivar = byCultivar.get(plan.cultivarId);
         if (!cultivar) return null;
+        const schedule = buildSchedule({
+          frostWindow: frost,
+          cultivar,
+          plan,
+        });
         return {
           plan,
           cultivar,
-          schedule: buildSchedule({
-            frostWindow: frost,
-            cultivar,
-            plan,
-          }),
+          schedule,
+          displayLabel: formatCropLabel(cultivar.crop),
+          sowDate: schedule.sowDates[0]?.date ?? '9999-12-31',
         };
       })
       .filter(Boolean) as ScheduleRow[];
-  }, [frost, cultivars, plans]);
+
+    // Sort based on selected option
+    if (sortBy === 'alphabetical') {
+      rows.sort((a, b) => a.displayLabel.localeCompare(b.displayLabel));
+    } else {
+      rows.sort((a, b) => a.sowDate.localeCompare(b.sowDate));
+    }
+
+    return rows;
+  }, [frost, cultivars, plans, sortBy]);
 
   const buildTimeline = useCallback(
     (schedule: ScheduleResult): TimelineData | null => {
@@ -238,7 +303,16 @@ export function Timeline({ frost, cultivars, plans, climate }: TimelineProps) {
     return Array.from({ length: 8 }, (_, i) => {
       const monthNum = i + 3;
       const date = `${year}-${String(monthNum).padStart(2, '0')}-01`;
-      return { date, left: clampPct(date) };
+      // Calculate center of month for label positioning
+      const nextMonthNum = monthNum + 1;
+      const nextMonth = String(nextMonthNum).padStart(2, '0');
+      const nextDate = nextMonthNum <= 10
+        ? `${year}-${nextMonth}-01`
+        : `${year}-11-01`;
+      const monthStart = clampPct(date);
+      const monthEnd = clampPct(nextDate);
+      const center = (monthStart + monthEnd) / 2;
+      return { date, left: monthStart, center };
     });
   }, [frost]);
 
@@ -250,27 +324,45 @@ export function Timeline({ frost, cultivars, plans, climate }: TimelineProps) {
     <div className={styles.timelineCard}>
       <div className={styles.timelineHeader}>
         <div>
-          <h3>Visual timeline</h3>
+          <h3>Seasonal planting reference</h3>
           <p className={styles.muted}>
-            Bars show sow window, transplant, harvest, with frost markers.
+            Baseline sow/harvest windows for common vegetables based on your
+            frost dates. Use as a general guide when planning.
           </p>
         </div>
-        <div className={styles.legend}>
-          <span className={styles.legendItem}>
-            <span className={styles.swatchSow} /> Sow window
-          </span>
-          <span className={styles.legendItem}>
-            <span className={styles.swatchTransplant} /> Transplant
-          </span>
-          <span className={styles.legendItem}>
-            <span className={styles.swatchHarvest} /> Harvest window
-          </span>
-          <span className={styles.legendItem}>
-            <span className={styles.swatchFrostRange} /> Frost risk range
-          </span>
-          <span className={styles.legendItem}>
-            <span className={styles.swatchFrostTypical} /> Typical frost date
-          </span>
+        <div className={styles.headerControls}>
+          <div className={styles.sortControls}>
+            <span className={styles.sortLabel}>Sort:</span>
+            <button
+              className={`${styles.sortButton} ${sortBy === 'sow-date' ? styles.sortButtonActive : ''}`}
+              onClick={() => setSortBy('sow-date')}
+            >
+              By sow date
+            </button>
+            <button
+              className={`${styles.sortButton} ${sortBy === 'alphabetical' ? styles.sortButtonActive : ''}`}
+              onClick={() => setSortBy('alphabetical')}
+            >
+              A–Z
+            </button>
+          </div>
+          <div className={styles.legend}>
+            <span className={styles.legendItem}>
+              <span className={styles.swatchSow} /> Sow window
+            </span>
+            <span className={styles.legendItem}>
+              <span className={styles.swatchTransplant} /> Transplant
+            </span>
+            <span className={styles.legendItem}>
+              <span className={styles.swatchHarvest} /> Harvest window
+            </span>
+            <span className={styles.legendItem}>
+              <span className={styles.swatchFrostRange} /> Frost risk range
+            </span>
+            <span className={styles.legendItem}>
+              <span className={styles.swatchFrostTypical} /> Typical frost date
+            </span>
+          </div>
         </div>
       </div>
 
@@ -283,10 +375,9 @@ export function Timeline({ frost, cultivars, plans, climate }: TimelineProps) {
               <div
                 key={`top-${t.date}`}
                 className={styles.tick}
-                style={{ left: `${t.left * 100}%` }}
+                style={{ left: `${t.center * 100}%` }}
                 title={t.date}
               >
-                <div className={styles.tickMark} />
                 <div className={styles.tickLabel}>
                   <div>{monthLabel(t.date)}</div>
                   {(() => {
@@ -320,19 +411,23 @@ export function Timeline({ frost, cultivars, plans, climate }: TimelineProps) {
       )}
 
       {/* Timeline rows */}
-      {scheduleRows.map(({ plan, cultivar, schedule }) => {
+      {scheduleRows.map(({ plan, cultivar, schedule, displayLabel }) => {
         const timeline = buildTimeline(schedule);
         if (!timeline) return null;
         return (
           <div className={styles.timelineRow} key={plan.id}>
             <div
               className={styles.timelineLabel}
-              title={`Cultivar: ${cultivar.crop} — ${cultivar.variety}
-Season: ${plan.season}, Method: ${schedule.method}
-Germ: ${cultivar.germDaysMin}–${cultivar.germDaysMax} days • Maturity: ${cultivar.maturityDays} (${cultivar.maturityBasis})
-Frosts: last ${frost.lastSpringFrost}, first ${frost.firstFallFrost}`}
+              title={`${cultivar.crop}
+Maturity: ${cultivar.maturityDays} days (${cultivar.maturityBasis})
+Method: ${cultivar.sowMethod}
+Temp range: ${cultivar.minGrowingTempC ?? '?'}–${cultivar.maxGrowingTempC ?? '?'}°C`}
             >
-              {cultivar.crop} — {cultivar.variety}
+              {displayLabel}
+              <span className={styles.maturityBadge}>
+                {cultivar.maturityDays}–
+                {cultivar.maturityBasis === 'from_transplant' ? 'T' : 'D'}
+              </span>
             </div>
             <div className={styles.timelineBody}>
               <div className={styles.timelineTrack}>
@@ -345,6 +440,15 @@ Frosts: last ${frost.lastSpringFrost}, first ${frost.firstFallFrost}`}
                         left: `${band.left * 100}%`,
                         width: `${band.width * 100}%`,
                       }}
+                    />
+                  ))}
+                </div>
+                <div className={styles.monthLines}>
+                  {timeline.monthTicks.slice(1).map((tick) => (
+                    <div
+                      key={tick.date}
+                      className={styles.monthLine}
+                      style={{ left: `${tick.left * 100}%` }}
                     />
                   ))}
                 </div>
@@ -442,10 +546,9 @@ Frosts: last ${frost.lastSpringFrost}, first ${frost.firstFallFrost}`}
               <div
                 key={`bottom-${t.date}`}
                 className={styles.tick}
-                style={{ left: `${t.left * 100}%` }}
+                style={{ left: `${t.center * 100}%` }}
                 title={t.date}
               >
-                <div className={styles.tickMark} />
                 <div className={styles.tickLabel}>
                   <div>{monthLabel(t.date)}</div>
                   {(() => {

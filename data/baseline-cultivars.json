@@ -497,13 +497,13 @@
       "transplantAfterLsfDays": 7,
       "fallBufferDays": 14,
       "harvestStyle": "continuous",
-      "harvestDurationDays": 42,
+      "harvestDurationDays": 56,
       "frostSensitive": true,
       "minGrowingTempC": 16,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
-      "notes": "Warm-season crop, very frost sensitive. Direct sow when soil is 70°F (21°C). Pick regularly for continued production. Trellising improves quality. Typical maturity 55-70 days."
+      "notes": "Warm-season crop, very frost sensitive. Direct sow when soil is 70°F (21°C). Pick regularly for continued production. Plants can produce for 6-10 weeks under good conditions. Trellising improves quality. Typical maturity 55-70 days."
     },
     {
       "id": "baseline-cucumber-pickling",
@@ -526,7 +526,7 @@
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
-      "notes": "Smaller fruits harvested young. Pick every 1-2 days at peak. Often more compact vines than slicers. Typical maturity 50-60 days."
+      "notes": "Smaller fruits harvested young. Pick every 1-2 days at peak. Heavy producers but may exhaust faster than slicers. Plants typically produce for 4-6 weeks. Typical maturity 50-60 days."
     },
     {
       "id": "baseline-gai-lan",
@@ -740,26 +740,6 @@
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
       "notes": "Slow, erratic germination - keep soil moist. Sow shallowly (1/4 inch). Does not transplant. Loose, stone-free soil essential. Sweetens after frost. Baby carrots in 50 days. Typical maturity 60-80 days."
-    },
-    {
-      "id": "baseline-carrot-short",
-      "crop": "Carrot (Short/Chantenay)",
-      "variety": "Baseline Short",
-      "germDaysMin": 14,
-      "germDaysMax": 21,
-      "maturityDays": 65,
-      "maturityBasis": "from_sow",
-      "sowMethod": "direct",
-      "directAfterLsfDays": -14,
-      "fallBufferDays": 0,
-      "harvestStyle": "single",
-      "harvestDurationDays": 21,
-      "frostSensitive": false,
-      "minGrowingTempC": 7,
-      "maxGrowingTempC": 24,
-      "optimalTempMinC": 16,
-      "optimalTempMaxC": 21,
-      "notes": "Shorter, stockier roots (4-6 inches). Better for heavy or shallow soils. Good for containers. Includes Chantenay, Parisian, and round types. Typical maturity 55-70 days."
     },
     {
       "id": "baseline-leek",

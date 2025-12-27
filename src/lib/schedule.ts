@@ -104,7 +104,11 @@ function buildHarvestWindow(start: string, fallAnchor: string, cultivar: Cultiva
   const style = cultivar.harvestStyle ?? 'single';
   const duration = ensureNumber(cultivar.harvestDurationDays, style === 'continuous' ? 999 : 1);
   if (style === 'continuous') {
-    const end = cultivar.frostSensitive ? fallAnchor : addDays(start, duration);
+    const durationEnd = addDays(start, duration);
+    // Use whichever comes first: duration limit or fall frost (for frost-sensitive crops)
+    const end = cultivar.frostSensitive
+      ? (durationEnd < fallAnchor ? durationEnd : fallAnchor)
+      : durationEnd;
     return { start, end };
   }
   const end = addDays(start, Math.max(duration - 1, 0));
