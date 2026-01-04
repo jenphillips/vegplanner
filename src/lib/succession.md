@@ -300,3 +300,93 @@ skippedPeriods: [
   }
 ]
 ```
+
+---
+
+## Drag-to-Reschedule Behavior
+
+The UI allows users to drag plantings on the timeline to reschedule them. This feature uses the succession logic to enforce constraints.
+
+### Supported Drag Operations
+
+| Crop Type | Draggable Element | Effect |
+|-----------|-------------------|--------|
+| Direct sow | Growing/harvest bars | Shifts entire planting forward or backward |
+| Transplant | Indoor sow bar | Adjusts how early to start seeds (transplant date unchanged) |
+
+### Constraints Enforced During Drag
+
+1. **Harvest overlap prevention**: A planting cannot be dragged earlier than the previous planting's harvest end date. This ensures continuous harvest without gaps or overlaps.
+
+2. **Temperature viability**: Plantings cannot be dragged into temperature-unfavorable periods. For heat-sensitive crops (like lettuce or spinach), dragging right from a spring position will "jump" over the hot summer months and snap to the next viable fall window.
+
+3. **Frost deadline**: Harvest end dates are automatically adjusted when dragging later in the season:
+   - Frost-sensitive crops: Harvest capped at earliest fall frost - 4 days
+   - Frost-tolerant crops: Harvest can extend to typical frost + 21 days
+   - Continuous harvest crops (`harvestDurationDays: null`): Extend to frost deadline
+
+### Temperature Range Jumping
+
+When dragging a heat-sensitive crop, the system calculates all viable temperature "ranges" and allows jumping between them:
+
+**Example: Lettuce (max 24°C, effective max 22°C)**
+
+```
+Spring range: April 1 - May 27 (viable sow dates)
+  ↓ drag right...
+[Summer gap: June-August - too hot, cannot drop here]
+  ↓ ...snaps to fall
+Fall range: September 2+ (viable sow dates)
+```
+
+The gap-jumping uses the drag direction to determine intent:
+- Dragging **right** past the end of a viable range → snap to start of next range
+- Dragging **left** from the start of a range → snap back to previous range
+
+### API Functions for Drag Support
+
+Two functions support the drag-to-reschedule feature:
+
+#### `isGrowingPeriodViable(startDate, endDate, cultivar, climate, options?)`
+
+Checks if a growing period is temperature-viable for a cultivar.
+
+```typescript
+const result = isGrowingPeriodViable(
+  '2025-06-01',
+  '2025-07-15',
+  lettuceCultivar,
+  climate
+);
+// result: { viable: false, reason: "Too hot in month 7 (avg high 24°C > max 24°C - 2° margin)" }
+```
+
+Options:
+- `checkHeatOnly: true` - Skip cold check (useful for frost-tolerant crops)
+
+#### `calculateAvailableWindowsAfter(cultivar, frostWindow, climate, afterHarvestEnd, existingPlantings)`
+
+Returns all viable planting windows that don't overlap with existing plantings and have harvest starting after a given date.
+
+```typescript
+const windows = calculateAvailableWindowsAfter(
+  lettuceCultivar,
+  frostWindow,
+  climate,
+  '2025-06-04',  // Previous harvest ended
+  existingPlantings
+);
+// Returns windows for remaining spring sowings and fall sowings
+```
+
+This is used to calculate the valid drag bounds for a planting, showing the user which positions are available.
+
+### Harvest End Recalculation
+
+When a planting is shifted via drag, the harvest end is recalculated based on:
+
+1. **Fixed duration crops**: `harvestEnd = newHarvestStart + harvestDurationDays`, capped at frost deadline
+2. **Continuous harvest crops**: `harvestEnd = frostDeadline`
+3. **Single harvest crops**: Shift with start, but cap at frost deadline
+
+This ensures late-season plantings have realistic harvest windows even when dragged close to frost.

@@ -207,6 +207,8 @@ export type SuccessionResult = {
  * 4. If temperature is unsuitable, skip to next viable window
  * 5. Continue until first fall frost (minus maturity buffer)
  */
+export { isGrowingPeriodViable };
+
 export function calculateSuccessionWindows(
   cultivar: Cultivar,
   frostWindow: FrostWindow,
@@ -615,6 +617,36 @@ export function calculateNextSuccession(
   const method: SowMethod =
     cultivar.sowMethod === 'either' ? 'direct' : cultivar.sowMethod;
 
+  // Helper to check if a proposed window overlaps with any existing planting
+  const overlapsExistingPlanting = (harvestStart: string, harvestEnd: string): boolean => {
+    const windowStart = toDate(harvestStart).getTime();
+    const windowEnd = toDate(harvestEnd).getTime();
+
+    return cultivarPlantings.some((p) => {
+      const plantingStart = toDate(p.harvestStart).getTime();
+      const plantingEnd = toDate(p.harvestEnd).getTime();
+
+      // For same-day windows/plantings (start == end), use exact match
+      // This handles the case where a window is truncated to a single day at frost deadline
+      const windowIsSameDay = windowStart === windowEnd;
+      const plantingIsSameDay = plantingStart === plantingEnd;
+
+      if (windowIsSameDay && plantingIsSameDay) {
+        // Both are same-day: overlap if they're the same day
+        return windowStart === plantingStart;
+      } else if (windowIsSameDay) {
+        // Window is same-day: overlaps if it falls within planting's range (inclusive)
+        return windowStart >= plantingStart && windowStart <= plantingEnd;
+      } else if (plantingIsSameDay) {
+        // Planting is same-day: overlaps if it falls within window's range (inclusive)
+        return plantingStart >= windowStart && plantingStart <= windowEnd;
+      } else {
+        // Normal case: overlap if windowStart < plantingEnd AND plantingStart < windowEnd
+        return windowStart < plantingEnd && plantingStart < windowEnd;
+      }
+    });
+  };
+
   // Calculate ideal next sow date targeting harvest start = previous harvest end
   let proposedSowDate = calculateNextSowDateForContinuousHarvest(
     lastPlanting.harvestEnd,
@@ -647,7 +679,14 @@ export function calculateNextSuccession(
       climate
     );
 
-    if (tempCheck.viable) {
+    // Also check that this window doesn't overlap with existing plantings
+    // This prevents suggesting duplicate windows when user has manually adjusted dates
+    const hasOverlap = overlapsExistingPlanting(
+      plantingDates.harvestStart,
+      plantingDates.harvestEnd
+    );
+
+    if (tempCheck.viable && !hasOverlap) {
       return {
         sowDate: proposedSowDate,
         transplantDate: plantingDates.transplantDate,
@@ -658,11 +697,121 @@ export function calculateNextSuccession(
       };
     }
 
-    // Temperature not viable - skip forward one week and try again
+    // Temperature not viable or overlaps - skip forward one week and try again
     proposedSowDate = addDays(proposedSowDate, 7);
     iterations++;
   }
 
   // No viable window found within constraints
   return null;
+}
+
+/**
+ * Calculate all available succession windows after a given harvest end date.
+ * This is useful when the user has manually adjusted planting dates and wants
+ * to see what windows are still available after a specific planting.
+ *
+ * Returns windows that:
+ * 1. Are temperature-viable
+ * 2. Have harvest start >= the given afterHarvestEnd date
+ * 3. Don't overlap with any existing planting's harvest period
+ */
+export function calculateAvailableWindowsAfter(
+  cultivar: Cultivar,
+  frostWindow: FrostWindow,
+  climate: Climate,
+  afterHarvestEnd: string,
+  existingPlantings: Planting[]
+): PlantingWindow[] {
+  const cultivarPlantings = existingPlantings.filter(
+    (p) => p.cultivarId === cultivar.id
+  );
+
+  const method: SowMethod =
+    cultivar.sowMethod === 'either' ? 'direct' : cultivar.sowMethod;
+
+  // Get the latest viable sow date
+  const latestSowDate = calculateLatestSowDate(cultivar, frostWindow, climate);
+
+  // Calculate the sow date that would result in harvest starting at afterHarvestEnd
+  let currentSowDate = calculateNextSowDateForContinuousHarvest(
+    afterHarvestEnd,
+    cultivar,
+    method
+  );
+
+  const availableWindows: PlantingWindow[] = [];
+  const maxIterations = 52; // ~1 year of weekly checks
+  let iterations = 0;
+  let successionNumber = getNextSuccessionNumber(existingPlantings, cultivar.id);
+
+  // Helper to check if a window overlaps with any existing planting
+  const overlapsExistingPlanting = (harvestStart: string, harvestEnd: string): boolean => {
+    const windowStart = toDate(harvestStart).getTime();
+    const windowEnd = toDate(harvestEnd).getTime();
+
+    return cultivarPlantings.some((p) => {
+      const plantingStart = toDate(p.harvestStart).getTime();
+      const plantingEnd = toDate(p.harvestEnd).getTime();
+
+      // For same-day windows/plantings (start == end), use exact match
+      const windowIsSameDay = windowStart === windowEnd;
+      const plantingIsSameDay = plantingStart === plantingEnd;
+
+      if (windowIsSameDay && plantingIsSameDay) {
+        return windowStart === plantingStart;
+      } else if (windowIsSameDay) {
+        return windowStart >= plantingStart && windowStart <= plantingEnd;
+      } else if (plantingIsSameDay) {
+        return plantingStart >= windowStart && plantingStart <= windowEnd;
+      } else {
+        return windowStart < plantingEnd && plantingStart < windowEnd;
+      }
+    });
+  };
+
+  while (iterations < maxIterations && currentSowDate <= latestSowDate) {
+    const plantingDates = calculatePlantingDates(
+      currentSowDate,
+      cultivar,
+      frostWindow,
+      method,
+      climate
+    );
+
+    // Check temperature viability
+    const outdoorStartDate = plantingDates.transplantDate ?? currentSowDate;
+    const tempCheck = isGrowingPeriodViable(
+      outdoorStartDate,
+      plantingDates.harvestStart,
+      cultivar,
+      climate
+    );
+
+    // Check that harvest starts after the reference date
+    const harvestStartsAfter = plantingDates.harvestStart >= afterHarvestEnd;
+
+    // Check for overlap with existing plantings
+    const hasOverlap = overlapsExistingPlanting(
+      plantingDates.harvestStart,
+      plantingDates.harvestEnd
+    );
+
+    if (tempCheck.viable && harvestStartsAfter && !hasOverlap) {
+      availableWindows.push({
+        sowDate: currentSowDate,
+        transplantDate: plantingDates.transplantDate,
+        harvestStart: plantingDates.harvestStart,
+        harvestEnd: plantingDates.harvestEnd,
+        method,
+        successionNumber: successionNumber++,
+      });
+    }
+
+    // Move to next week
+    currentSowDate = addDays(currentSowDate, 7);
+    iterations++;
+  }
+
+  return availableWindows;
 }

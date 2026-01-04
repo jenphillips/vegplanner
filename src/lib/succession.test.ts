@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   calculateSuccessionWindows,
   calculateNextSuccession,
+  calculateAvailableWindowsAfter,
+  isGrowingPeriodViable,
   createPlantingFromWindow,
   getNextSuccessionNumber,
   type PlantingWindow,
@@ -1095,3 +1097,661 @@ function addDays(iso: string, days: number): string {
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 }
+
+// ============================================
+// isGrowingPeriodViable Tests
+// ============================================
+
+describe('isGrowingPeriodViable', () => {
+  describe('basic viability checks', () => {
+    it('returns viable for period within temperature bounds', () => {
+      // Lettuce in May - avg high 17°C, max 24°C (effective 22°C)
+      const result = isGrowingPeriodViable(
+        '2025-05-01',
+        '2025-05-30',
+        lettuceCultivar,
+        sussexClimate
+      );
+      expect(result.viable).toBe(true);
+    });
+
+    it('returns not viable when too hot', () => {
+      // Lettuce growing through July - avg high 24°C > effective max 22°C
+      const result = isGrowingPeriodViable(
+        '2025-06-01',
+        '2025-07-15',
+        lettuceCultivar,
+        sussexClimate
+      );
+      expect(result.viable).toBe(false);
+      expect(result.reason).toContain('Too hot');
+    });
+
+    it('returns not viable when too cold for frost-sensitive crops', () => {
+      // Bush beans in April - avg temp 6°C < min 15°C
+      const result = isGrowingPeriodViable(
+        '2025-04-01',
+        '2025-04-30',
+        bushBeansCultivar,
+        sussexClimate
+      );
+      expect(result.viable).toBe(false);
+      expect(result.reason).toContain('Too cold');
+    });
+
+    it('skips cold check for frost-tolerant crops', () => {
+      // Spinach in April - cold but frost-tolerant
+      const result = isGrowingPeriodViable(
+        '2025-04-01',
+        '2025-04-30',
+        spinachCultivar,
+        sussexClimate
+      );
+      expect(result.viable).toBe(true);
+    });
+  });
+
+  describe('month boundary handling', () => {
+    it('checks all months in the growing period', () => {
+      // Lettuce from June through July - should fail in July
+      // Note: function advances by 30 days, so we need to ensure July is actually checked
+      // June 1 + 30 = July 1, which is in month 7
+      const result = isGrowingPeriodViable(
+        '2025-06-01',
+        '2025-07-31',
+        lettuceCultivar,
+        sussexClimate
+      );
+      expect(result.viable).toBe(false);
+      expect(result.reason).toContain('month 7');
+    });
+
+    it('handles single-month growing periods', () => {
+      const result = isGrowingPeriodViable(
+        '2025-06-01',
+        '2025-06-25',
+        lettuceCultivar,
+        sussexClimate
+      );
+      // June avg high 21°C < effective max 22°C
+      expect(result.viable).toBe(true);
+    });
+  });
+
+  describe('temperature margin handling', () => {
+    it('uses default 2°C margin for heat check', () => {
+      // Lettuce max 24°C - 2°C margin = 22°C effective max
+      // July avg high 24°C > 22°C = too hot
+      const result = isGrowingPeriodViable(
+        '2025-07-01',
+        '2025-07-15',
+        lettuceCultivar,
+        sussexClimate
+      );
+      expect(result.viable).toBe(false);
+    });
+
+    it('uses custom tempMarginC when set', () => {
+      const noMarginLettuce: Cultivar = {
+        ...lettuceCultivar,
+        id: 'lettuce-no-margin',
+        tempMarginC: 0,
+      };
+      // With 0 margin, effective max = 24°C
+      // July avg high 24°C is NOT > 24°C, so should be viable
+      const result = isGrowingPeriodViable(
+        '2025-07-01',
+        '2025-07-15',
+        noMarginLettuce,
+        sussexClimate
+      );
+      expect(result.viable).toBe(true);
+    });
+  });
+
+  describe('checkHeatOnly option', () => {
+    it('skips cold check when checkHeatOnly is true', () => {
+      // Create a frost-sensitive crop that would fail cold check
+      const warmCrop: Cultivar = {
+        ...bushBeansCultivar,
+        id: 'warm-test',
+        minGrowingTempC: 20, // April avg temp 6°C would fail
+      };
+
+      // Without checkHeatOnly - should fail
+      const normalResult = isGrowingPeriodViable(
+        '2025-04-01',
+        '2025-04-30',
+        warmCrop,
+        sussexClimate
+      );
+      expect(normalResult.viable).toBe(false);
+
+      // With checkHeatOnly - should pass (no heat issue in April)
+      const heatOnlyResult = isGrowingPeriodViable(
+        '2025-04-01',
+        '2025-04-30',
+        warmCrop,
+        sussexClimate,
+        { checkHeatOnly: true }
+      );
+      expect(heatOnlyResult.viable).toBe(true);
+    });
+  });
+
+  describe('missing climate data handling', () => {
+    it('treats missing month data as viable', () => {
+      const sparseClimate: Climate = {
+        ...sussexClimate,
+        monthlyAvgC: {
+          '6': sussexClimate.monthlyAvgC['6'], // Only June data
+        },
+      };
+
+      // May has no data - should be treated as viable
+      const result = isGrowingPeriodViable(
+        '2025-05-01',
+        '2025-05-30',
+        lettuceCultivar,
+        sparseClimate
+      );
+      expect(result.viable).toBe(true);
+    });
+  });
+});
+
+// ============================================
+// calculateAvailableWindowsAfter Tests
+// ============================================
+
+describe('calculateAvailableWindowsAfter', () => {
+  describe('basic functionality', () => {
+    it('returns windows after the specified harvest end date', () => {
+      const result = calculateAvailableWindowsAfter(
+        beetCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-06-01',
+        []
+      );
+
+      expect(result.length).toBeGreaterThan(0);
+      // All windows should have harvest start >= afterHarvestEnd
+      result.forEach((w) => {
+        expect(w.harvestStart >= '2025-06-01').toBe(true);
+      });
+    });
+
+    it('returns empty array when no windows available after date', () => {
+      // Use a date very late in the season
+      const result = calculateAvailableWindowsAfter(
+        beetCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-11-01',
+        []
+      );
+
+      expect(result.length).toBe(0);
+    });
+
+    it('assigns sequential succession numbers starting from next available', () => {
+      const existingPlanting: Planting = {
+        id: 'p1',
+        cultivarId: beetCultivar.id,
+        label: 'Beet #1',
+        quantity: 10,
+        sowDate: '2025-04-01',
+        harvestStart: '2025-05-26',
+        harvestEnd: '2025-06-02',
+        method: 'direct',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      };
+
+      const result = calculateAvailableWindowsAfter(
+        beetCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-06-02',
+        [existingPlanting]
+      );
+
+      if (result.length > 0) {
+        expect(result[0].successionNumber).toBe(2);
+      }
+    });
+  });
+
+  describe('overlap detection', () => {
+    it('excludes windows that overlap with existing plantings', () => {
+      const existingPlantings: Planting[] = [
+        {
+          id: 'p1',
+          cultivarId: beetCultivar.id,
+          label: 'Beet #1',
+          quantity: 10,
+          sowDate: '2025-04-01',
+          harvestStart: '2025-05-26',
+          harvestEnd: '2025-06-02',
+          method: 'direct',
+          status: 'planned',
+          successionNumber: 1,
+          createdAt: '2025-01-01',
+        },
+        {
+          id: 'p2',
+          cultivarId: beetCultivar.id,
+          label: 'Beet #2',
+          quantity: 10,
+          sowDate: '2025-04-08',
+          harvestStart: '2025-06-02',
+          harvestEnd: '2025-06-09',
+          method: 'direct',
+          status: 'planned',
+          successionNumber: 2,
+          createdAt: '2025-01-01',
+        },
+      ];
+
+      // Ask for windows after first planting
+      const result = calculateAvailableWindowsAfter(
+        beetCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-06-02',
+        existingPlantings
+      );
+
+      // Should not include windows that overlap with second planting (June 2-9)
+      result.forEach((w) => {
+        const windowEnd = new Date(`${w.harvestEnd}T00:00:00Z`).getTime();
+        const existingStart = new Date('2025-06-02T00:00:00Z').getTime();
+        const windowStart = new Date(`${w.harvestStart}T00:00:00Z`).getTime();
+        const existingEnd = new Date('2025-06-09T00:00:00Z').getTime();
+
+        // Should not overlap: !(windowStart < existingEnd && existingStart < windowEnd)
+        const overlaps = windowStart < existingEnd && existingStart < windowEnd;
+        expect(overlaps).toBe(false);
+      });
+    });
+
+    it('handles same-day harvest windows (truncated by frost)', () => {
+      // Create a planting with same-day harvest (harvestStart === harvestEnd)
+      const sameDayPlanting: Planting = {
+        id: 'p1',
+        cultivarId: beetCultivar.id,
+        label: 'Beet #1',
+        quantity: 10,
+        sowDate: '2025-08-20',
+        harvestStart: '2025-10-14',
+        harvestEnd: '2025-10-14', // Same day - truncated by frost
+        method: 'direct',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      };
+
+      const result = calculateAvailableWindowsAfter(
+        beetCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-10-14',
+        [sameDayPlanting]
+      );
+
+      // Windows should not have harvest on the same day
+      result.forEach((w) => {
+        if (w.harvestStart === w.harvestEnd) {
+          expect(w.harvestStart).not.toBe('2025-10-14');
+        }
+      });
+    });
+  });
+
+  describe('temperature viability', () => {
+    it('skips temperature-unfavorable periods', () => {
+      // Use spinach which has summer heat gap
+      const result = calculateAvailableWindowsAfter(
+        spinachCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-05-01',
+        []
+      );
+
+      // Should have spring windows and fall windows, but no mid-summer
+      const hasMidSummer = result.some(
+        (w) => w.sowDate >= '2025-06-01' && w.sowDate <= '2025-08-15'
+      );
+      expect(hasMidSummer).toBe(false);
+    });
+
+    it('finds fall windows for heat-sensitive crops when asking for earlier harvest date', () => {
+      // For lettuce (50 days maturity), asking for windows after a June harvest end
+      // will find fall windows. The algorithm starts from sowDate = Jun 4 - 50 = Apr 15
+      // and iterates forward, finding spring windows (April/May viable) and fall windows (Sept viable).
+      const result = calculateAvailableWindowsAfter(
+        lettuceCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-06-04', // Spring harvest end - algorithm will find subsequent windows
+        []
+      );
+
+      // Should find fall windows among the results
+      const fallWindows = result.filter((w) => w.sowDate >= '2025-09-01');
+      expect(fallWindows.length).toBeGreaterThan(0);
+    });
+
+    it('returns empty when harvest timing makes sowing impossible during viable temps', () => {
+      // Lettuce: 50 days to maturity, max temp 24°C (effective 22°C)
+      // If we ask for windows after Sept 1 harvest, we need to sow by mid-July
+      // But July/August are too hot (24°C > 22°C effective max)
+      // So there are no viable windows - this is expected behavior
+      const result = calculateAvailableWindowsAfter(
+        lettuceCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-09-01', // Asking for windows where harvest starts >= Sept 1
+        []
+      );
+
+      // No windows available because:
+      // - To harvest >= Sept 1, must sow by ~July 12
+      // - But July/August are too hot for lettuce
+      // - By the time temps cool (Sept), latest sow date (Sept 2) has passed
+      expect(result.length).toBe(0);
+    });
+  });
+
+  describe('frost deadline handling', () => {
+    it('caps harvest end at frost deadline for frost-sensitive crops', () => {
+      const result = calculateAvailableWindowsAfter(
+        bushBeansCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-08-01',
+        []
+      );
+
+      // Frost deadline for frost-sensitive: earliest frost (Sept 15) - 4 days = Sept 11
+      result.forEach((w) => {
+        expect(w.harvestEnd <= '2025-09-11').toBe(true);
+      });
+    });
+
+    it('extends past frost for frost-tolerant crops', () => {
+      const result = calculateAvailableWindowsAfter(
+        beetCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-09-01',
+        []
+      );
+
+      // Frost-tolerant crops can harvest past typical frost (Oct 1 + 21 days = Oct 22)
+      if (result.length > 0) {
+        const latestHarvestEnd = result[result.length - 1].harvestEnd;
+        expect(latestHarvestEnd >= '2025-10-01').toBe(true);
+      }
+    });
+  });
+});
+
+// ============================================
+// Drag-Related Edge Case Tests
+// ============================================
+
+describe('drag-related edge cases', () => {
+  describe('harvest overlap prevention', () => {
+    it('calculateNextSuccession prevents overlapping with existing plantings', () => {
+      // Create a planting that was manually dragged to a later date
+      const manuallyAdjustedPlanting: Planting = {
+        id: 'p1',
+        cultivarId: lettuceCultivar.id,
+        label: 'Lettuce #1',
+        quantity: 10,
+        sowDate: '2025-04-15', // Dragged later than original
+        harvestStart: '2025-06-04',
+        harvestEnd: '2025-06-18',
+        method: 'direct',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      };
+
+      const result = calculateNextSuccession(
+        lettuceCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        [manuallyAdjustedPlanting]
+      );
+
+      // Next window should not overlap with existing planting
+      if (result) {
+        const resultStart = new Date(`${result.harvestStart}T00:00:00Z`).getTime();
+        const existingEnd = new Date('2025-06-18T00:00:00Z').getTime();
+        // Result harvest should start at or after existing harvest end
+        expect(resultStart >= existingEnd || result.harvestEnd <= '2025-06-04').toBe(true);
+      }
+    });
+
+    it('handles multiple existing plantings with gaps', () => {
+      // Create plantings with a gap between them
+      const plantings: Planting[] = [
+        {
+          id: 'p1',
+          cultivarId: lettuceCultivar.id,
+          label: 'Lettuce #1',
+          quantity: 10,
+          sowDate: '2025-04-01',
+          harvestStart: '2025-05-21',
+          harvestEnd: '2025-06-04',
+          method: 'direct',
+          status: 'planned',
+          successionNumber: 1,
+          createdAt: '2025-01-01',
+        },
+        {
+          id: 'p2',
+          cultivarId: lettuceCultivar.id,
+          label: 'Lettuce #2',
+          quantity: 10,
+          sowDate: '2025-09-02', // Fall planting - gap in summer
+          harvestStart: '2025-10-22',
+          harvestEnd: '2025-11-05',
+          method: 'direct',
+          status: 'planned',
+          successionNumber: 2,
+          createdAt: '2025-01-01',
+        },
+      ];
+
+      const result = calculateAvailableWindowsAfter(
+        lettuceCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-06-04',
+        plantings
+      );
+
+      // Should find windows between the two plantings (if temperature allows)
+      // and not overlap with the fall planting
+      result.forEach((w) => {
+        const windowStart = new Date(`${w.harvestStart}T00:00:00Z`).getTime();
+        const windowEnd = new Date(`${w.harvestEnd}T00:00:00Z`).getTime();
+        const fallStart = new Date('2025-10-22T00:00:00Z').getTime();
+        const fallEnd = new Date('2025-11-05T00:00:00Z').getTime();
+
+        const overlaps = windowStart < fallEnd && fallStart < windowEnd;
+        expect(overlaps).toBe(false);
+      });
+    });
+  });
+
+  describe('frost deadline truncation for late-season plantings', () => {
+    it('truncates harvest end to frost deadline for last viable window', () => {
+      // Get windows late in the season for frost-sensitive crop
+      const result = calculateAvailableWindowsAfter(
+        bushBeansCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-08-15',
+        []
+      );
+
+      // All harvest ends should be at or before frost deadline (Sept 11)
+      result.forEach((w) => {
+        expect(w.harvestEnd <= '2025-09-11').toBe(true);
+      });
+    });
+
+    it('may produce single-day harvest windows near frost deadline', () => {
+      // For crops sown very late, harvestEnd might equal harvestStart
+      // This is a valid edge case when frost deadline falls during harvest window
+      const lateSeason = calculateAvailableWindowsAfter(
+        bushBeansCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-09-01',
+        []
+      );
+
+      // If there are any windows, check that single-day harvests are handled
+      lateSeason.forEach((w) => {
+        // harvestEnd should be >= harvestStart
+        expect(w.harvestEnd >= w.harvestStart).toBe(true);
+      });
+    });
+  });
+
+  describe('first planting constraints (no previousHarvestEnd)', () => {
+    it('allows first planting from season start', () => {
+      const result = calculateAvailableWindowsAfter(
+        beetCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-03-01', // Very early - before typical season
+        []
+      );
+
+      expect(result.length).toBeGreaterThan(0);
+      // First window should start from earliest viable date
+    });
+
+    it('respects temperature constraints even for first planting', () => {
+      // Frost-sensitive crop (bush beans) should not have windows where
+      // growing period is too cold (avg temp < minGrowingTempC of 15°C)
+      // April avg temp is 6°C, May is 12°C - both too cold
+      // June avg temp is 17°C - viable
+      const result = calculateAvailableWindowsAfter(
+        bushBeansCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-03-01',
+        []
+      );
+
+      if (result.length > 0) {
+        // First window should be in June when temps are warm enough
+        // (June avg temp 17°C >= min 15°C)
+        const firstSowMonth = parseInt(result[0].sowDate.slice(5, 7));
+        expect(firstSowMonth).toBeGreaterThanOrEqual(6);
+      }
+    });
+  });
+
+  describe('temperature range jumping (spring to fall)', () => {
+    it('finds both spring and fall ranges for heat-sensitive crops', () => {
+      const allWindows = calculateSuccessionWindows(
+        lettuceCultivar,
+        defaultFrostWindow,
+        sussexClimate
+      );
+
+      const springWindows = allWindows.windows.filter(
+        (w) => w.sowDate.startsWith('2025-04') || w.sowDate.startsWith('2025-05')
+      );
+      const fallWindows = allWindows.windows.filter(
+        (w) => w.sowDate.startsWith('2025-09') || w.sowDate.startsWith('2025-10')
+      );
+
+      expect(springWindows.length).toBeGreaterThan(0);
+      expect(fallWindows.length).toBeGreaterThan(0);
+    });
+
+    it('correctly skips summer for heat-sensitive crops', () => {
+      const result = calculateAvailableWindowsAfter(
+        spinachCultivar,
+        defaultFrostWindow,
+        sussexClimate,
+        '2025-06-15', // After spring season
+        []
+      );
+
+      // Should jump to fall, not include summer
+      result.forEach((w) => {
+        // Sow dates should be either before summer heat or after it
+        const inSummer = w.sowDate >= '2025-06-01' && w.sowDate <= '2025-08-20';
+        expect(inSummer).toBe(false);
+      });
+    });
+
+    it('provides continuous windows within viable temperature ranges', () => {
+      const result = calculateSuccessionWindows(
+        lettuceCultivar,
+        defaultFrostWindow,
+        sussexClimate
+      );
+
+      // Within spring, windows should be roughly contiguous
+      const springWindows = result.windows.filter((w) =>
+        w.sowDate.startsWith('2025-04') || w.sowDate.startsWith('2025-05')
+      );
+
+      for (let i = 1; i < springWindows.length; i++) {
+        const prev = springWindows[i - 1];
+        const curr = springWindows[i];
+
+        // Current harvest should start around when previous ends
+        const prevEnd = new Date(`${prev.harvestEnd}T00:00:00Z`).getTime();
+        const currStart = new Date(`${curr.harvestStart}T00:00:00Z`).getTime();
+        const gapDays = (currStart - prevEnd) / (1000 * 60 * 60 * 24);
+
+        // Gap should be minimal within same temperature range
+        expect(gapDays).toBeLessThanOrEqual(7);
+      }
+    });
+  });
+
+  describe('large temperature gaps (90+ days)', () => {
+    it('handles large gap between spring and fall viable periods', () => {
+      // Spinach has a large gap - spring viable (April-May), summer too hot, fall viable (Sept+)
+      const result = calculateSuccessionWindows(
+        spinachCultivar,
+        defaultFrostWindow,
+        sussexClimate
+      );
+
+      // Should have skipped periods covering the summer
+      expect(result.skippedPeriods.length).toBeGreaterThan(0);
+
+      // Find the gap duration
+      const summerGap = result.skippedPeriods.find(
+        (p) => p.startDate >= '2025-05-01' && p.endDate <= '2025-10-01'
+      );
+
+      if (summerGap) {
+        const gapDays = Math.round(
+          (new Date(`${summerGap.endDate}T00:00:00Z`).getTime() -
+            new Date(`${summerGap.startDate}T00:00:00Z`).getTime()) /
+            (1000 * 60 * 60 * 24)
+        );
+        // Gap should be substantial (at least a month)
+        expect(gapDays).toBeGreaterThan(30);
+      }
+    });
+  });
+});

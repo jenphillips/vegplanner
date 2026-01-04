@@ -161,6 +161,33 @@
   z-index: 2;
 }
 
+/* Direct sow draggable bars (shift entire planting) */
+.barDirectSowDraggable {
+  cursor: grab;
+}
+
+.barDirectSowDraggable:hover {
+  box-shadow: 0 0 0 2px rgba(78, 155, 113, 0.3);
+}
+
+.barDirectSowDragging {
+  cursor: grabbing;
+  box-shadow: 0 0 0 2px rgba(78, 155, 113, 0.5);
+  opacity: 0.9;
+}
+
+/* Direct sow shift bounds indicator (shown when dragging) */
+.shiftBounds {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: rgba(78, 155, 113, 0.12);
+  border-left: 2px dashed rgba(78, 155, 113, 0.5);
+  border-right: 2px dashed rgba(78, 155, 113, 0.5);
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* Transplant marker */
 .markerTransplant {
   position: absolute;

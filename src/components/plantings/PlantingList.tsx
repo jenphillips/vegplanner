@@ -12,6 +12,8 @@ type PlantingListProps = {
   climate?: Climate;
   onUpdate: (id: string, updates: Partial<Planting>) => void;
   onDelete: (id: string) => void;
+  selectedPlantingId?: string | null;
+  onSelectPlanting?: (id: string) => void;
 };
 
 export function PlantingList({
@@ -21,6 +23,8 @@ export function PlantingList({
   climate,
   onUpdate,
   onDelete,
+  selectedPlantingId,
+  onSelectPlanting,
 }: PlantingListProps) {
   if (plantings.length === 0) {
     return null;
@@ -30,15 +34,18 @@ export function PlantingList({
     <div className={styles.list}>
       <TimelineHeader frost={frost} />
       <div className={styles.plantings}>
-        {plantings.map((planting) => (
+        {plantings.map((planting, index) => (
           <PlantingCard
             key={planting.id}
             planting={planting}
             cultivar={cultivar}
             frost={frost}
             climate={climate}
+            previousHarvestEnd={index > 0 ? plantings[index - 1].harvestEnd : undefined}
             onUpdate={onUpdate}
             onDelete={onDelete}
+            isSelected={selectedPlantingId === planting.id}
+            onSelect={onSelectPlanting}
           />
         ))}
       </div>

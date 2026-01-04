@@ -10,6 +10,11 @@
   border-color: var(--accent, #2f6f4e);
 }
 
+.cardSelected {
+  border-color: var(--accent, #2f6f4e);
+  background: #f0f7f4;
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -22,6 +27,18 @@
   gap: 8px;
   flex-shrink: 0;
   width: 200px;
+}
+
+.infoSelectable {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  transition: background-color 0.15s ease;
+}
+
+.infoSelectable:hover {
+  background: rgba(47, 111, 78, 0.08);
 }
 
 .label {

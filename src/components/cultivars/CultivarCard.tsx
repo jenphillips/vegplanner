@@ -5,6 +5,7 @@ import type { Cultivar, FrostWindow, Climate, Planting } from '@/lib/types';
 import {
   calculateSuccessionWindows,
   calculateNextSuccession,
+  calculateAvailableWindowsAfter,
   createPlantingFromWindow,
 } from '@/lib/succession';
 import { PlantingList } from '@/components/plantings/PlantingList';
@@ -34,10 +35,11 @@ export function CultivarCard({
   const [localExpanded, setLocalExpanded] = useState(false);
   const expanded = forceExpanded ?? localExpanded;
   const [quantity, setQuantity] = useState(10);
+  const [selectedPlantingId, setSelectedPlantingId] = useState<string | null>(null);
 
   const cultivarPlantings = plantings
     .filter((p) => p.cultivarId === cultivar.id)
-    .sort((a, b) => a.successionNumber - b.successionNumber);
+    .sort((a, b) => a.sowDate.localeCompare(b.sowDate));
 
   const handleGenerateInitial = () => {
     const firstWindow = allWindows.windows[0];
@@ -48,23 +50,90 @@ export function CultivarCard({
   };
 
   const handleAddSuccession = () => {
-    const nextWindow = calculateNextSuccession(
-      cultivar,
-      frost,
-      climate,
-      plantings
-    );
+    // If a planting is selected, calculate windows after that planting's harvest end
+    const selectedPlanting = selectedPlantingId
+      ? cultivarPlantings.find((p) => p.id === selectedPlantingId)
+      : null;
+
+    let nextWindow;
+    if (selectedPlanting) {
+      const windowsAfter = calculateAvailableWindowsAfter(
+        cultivar,
+        frost,
+        climate,
+        selectedPlanting.harvestEnd,
+        plantings
+      );
+      nextWindow = windowsAfter[0] ?? null;
+    } else {
+      nextWindow = calculateNextSuccession(
+        cultivar,
+        frost,
+        climate,
+        plantings
+      );
+    }
+
     if (nextWindow) {
       const planting = createPlantingFromWindow(nextWindow, cultivar, quantity);
       onAddPlanting(planting);
     }
   };
 
+  const handleSelectPlanting = (id: string) => {
+    setSelectedPlantingId((prev) => (prev === id ? null : id));
+  };
+
   // Calculate available succession windows to show potential
   const allWindows = calculateSuccessionWindows(cultivar, frost, climate);
-  const remainingWindows = allWindows.windows.filter(
-    (w) => !cultivarPlantings.some((p) => p.sowDate === w.sowDate)
-  );
+
+  // Check if a window overlaps with any existing planting's harvest period
+  // This is more robust than comparing sowDate, since users can drag plantings
+  const windowOverlapsPlanting = (window: (typeof allWindows.windows)[0]) => {
+    return cultivarPlantings.some((p) => {
+      // Windows overlap if one starts before the other ends
+      // We check harvest periods since that's what matters for succession planning
+      const windowStart = new Date(window.harvestStart).getTime();
+      const windowEnd = new Date(window.harvestEnd).getTime();
+      const plantingStart = new Date(p.harvestStart).getTime();
+      const plantingEnd = new Date(p.harvestEnd).getTime();
+
+      // For same-day windows/plantings (start == end), use special handling
+      // This handles the case where a window is truncated to a single day at frost deadline
+      const windowIsSameDay = windowStart === windowEnd;
+      const plantingIsSameDay = plantingStart === plantingEnd;
+
+      if (windowIsSameDay && plantingIsSameDay) {
+        // Both are same-day: overlap if they're the same day
+        return windowStart === plantingStart;
+      } else if (windowIsSameDay) {
+        // Window is same-day: overlaps if it falls within planting's range (inclusive)
+        return windowStart >= plantingStart && windowStart <= plantingEnd;
+      } else if (plantingIsSameDay) {
+        // Planting is same-day: overlaps if it falls within window's range (inclusive)
+        return plantingStart >= windowStart && plantingStart <= windowEnd;
+      } else {
+        // Normal case: overlap if windowStart < plantingEnd AND plantingStart < windowEnd
+        return windowStart < plantingEnd && plantingStart < windowEnd;
+      }
+    });
+  };
+
+  // Get the selected planting for display and calculations
+  const selectedPlanting = selectedPlantingId
+    ? cultivarPlantings.find((p) => p.id === selectedPlantingId)
+    : null;
+
+  // Calculate remaining windows based on selection state
+  const remainingWindows = selectedPlanting
+    ? calculateAvailableWindowsAfter(
+        cultivar,
+        frost,
+        climate,
+        selectedPlanting.harvestEnd,
+        plantings
+      )
+    : allWindows.windows.filter((w) => !windowOverlapsPlanting(w));
 
   const methodLabel =
     cultivar.sowMethod === 'transplant'
@@ -152,12 +221,7 @@ export function CultivarCard({
                   >
                     + Add Succession
                   </button>
-                  {remainingWindows.length > 0 && (
-                    <span className={styles.inlineHint}>
-                      {remainingWindows.length} more window
-                      {remainingWindows.length !== 1 ? 's' : ''} available
-                    </span>
-                  )}
+                  {/* Only show hint for continuous harvest crops that don't need successions */}
                   {remainingWindows.length === 0 &&
                     cultivar.harvestStyle === 'continuous' &&
                     cultivar.harvestDurationDays == null && (
@@ -201,6 +265,8 @@ export function CultivarCard({
               climate={climate}
               onUpdate={onUpdatePlanting}
               onDelete={onDeletePlanting}
+              selectedPlantingId={selectedPlantingId}
+              onSelectPlanting={handleSelectPlanting}
             />
           )}
 
