@@ -13,7 +13,7 @@ export function TimelineHeader({ frost }: TimelineHeaderProps) {
     const toDate = (iso: string) => new Date(`${iso}T00:00:00Z`);
     const year = toDate(frost.lastSpringFrost).getUTCFullYear();
     const rangeStart = `${year}-03-01`;
-    const rangeEnd = `${year}-10-31`;
+    const rangeEnd = `${year}-11-30`;
 
     const startDate = toDate(rangeStart);
     const endDate = toDate(rangeEnd);
@@ -34,16 +34,16 @@ export function TimelineHeader({ frost }: TimelineHeaderProps) {
         timeZone: 'UTC',
       });
 
-    return Array.from({ length: 8 }, (_, i) => {
+    return Array.from({ length: 9 }, (_, i) => {
       const monthNum = i + 3;
       const month = String(monthNum).padStart(2, '0');
       const date = `${year}-${month}-01`;
       // Calculate next month start for centering
       const nextMonthNum = monthNum + 1;
       const nextMonth = String(nextMonthNum).padStart(2, '0');
-      const nextDate = nextMonthNum <= 10
+      const nextDate = nextMonthNum <= 11
         ? `${year}-${nextMonth}-01`
-        : `${year}-11-01`; // Cap at Nov 1 for October
+        : `${year}-12-01`; // Cap at Dec 1 for November
       const monthStart = clampPct(date);
       const monthEnd = clampPct(nextDate);
       const center = (monthStart + monthEnd) / 2;

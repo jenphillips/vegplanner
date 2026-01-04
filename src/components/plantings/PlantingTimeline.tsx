@@ -21,7 +21,7 @@ export function PlantingTimeline({ planting, frost, climate }: PlantingTimelineP
     const toDate = (iso: string) => new Date(`${iso}T00:00:00Z`);
     const year = toDate(frost.lastSpringFrost).getUTCFullYear();
     const rangeStart = `${year}-03-01`;
-    const rangeEnd = `${year}-10-31`;
+    const rangeEnd = `${year}-11-30`;
 
     const startDate = toDate(rangeStart);
     const endDate = toDate(rangeEnd);
@@ -48,7 +48,7 @@ export function PlantingTimeline({ planting, frost, climate }: PlantingTimelineP
     }
 
     // Month ticks (for visual tick marks on track)
-    const monthTicks = Array.from({ length: 8 }, (_, i) => {
+    const monthTicks = Array.from({ length: 9 }, (_, i) => {
       const monthNum = i + 3;
       const month = String(monthNum).padStart(2, '0');
       const date = `${year}-${month}-01`;

@@ -188,7 +188,7 @@ export function BaselineTimeline({ frost, climate }: BaselineTimelineProps) {
         `${frost.lastSpringFrost}T00:00:00Z`
       ).getUTCFullYear();
       const rangeStart = `${year}-03-01`;
-      const rangeEnd = `${year}-10-31`;
+      const rangeEnd = `${year}-11-30`;
 
       const startDate = toDate(rangeStart);
       const endDate = toDate(rangeEnd);
@@ -209,7 +209,7 @@ export function BaselineTimeline({ frost, climate }: BaselineTimelineProps) {
       const frostMarker = frost.lastSpringFrost;
       const fallFrostMarker = frost.firstFallFrost;
 
-      const monthTicks = Array.from({ length: 8 }, (_, i) => {
+      const monthTicks = Array.from({ length: 9 }, (_, i) => {
         const monthNum = i + 3;
         const month = String(monthNum).padStart(2, '0');
         const date = `${year}-${month}-01`;
@@ -290,7 +290,7 @@ export function BaselineTimeline({ frost, climate }: BaselineTimelineProps) {
       `${frost.lastSpringFrost}T00:00:00Z`
     ).getUTCFullYear();
     const startDate = new Date(`${year}-03-01T00:00:00Z`);
-    const endDate = new Date(`${year}-10-31T00:00:00Z`);
+    const endDate = new Date(`${year}-11-30T00:00:00Z`);
     const rangeDays =
       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) || 1;
     const clampPct = (iso: string) => {
@@ -300,15 +300,15 @@ export function BaselineTimeline({ frost, climate }: BaselineTimelineProps) {
         rangeDays;
       return Math.min(1, Math.max(0, t));
     };
-    return Array.from({ length: 8 }, (_, i) => {
+    return Array.from({ length: 9 }, (_, i) => {
       const monthNum = i + 3;
       const date = `${year}-${String(monthNum).padStart(2, '0')}-01`;
       // Calculate center of month for label positioning
       const nextMonthNum = monthNum + 1;
       const nextMonth = String(nextMonthNum).padStart(2, '0');
-      const nextDate = nextMonthNum <= 10
+      const nextDate = nextMonthNum <= 11
         ? `${year}-${nextMonth}-01`
-        : `${year}-11-01`;
+        : `${year}-12-01`;
       const monthStart = clampPct(date);
       const monthEnd = clampPct(nextDate);
       const center = (monthStart + monthEnd) / 2;
