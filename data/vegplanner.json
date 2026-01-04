@@ -161,7 +161,7 @@
       "transplantAfterLsfDays": 0,
       "harvestStyle": "continuous",
       "harvestDurationDays": 21,
-      "frostSensitive": true,
+      "frostSensitive": false,
       "minGrowingTempC": 10,
       "maxGrowingTempC": 25,
       "optimalTempMinC": 15,

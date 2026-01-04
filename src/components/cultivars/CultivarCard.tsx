@@ -40,10 +40,7 @@ export function CultivarCard({
     .sort((a, b) => a.successionNumber - b.successionNumber);
 
   const handleGenerateInitial = () => {
-    const result = calculateSuccessionWindows(cultivar, frost, climate, {
-      maxSuccessions: 1,
-    });
-    const firstWindow = result.windows[0];
+    const firstWindow = allWindows.windows[0];
     if (firstWindow) {
       const planting = createPlantingFromWindow(firstWindow, cultivar, quantity);
       onAddPlanting(planting);
@@ -134,6 +131,12 @@ export function CultivarCard({
                 <button
                   onClick={handleGenerateInitial}
                   className={styles.primaryButton}
+                  disabled={allWindows.windows.length === 0}
+                  title={
+                    allWindows.windows.length === 0
+                      ? allWindows.diagnostic?.noWindowsReason ?? 'No viable planting windows'
+                      : 'Generate first planting'
+                  }
                 >
                   Generate Initial Planting
                 </button>
@@ -152,6 +155,17 @@ export function CultivarCard({
                 </button>
               )}
             </div>
+
+            {/* Show diagnostic when no windows available */}
+            {allWindows.windows.length === 0 && allWindows.diagnostic && (
+              <div className={styles.diagnosticWarning}>
+                <strong>No planting windows available:</strong>{' '}
+                {allWindows.diagnostic.noWindowsReason}
+                <div className={styles.diagnosticDetails}>
+                  Sow range: {allWindows.diagnostic.earliestSowDate} – {allWindows.diagnostic.latestSowDate}
+                </div>
+              </div>
+            )}
 
             {allWindows.skippedPeriods.length > 0 && (
               <div className={styles.skippedInfo}>

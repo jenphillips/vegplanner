@@ -167,6 +167,28 @@
   cursor: not-allowed;
 }
 
+.diagnosticWarning {
+  font-size: 13px;
+  color: #b71c1c;
+  padding: 10px 12px;
+  background: #ffebee;
+  border-radius: 6px;
+  border-left: 3px solid #ef5350;
+}
+
+.diagnosticDetails {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #c62828;
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .skippedInfo {
   display: flex;
   align-items: center;
