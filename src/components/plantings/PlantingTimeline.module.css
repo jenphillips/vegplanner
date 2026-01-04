@@ -15,6 +15,10 @@
   overflow: hidden;
 }
 
+.trackDragging {
+  cursor: ew-resize;
+}
+
 /* Week bands (zebra striping) */
 .weekBands {
   position: absolute;
@@ -78,6 +82,18 @@
   background: #33b5e5;
 }
 
+/* Drag bounds indicator */
+.dragBounds {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: rgba(45, 90, 64, 0.1);
+  border-left: 2px dashed rgba(45, 90, 64, 0.4);
+  border-right: 2px dashed rgba(45, 90, 64, 0.4);
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* Sow bar (indoor period for transplants) */
 .barSow {
   position: absolute;
@@ -86,6 +102,43 @@
   background: linear-gradient(90deg, #2d5a40, #3b7a57);
   border-radius: 3px;
   z-index: 2;
+}
+
+.barSowDraggable {
+  cursor: ew-resize;
+}
+
+.barSowDraggable:hover {
+  box-shadow: 0 0 0 2px rgba(45, 90, 64, 0.3);
+}
+
+.barSowDragging {
+  box-shadow: 0 0 0 2px rgba(45, 90, 64, 0.5);
+  opacity: 0.9;
+}
+
+/* Drag handle on left edge */
+.dragHandle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  background: linear-gradient(90deg, #1a3d2a, #2d5a40);
+  border-radius: 3px 0 0 3px;
+  cursor: ew-resize;
+}
+
+.dragHandle::before {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 1px;
 }
 
 /* Growing period bar */

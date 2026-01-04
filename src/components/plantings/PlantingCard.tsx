@@ -54,9 +54,21 @@ export function PlantingCard({
     }
   };
 
-  // Suppress unused variable warnings - passed for future use
-  void cultivar;
-  void onUpdate;
+  const handleSowDateUpdate = (
+    id: string,
+    sowDateOverride: string,
+    newHarvestStart: string,
+    newHarvestEnd: string
+  ) => {
+    onUpdate(id, {
+      sowDateOverride,
+      harvestStart: newHarvestStart,
+      harvestEnd: newHarvestEnd,
+    });
+  };
+
+  // Use the override sow date for display if available
+  const displaySowDate = planting.sowDateOverride ?? planting.sowDate;
 
   return (
     <div className={styles.card}>
@@ -65,10 +77,16 @@ export function PlantingCard({
           <span className={styles.label}>{planting.label}</span>
           <span className={styles.quantity}>{planting.quantity}</span>
           <span className={styles.dateRange}>
-            {formatDate(planting.sowDate)} → {formatDate(planting.harvestEnd)}
+            {formatDate(displaySowDate)} → {formatDate(planting.harvestEnd)}
           </span>
         </div>
-        <PlantingTimeline planting={planting} frost={frost} climate={climate} />
+        <PlantingTimeline
+          planting={planting}
+          frost={frost}
+          climate={climate}
+          cultivar={cultivar}
+          onUpdateSowDate={handleSowDateUpdate}
+        />
         <button
           onClick={handleDelete}
           className={`${styles.deleteButton} ${confirmDelete ? styles.deleteConfirm : ''}`}

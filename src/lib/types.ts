@@ -127,6 +127,7 @@ export type Planting = {
   label: string; // "Spinach #1", "Tomato - Early"
   quantity: number; // Number of plants/seeds
   sowDate: string; // Calculated ISO date
+  sowDateOverride?: string; // User-adjusted sow date (earlier indoor start for transplants)
   transplantDate?: string; // If transplant method
   harvestStart: string;
   harvestEnd: string;

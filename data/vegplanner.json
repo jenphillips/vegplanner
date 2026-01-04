@@ -157,7 +157,7 @@
       "maturityBasis": "from_transplant",
       "sowMethod": "transplant",
       "indoorLeadWeeksMin": 4,
-      "indoorLeadWeeksMax": 5,
+      "indoorLeadWeeksMax": 6,
       "transplantAfterLsfDays": 0,
       "harvestStyle": "continuous",
       "harvestDurationDays": 21,
