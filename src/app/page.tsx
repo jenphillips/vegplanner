@@ -47,7 +47,7 @@ const daysBetweenExclusive = (startIso: string, endIso: string) => {
 // ============================================
 
 export default function Home() {
-  const [expandAll, setExpandAll] = useState(false);
+  const [expandAll, setExpandAll] = useState(true);
   const {
     plantings,
     loading: plantingsLoading,
@@ -56,13 +56,18 @@ export default function Home() {
     deletePlanting,
   } = usePlantings();
 
-  // Get unique cultivars from plans
+  // Get unique cultivars from plans, sorted alphabetically by crop then variety
   const plannedCultivars = useMemo(() => {
     const cultivarMap = new Map(data.cultivars.map((c) => [c.id, c]));
     const uniqueIds = [...new Set(data.plans.map((p) => p.cultivarId))];
-    return uniqueIds
+    return (uniqueIds
       .map((id) => cultivarMap.get(id))
-      .filter(Boolean) as Cultivar[];
+      .filter(Boolean) as Cultivar[])
+      .sort((a, b) => {
+        const cropCompare = a.crop.localeCompare(b.crop);
+        if (cropCompare !== 0) return cropCompare;
+        return a.variety.localeCompare(b.variety);
+      });
   }, []);
 
   const handleAddPlanting = async (

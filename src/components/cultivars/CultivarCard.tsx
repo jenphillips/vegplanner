@@ -91,20 +91,19 @@ export function CultivarCard({
           <h3 className={styles.title}>
             {cultivar.crop} — {cultivar.variety}
           </h3>
-          <span className={styles.badge}>{methodLabel}</span>
-          {cultivarPlantings.length > 0 && (
-            <span className={styles.countBadge}>
-              {cultivarPlantings.length} planting
-              {cultivarPlantings.length !== 1 ? 's' : ''}
-            </span>
-          )}
-        </div>
-        <div className={styles.meta}>
-          <span>{cultivar.maturityDays} days to maturity</span>
-          {tempRange && <span>Temp: {tempRange}</span>}
-          {cultivar.harvestStyle === 'continuous' && (
-            <span className={styles.harvestBadge}>Continuous harvest</span>
-          )}
+          <span className={styles.meta}>
+            {cultivar.maturityDays} days from {cultivar.sowMethod === 'transplant' ? 'transplant' : 'direct sow'}
+            {tempRange && <> · {tempRange}</>}
+          </span>
+          <div className={styles.badges}>
+            <span className={cultivar.sowMethod === 'transplant' ? styles.badgeTransplant : styles.badge}>{methodLabel}</span>
+            {cultivarPlantings.length > 0 && (
+              <span className={styles.countBadge}>
+                {cultivarPlantings.length} planting
+                {cultivarPlantings.length !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
         </div>
         <span className={styles.chevron}>{expanded ? '▼' : '▶'}</span>
       </div>
@@ -113,8 +112,10 @@ export function CultivarCard({
         <div className={styles.content}>
           {/* Planting controls */}
           <div className={styles.controls}>
-            <div className={styles.quantityRow}>
-              <label htmlFor={`qty-${cultivar.id}`}>Plants per succession:</label>
+            <div className={styles.actionRow}>
+              <label htmlFor={`qty-${cultivar.id}`}>
+                {cultivarPlantings.length === 0 ? 'Plants per planting:' : 'Plants per succession:'}
+              </label>
               <input
                 id={`qty-${cultivar.id}`}
                 type="number"
@@ -124,9 +125,6 @@ export function CultivarCard({
                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                 className={styles.quantityInput}
               />
-            </div>
-
-            <div className={styles.buttonRow}>
               {cultivarPlantings.length === 0 ? (
                 <button
                   onClick={handleGenerateInitial}
@@ -141,18 +139,33 @@ export function CultivarCard({
                   Generate Initial Planting
                 </button>
               ) : (
-                <button
-                  onClick={handleAddSuccession}
-                  className={styles.secondaryButton}
-                  disabled={remainingWindows.length === 0}
-                  title={
-                    remainingWindows.length === 0
-                      ? 'No more viable planting windows this season'
-                      : `Add succession #${cultivarPlantings.length + 1}`
-                  }
-                >
-                  + Add Succession
-                </button>
+                <>
+                  <button
+                    onClick={handleAddSuccession}
+                    className={styles.secondaryButton}
+                    disabled={remainingWindows.length === 0}
+                    title={
+                      remainingWindows.length === 0
+                        ? 'No more viable planting windows this season'
+                        : `Add succession #${cultivarPlantings.length + 1}`
+                    }
+                  >
+                    + Add Succession
+                  </button>
+                  {remainingWindows.length > 0 && (
+                    <span className={styles.inlineHint}>
+                      {remainingWindows.length} more window
+                      {remainingWindows.length !== 1 ? 's' : ''} available
+                    </span>
+                  )}
+                  {remainingWindows.length === 0 &&
+                    cultivar.harvestStyle === 'continuous' &&
+                    cultivar.harvestDurationDays == null && (
+                      <span className={styles.inlineHint}>
+                        One planting provides continuous harvest until frost
+                      </span>
+                    )}
+                </>
               )}
             </div>
 
@@ -177,22 +190,6 @@ export function CultivarCard({
                 ))}
               </div>
             )}
-
-            {remainingWindows.length > 0 && cultivarPlantings.length > 0 && (
-              <p className={styles.hint}>
-                {remainingWindows.length} more succession window
-                {remainingWindows.length !== 1 ? 's' : ''} available
-              </p>
-            )}
-
-            {remainingWindows.length === 0 &&
-              cultivarPlantings.length > 0 &&
-              cultivar.harvestStyle === 'continuous' &&
-              cultivar.harvestDurationDays == null && (
-                <p className={styles.hint}>
-                  One planting provides continuous harvest until frost
-                </p>
-              )}
           </div>
 
           {/* Existing plantings */}

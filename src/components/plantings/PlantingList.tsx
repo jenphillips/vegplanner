@@ -28,7 +28,6 @@ export function PlantingList({
 
   return (
     <div className={styles.list}>
-      <h4 className={styles.heading}>Planned Plantings</h4>
       <TimelineHeader frost={frost} />
       <div className={styles.plantings}>
         {plantings.map((planting) => (
