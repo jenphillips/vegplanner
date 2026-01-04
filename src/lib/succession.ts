@@ -323,11 +323,19 @@ export function calculateSuccessionWindows(
 
     // Calculate next sow date for continuous harvest
     // Aim to start harvesting as previous harvest ends
-    currentSowDate = calculateNextSowDateForContinuousHarvest(
+    const nextSowDate = calculateNextSowDateForContinuousHarvest(
       plantingDates.harvestEnd,
       cultivar,
       method
     );
+
+    // If the next sow date isn't advancing (can happen when harvestEnd gets capped
+    // at frost deadline), we've exhausted viable windows - exit the loop
+    if (nextSowDate <= currentSowDate) {
+      break;
+    }
+
+    currentSowDate = nextSowDate;
   }
 
   // Close any remaining skipped period

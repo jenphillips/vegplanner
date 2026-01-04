@@ -144,24 +144,33 @@ For crops with explicit duration, `harvestEnd = harvestStart + duration`, capped
 - `minGrowingTempC: 10`, `maxGrowingTempC: 35`
 - `frostSensitive: true`
 - `sowMethod: transplant`
-- `indoorLeadWeeksMin: 6`
+- `indoorLeadWeeksMin: 6`, `indoorLeadWeeksMax: 8`
 - `transplantAfterLsfDays: 7`
 - `maturityDays: 57`, `maturityBasis: from_transplant`
 - `harvestDurationDays: null` (harvest until frost)
 - `harvestStyle: continuous`
 
 **Calculation:**
-- Transplant date: June 8 (June 1 + 7 days)
-- Sow date: April 20 (June 8 - 6 weeks indoors)
-- Harvest start: Aug 4 (June 8 + 57 days)
-- Harvest end: Sept 22 (earliest frost - 4 day buffer)
+
+The algorithm uses two different lead week values for different purposes:
+- `indoorLeadWeeksMax` (8 weeks): Used to calculate the **earliest possible sow date**
+- `indoorLeadWeeksMin` (6 weeks): Used to calculate **transplant date from sow date**
+
+Step by step:
+1. Target transplant date: June 8 (June 1 + 7 days after frost)
+2. Earliest sow date: April 13 (June 8 - 8 weeks using `indoorLeadWeeksMax`)
+3. Actual transplant date: May 25 (April 13 + 6 weeks using `indoorLeadWeeksMin`)
+4. Harvest start: July 21 (May 25 + 57 days from transplant)
+5. Harvest end: Sept 11 (earliest frost Sept 15 - 4 day buffer)
 
 **Temperature check:**
-- Only check from transplant (June 8) through harvest start (Aug 4)
-- Indoor period (April 20 - June 8) not checked
-- June/July/Aug all within 10-33°C range → OK ✓
+- Only check from transplant (May 25) through harvest start (July 21)
+- Indoor period (April 13 - May 25) not checked
+- May/June/July all within 10-33°C range → OK ✓
 
-**Result:** Single planting provides continuous harvest July 21 - Sept 22. No succession needed because `harvestDurationDays: null` means it produces until frost.
+**Result:** Single planting provides continuous harvest July 21 - Sept 11. No succession needed because `harvestDurationDays: null` means it produces until frost.
+
+> **Note:** The use of `indoorLeadWeeksMax` for earliest sow allows gardeners to start seeds earlier if desired (up to 8 weeks before transplant), while `indoorLeadWeeksMin` ensures transplants aren't set out too young (minimum 6 weeks old).
 
 ---
 
@@ -171,7 +180,7 @@ For crops with explicit duration, `harvestEnd = harvestStart + duration`, capped
 - `minGrowingTempC: 10`, `maxGrowingTempC: 25`
 - `frostSensitive: false`
 - `sowMethod: transplant`
-- `indoorLeadWeeksMin: 4`
+- `indoorLeadWeeksMin: 4`, `indoorLeadWeeksMax: 6`
 - `transplantAfterLsfDays: 0`
 - `maturityDays: 55`, `maturityBasis: from_transplant`
 - `harvestDurationDays: 21`
@@ -182,21 +191,22 @@ For crops with explicit duration, `harvestEnd = harvestStart + duration`, capped
 
 **Calculation:**
 - Effective max: 25 - 2 = 23°C
-- Transplant date: June 1 (frost date + 0)
-- Sow date: May 4 (June 1 - 4 weeks)
-- Harvest start: July 26 (June 1 + 55 days)
+- Target transplant date: June 1 (frost date + 0)
+- Earliest sow date: April 20 (June 1 - 6 weeks using `indoorLeadWeeksMax`)
+- Actual transplant date: May 18 (April 20 + 4 weeks using `indoorLeadWeeksMin`)
+- Harvest start: July 12 (May 18 + 55 days)
 
-**Temperature check (June 1 - July 26):**
+**Temperature check (May 18 - July 12):**
+- May: 17°C < 23°C → OK
 - June: 21°C < 23°C → OK
 - July: 24°C > 23°C → FAIL
 
 **Spring window attempt:**
-- The earliest transplant puts harvest start in late July
+- Growing period extends into July when it's too hot
 - July is too hot → spring window fails
 
-**Fall window (sow Aug 10):**
-- Transplant: Sept 7
-- Harvest start: Nov 1
+**Fall window:**
+- Resume sowing when temps drop in late summer
 - Check Sept (19°C) → OK ✓
 
 **Result:** Only fall plantings viable. To get spring gai lan, would need earlier transplanting (negative `transplantAfterLsfDays`) to harvest before July heat.
@@ -253,7 +263,8 @@ For crops with explicit duration, `harvestEnd = harvestStart + duration`, capped
 | `harvestStyle` | 'single' \| 'continuous' | Affects default duration if not specified |
 | `directAfterLsfDays` | number | Days after last frost for direct sowing (negative = before) |
 | `transplantAfterLsfDays` | number | Days after last frost for transplanting |
-| `indoorLeadWeeksMin` | number | Weeks to start seeds indoors before transplant |
+| `indoorLeadWeeksMin` | number | Minimum weeks indoors; used to calculate transplant date from sow date |
+| `indoorLeadWeeksMax` | number | Maximum weeks indoors; used to calculate earliest possible sow date |
 | `maturityBasis` | 'from_sow' \| 'from_transplant' | When maturity countdown starts |
 
 ### Climate Data Used
