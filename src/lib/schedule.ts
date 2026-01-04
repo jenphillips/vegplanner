@@ -1,16 +1,5 @@
 import { Cultivar, PlantingPlan, ScheduleInput, ScheduleResult, SowMethod } from './types';
-
-const toDate = (iso: string) => new Date(iso + 'T00:00:00Z');
-const addDays = (iso: string, days: number) => {
-  const d = toDate(iso);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-};
-
-const addWeeks = (iso: string, weeks: number) => addDays(iso, Math.round(weeks * 7));
-
-const ensureNumber = (value: number | null | undefined, fallback = 0) =>
-  typeof value === 'number' ? value : fallback;
+import { addDays, addWeeks, ensureNumber } from './dateUtils';
 
 const pickMethod = (plan: PlantingPlan, cultivar: Cultivar): SowMethod =>
   plan.methodOverride ?? cultivar.sowMethod;

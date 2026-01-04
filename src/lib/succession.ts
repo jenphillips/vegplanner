@@ -1,29 +1,5 @@
 import type { Cultivar, Climate, FrostWindow, SowMethod, Planting, HarvestStyle } from './types';
-
-// ============================================
-// Date Utilities
-// ============================================
-
-const toDate = (iso: string) => new Date(iso + 'T00:00:00Z');
-
-const addDays = (iso: string, days: number): string => {
-  const d = toDate(iso);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-};
-
-const daysBetween = (start: string, end: string): number => {
-  const s = toDate(start);
-  const e = toDate(end);
-  return Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
-};
-
-const getMonth = (iso: string): number => {
-  return toDate(iso).getUTCMonth() + 1; // 1-12
-};
-
-const ensureNumber = (value: number | null | undefined, fallback = 0): number =>
-  typeof value === 'number' ? value : fallback;
+import { toDate, addDays, getMonth, ensureNumber } from './dateUtils';
 
 // ============================================
 // Harvest Duration Helpers
