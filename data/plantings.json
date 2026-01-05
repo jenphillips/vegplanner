@@ -138,52 +138,13 @@
     "cultivarId": "beet-avalanche",
     "label": "Beet #2",
     "quantity": 10,
-    "sowDate": "2025-04-08",
-    "harvestStart": "2025-06-02",
-    "harvestEnd": "2025-06-09",
-    "method": "direct",
-    "status": "planned",
-    "successionNumber": 2,
-    "id": "9e656709-6bf5-4fd0-9dd5-738e720000c7",
-    "createdAt": "2026-01-05T02:00:09.456Z"
-  },
-  {
-    "cultivarId": "beet-avalanche",
-    "label": "Beet #3",
-    "quantity": 10,
     "sowDate": "2025-04-15",
     "harvestStart": "2025-06-09",
     "harvestEnd": "2025-06-16",
     "method": "direct",
     "status": "planned",
-    "successionNumber": 3,
+    "successionNumber": 2,
     "id": "950bab58-4d37-45ed-883d-68e8ceb8e40c",
     "createdAt": "2026-01-05T02:00:16.155Z"
-  },
-  {
-    "cultivarId": "beet-avalanche",
-    "label": "Beet #4",
-    "quantity": 10,
-    "sowDate": "2025-07-18",
-    "harvestStart": "2025-09-11",
-    "harvestEnd": "2025-09-18",
-    "method": "direct",
-    "status": "planned",
-    "successionNumber": 4,
-    "id": "014dbfc3-79c0-4976-b56e-f55afa0993df",
-    "createdAt": "2026-01-05T02:00:02.922Z"
-  },
-  {
-    "cultivarId": "beet-avalanche",
-    "label": "Beet #5",
-    "quantity": 10,
-    "sowDate": "2025-07-25",
-    "harvestStart": "2025-09-18",
-    "harvestEnd": "2025-09-25",
-    "method": "direct",
-    "status": "planned",
-    "successionNumber": 5,
-    "id": "7472b85d-132c-45a1-aaa3-daaf50a63d77",
-    "createdAt": "2026-01-05T02:00:12.708Z"
   }
 ]

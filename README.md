@@ -7,7 +7,10 @@ A lightweight planner for vegetable gardening. Track seed cultivars, record your
 - Save your average last spring and first fall frost dates.
 - See recommended indoor start, direct sow, transplant, and expected harvest windows.
 - Support separate timelines for crops grown by transplant vs direct sow.
-- Plan successions (optional offsets for multiple plantings).
+- Plan successions with automatic scheduling based on temperature windows.
+- Toggle plantings between direct sow and transplant for crops that support both methods.
+- Drag planting bars on the timeline to reschedule (temperature-aware, respects season boundaries).
+- Succession numbers automatically renumber when plantings are added or reordered.
 
 ## How scheduling works (concept)
 - Indoor start: `last_spring_frost - lead_time_weeks*7 - harden_days`.
@@ -20,8 +23,9 @@ A lightweight planner for vegetable gardening. Track seed cultivars, record your
 
 See `docs/spec.md` for the detailed data model and logic outline.
 
-## Next steps
-- Pick a stack (suggested: Expo/React Native or Next.js) and scaffold the app.
-- Build data entry for cultivars and frost dates.
-- Implement the scheduling engine and surface a calendar/timeline view.
-- Add import/export (CSV/JSON) for cultivar lists.
+## Tech stack
+- Next.js + React + TypeScript
+- CSS Modules for styling
+- Local JSON files for storage
+
+See `docs/ARCHITECTURE.md` for implementation details.

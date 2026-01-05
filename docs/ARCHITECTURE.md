@@ -47,6 +47,33 @@ skips July-August (too hot), resumes in fall.
 
 ---
 
+## Interactive Features
+
+### Drag to Reschedule
+Location: `src/components/plantings/PlantingTimeline.tsx`
+
+Users can drag planting bars on the timeline to reschedule. The system calculates shift bounds that:
+- Prevent shifting earlier than previous planting's harvest end (respects succession spacing)
+- Prevent shifting later than frost deadline allows
+- Enforce season start/end boundaries
+
+**Temperature-aware shifting**: For heat-sensitive crops with viable spring and fall windows, dragging past an unfavorable temperature period will "jump" to the next viable range.
+
+### Method Toggle
+Location: `src/components/plantings/MethodToggle.tsx`
+
+For cultivars with `sowMethod: "either"`, plantings can be toggled between direct sow (DS) and transplant (TR). When toggled:
+- All dates recalculate based on the new method
+- Transplant adds indoor lead time and transplant date
+- Direct sow removes transplant date and recalculates harvest based on sow date
+
+### Automatic Succession Renumbering
+Location: `src/lib/succession.ts`, `src/hooks/usePlantings.ts`
+
+When plantings are added or edited, succession numbers automatically renumber based on chronological sow date order. This ensures plantings always display as #1, #2, #3 in date order regardless of when they were created.
+
+---
+
 ## UI Structure
 
 - **Tab navigation**: Timeline | Tasks | Garden Layout
@@ -65,12 +92,16 @@ src/
 │   └── page.module.css
 ├── components/
 │   ├── cultivars/CultivarCard.tsx
-│   ├── plantings/PlantingCard.tsx
+│   ├── plantings/
+│   │   ├── PlantingCard.tsx
+│   │   ├── PlantingTimeline.tsx  # Timeline bar with drag support
+│   │   └── MethodToggle.tsx      # Direct sow / transplant toggle
 │   ├── tasks/TaskList.tsx, TaskCalendar.tsx
 │   ├── timeline/Timeline.tsx
 │   └── garden/GardenCanvas.tsx (Phase 3)
 ├── lib/
 │   ├── types.ts          # All type definitions
+│   ├── dateUtils.ts      # Shared date utilities
 │   ├── schedule.ts       # Date calculation
 │   ├── succession.ts     # Succession window calculation
 │   └── tasks.ts          # Task generation
@@ -151,6 +182,7 @@ minGrowingTempC?: number;   // Below this, don't plant
 maxGrowingTempC?: number;   // Above this, skip succession
 optimalTempMinC?: number;
 optimalTempMaxC?: number;
+preferredMethod?: 'direct' | 'transplant';  // Default method for sowMethod: "either"
 ```
 
 ---

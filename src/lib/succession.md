@@ -266,6 +266,7 @@ Step by step:
 | `indoorLeadWeeksMin` | number | Minimum weeks indoors; used to calculate transplant date from sow date |
 | `indoorLeadWeeksMax` | number | Maximum weeks indoors; used to calculate earliest possible sow date |
 | `maturityBasis` | 'from_sow' \| 'from_transplant' | When maturity countdown starts |
+| `preferredMethod` | 'direct' \| 'transplant' | Default method for `sowMethod: either` crops |
 
 ### Climate Data Used
 
@@ -390,3 +391,74 @@ When a planting is shifted via drag, the harvest end is recalculated based on:
 3. **Single harvest crops**: Shift with start, but cap at frost deadline
 
 This ensures late-season plantings have realistic harvest windows even when dragged close to frost.
+
+---
+
+## Method Toggle (Direct Sow ↔ Transplant)
+
+For cultivars with `sowMethod: "either"`, individual plantings can be toggled between direct sow and transplant methods. This is handled by `recalculatePlantingForMethodChange()`.
+
+### When Method Changes
+
+| From | To | Date Changes |
+|------|-----|--------------|
+| Direct sow | Transplant | Adds `transplantDate` (current sow date becomes indoor sow), recalculates harvest based on transplant |
+| Transplant | Direct sow | Removes `transplantDate`, sow date becomes outdoor sow, recalculates harvest from sow |
+
+### Date Recalculation Logic
+
+**Switching to transplant:**
+1. Current `sowDate` becomes the indoor sow date
+2. `transplantDate` = `sowDate` + (`indoorLeadWeeksMin` × 7 days)
+3. If `maturityBasis: 'from_transplant'`: `harvestStart` = `transplantDate` + `maturityDays`
+4. If `maturityBasis: 'from_sow'`: `harvestStart` = `sowDate` + `maturityDays`
+
+**Switching to direct sow:**
+1. `transplantDate` is removed
+2. `sowDate` remains unchanged (now represents outdoor direct sow)
+3. `harvestStart` = `sowDate` + `maturityDays` (always from sow for direct sow)
+
+### Default Method Selection
+
+When a new planting is created for an "either" cultivar, the method is determined by:
+1. `cultivar.preferredMethod` if set ('direct' or 'transplant')
+2. Otherwise defaults to 'direct'
+
+---
+
+## Automatic Succession Renumbering
+
+Succession numbers automatically update to maintain chronological order by sow date. This is handled by `renumberPlantingsForCrop()`.
+
+### When Renumbering Occurs
+
+- After adding a new planting (`addAndRenumber()`)
+- After updating a planting that changes its sow date (`updateAndRenumber()`)
+- After deleting a planting
+
+### Algorithm
+
+```
+1. Filter plantings by cultivarId
+2. Sort by sowDate ascending
+3. Assign successionNumber = index + 1
+4. Update labels to match ("Spinach #1", "Spinach #2", etc.)
+```
+
+### Example
+
+Before (added out of order):
+| Label | Sow Date | Succession # |
+|-------|----------|--------------|
+| Beet #1 | April 1 | 1 |
+| Beet #2 | June 24 | 2 |
+| Beet #3 | April 8 | 3 | ← just added
+
+After renumbering:
+| Label | Sow Date | Succession # |
+|-------|----------|--------------|
+| Beet #1 | April 1 | 1 |
+| Beet #2 | April 8 | 2 | ← renumbered
+| Beet #3 | June 24 | 3 | ← renumbered
+
+This ensures the UI always displays plantings in logical chronological order regardless of when they were created.

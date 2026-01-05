@@ -15,6 +15,9 @@ This document captures the initial requirements, data model, and scheduling logi
 - As a gardener I can record whether I plan to direct sow or transplant a cultivar (or both).
 - As a gardener I see when to start seeds indoors, when to transplant, when to direct sow, and when to expect harvest.
 - As a gardener I can schedule multiple successions by shifting the start date forward by a fixed interval.
+- As a gardener I can toggle a planting between direct sow and transplant for crops that support both methods.
+- As a gardener I can drag planting bars on the timeline to reschedule, with the system respecting temperature windows and season boundaries.
+- As a gardener I see succession numbers automatically reorder when I add or modify plantings.
 
 ## Data model (proposed)
 - `FrostWindow`
@@ -33,6 +36,7 @@ This document captures the initial requirements, data model, and scheduling logi
   - `harvest_style` (`single` | `continuous`)
   - `harvest_duration_days` (optional window length; for `continuous` defaults to frost-bounded)
   - `frost_sensitive` (bool; if true and `continuous`, harvest ends at first fall frost)
+  - `preferredMethod` (`direct` | `transplant`; for `sow_method: either`, which method to default to)
   - `notes`
 - `PlantingPlan`
   - `cultivar_id`
@@ -95,12 +99,29 @@ Given `LSF`, `FFF`, and a `PlantingPlan` for a `Cultivar`:
 
 All generated dates should include the assumptions used (basis, lead times, buffers) so gardeners can tweak inputs.
 
+## Interactive features
+
+### Drag to reschedule
+Planting bars on the timeline can be dragged to reschedule. The system calculates valid shift bounds:
+- Cannot shift earlier than previous succession's harvest end
+- Cannot shift later than frost deadline allows
+- Respects season start/end boundaries
+
+For heat-sensitive crops, dragging past an unfavorable temperature window will "jump" to the next viable range (e.g., spring to fall for crops that skip hot summer months).
+
+### Method toggle
+For cultivars with `sow_method: either`, individual plantings can be toggled between direct sow and transplant. When toggled:
+- All dates recalculate based on the new method
+- Transplant mode adds indoor lead time and transplant date
+- Direct sow mode removes transplant date and recalculates harvest from sow date
+
+### Automatic succession renumbering
+When plantings are added or edited, succession numbers automatically renumber based on chronological sow date order. This keeps the display as #1, #2, #3 in date order regardless of creation order.
+
 ## Implementation notes
-- Start with a simple JSON-backed store for cultivars and plans; add persistence later (SQLite or Supabase).
-- Expose a minimal scheduling function that accepts `FrostWindow`, `Cultivar`, and `PlantingPlan` and returns calculated dates plus the assumption metadata.
-- Build UI flows:
-  - Frost date setup (LSF/FFF).
-  - Cultivar catalog entry (with defaults).
-  - Plan creator (choose method, season, successions).
-  - Schedule view (list and calendar).
+- JSON-backed store for cultivars and plans in `data/` directory.
+- Scheduling functions in `src/lib/schedule.ts` and `src/lib/succession.ts`.
+- Date utilities extracted to `src/lib/dateUtils.ts`.
+- UI built with Next.js + React + TypeScript.
+- Tab-based navigation: Timeline, Tasks, Garden Layout.
 - Keep all numbers editable; catalogs vary and gardeners need overrides.
