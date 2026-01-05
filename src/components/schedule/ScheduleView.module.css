@@ -1,0 +1,14 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.loading,
+.empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--muted, #5f6653);
+  background: var(--panel, #ffffff);
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 12px;
+}

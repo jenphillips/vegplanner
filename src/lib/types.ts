@@ -158,6 +158,14 @@ export type Task = {
   completedAt?: string;
 };
 
+export type TaskCompletion = {
+  id: string; // Format: `${plantingId}-${type}`
+  plantingId: string;
+  type: TaskType;
+  completed: boolean;
+  completedAt?: string;
+};
+
 // ============================================
 // Garden Bed Types (Phase 3)
 // ============================================

@@ -109,6 +109,12 @@
   border-radius: 12px;
 }
 
+.tabNavContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: -8px;
+}
+
 .infoItem {
   display: grid;
   grid-template-columns: auto 1fr;

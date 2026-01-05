@@ -4,7 +4,10 @@ import { useMemo, useState } from 'react';
 import plannerData from '@/../data/vegplanner.json';
 import { BaselineTimeline } from '@/components/timeline/BaselineTimeline';
 import { CultivarCard } from '@/components/cultivars/CultivarCard';
+import { TabNav, type Tab } from '@/components/tabs/TabNav';
+import { ScheduleView } from '@/components/schedule/ScheduleView';
 import { usePlantings } from '@/hooks/usePlantings';
+import { useTasks } from '@/hooks/useTasks';
 import type { Cultivar, FrostWindow, PlantingPlan, Climate } from '@/lib/types';
 import styles from './page.module.css';
 
@@ -48,6 +51,7 @@ const daysBetweenExclusive = (startIso: string, endIso: string) => {
 
 export default function Home() {
   const [expandAll, setExpandAll] = useState(true);
+  const [activeTab, setActiveTab] = useState<Tab>('timeline');
   const {
     plantings,
     loading: plantingsLoading,
@@ -56,6 +60,12 @@ export default function Home() {
     updateAndRenumber,
     addAndRenumber,
   } = usePlantings();
+
+  const {
+    tasksByWeek,
+    loading: tasksLoading,
+    toggleTaskComplete,
+  } = useTasks(plantings, data.cultivars);
 
   // Get unique cultivars from plans, sorted alphabetically by crop then variety
   const plannedCultivars = useMemo(() => {
@@ -156,46 +166,74 @@ export default function Home() {
           </div>
         )}
 
-        {/* Cultivar Cards with Planting Management */}
+        {/* Tab Navigation */}
         {ready && (
+          <div className={styles.tabNavContainer}>
+            <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
+          </div>
+        )}
+
+        {/* Timeline Tab: Cultivar Cards with Planting Management */}
+        {ready && activeTab === 'timeline' && (
+          <>
+            <section className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2 className={styles.sectionTitle}>Cultivars & Plantings</h2>
+                  <p className={styles.sectionDesc}>
+                    Click a cultivar to expand and manage succession plantings. The
+                    app will automatically calculate optimal sowing dates based on
+                    temperature tolerances.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setExpandAll(!expandAll)}
+                  className={styles.expandButton}
+                >
+                  {expandAll ? 'Collapse All' : 'Expand All'}
+                </button>
+              </div>
+              <div className={styles.cultivarGrid}>
+                {plannedCultivars.map((cultivar) => (
+                  <CultivarCard
+                    key={cultivar.id}
+                    cultivar={cultivar}
+                    frost={data.frost}
+                    climate={data.climate}
+                    plantings={plantings}
+                    onAddPlanting={handleAddPlanting}
+                    onUpdatePlanting={handleUpdatePlanting}
+                    onDeletePlanting={handleDeletePlanting}
+                    forceExpanded={expandAll ? true : undefined}
+                  />
+                ))}
+              </div>
+            </section>
+
+            {/* Seasonal Planting Reference (Baseline Vegetables) */}
+            <BaselineTimeline frost={data.frost} climate={data.climate} />
+          </>
+        )}
+
+        {/* Tasks Tab: Schedule View */}
+        {ready && activeTab === 'tasks' && (
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>
-                <h2 className={styles.sectionTitle}>Cultivars & Plantings</h2>
+                <h2 className={styles.sectionTitle}>Tasks & Schedule</h2>
                 <p className={styles.sectionDesc}>
-                  Click a cultivar to expand and manage succession plantings. The
-                  app will automatically calculate optimal sowing dates based on
-                  temperature tolerances.
+                  All tasks derived from your plantings, grouped by week.
+                  Check off tasks as you complete them.
                 </p>
               </div>
-              <button
-                onClick={() => setExpandAll(!expandAll)}
-                className={styles.expandButton}
-              >
-                {expandAll ? 'Collapse All' : 'Expand All'}
-              </button>
             </div>
-            <div className={styles.cultivarGrid}>
-              {plannedCultivars.map((cultivar) => (
-                <CultivarCard
-                  key={cultivar.id}
-                  cultivar={cultivar}
-                  frost={data.frost}
-                  climate={data.climate}
-                  plantings={plantings}
-                  onAddPlanting={handleAddPlanting}
-                  onUpdatePlanting={handleUpdatePlanting}
-                  onDeletePlanting={handleDeletePlanting}
-                  forceExpanded={expandAll ? true : undefined}
-                />
-              ))}
-            </div>
+            <ScheduleView
+              tasksByWeek={tasksByWeek}
+              cultivars={data.cultivars}
+              onToggleComplete={toggleTaskComplete}
+              loading={tasksLoading}
+            />
           </section>
-        )}
-
-        {/* Seasonal Planting Reference (Baseline Vegetables) */}
-        {ready && (
-          <BaselineTimeline frost={data.frost} climate={data.climate} />
         )}
 
       </main>

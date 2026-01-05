@@ -76,9 +76,12 @@ When plantings are added or edited, succession numbers automatically renumber ba
 
 ## UI Structure
 
-- **Tab navigation**: Timeline | Tasks | Garden Layout
+- **Tab navigation**: Timeline | Tasks (Garden Layout planned for Phase 3)
 - **CultivarCard**: Expandable cards showing cultivar info + plantings
 - **PlantingCard**: Individual planting with dates, quantity, status
+- **ScheduleView**: Tasks grouped by week with completion checkboxes
+- **WeekGroup**: Week header with task count and list of tasks
+- **TaskCard**: Individual task with type badge, date, and checkbox
 
 ---
 
@@ -96,8 +99,12 @@ src/
 │   │   ├── PlantingCard.tsx
 │   │   ├── PlantingTimeline.tsx  # Timeline bar with drag support
 │   │   └── MethodToggle.tsx      # Direct sow / transplant toggle
-│   ├── tasks/TaskList.tsx, TaskCalendar.tsx
-│   ├── timeline/Timeline.tsx
+│   ├── schedule/
+│   │   ├── ScheduleView.tsx      # Main tasks container
+│   │   ├── WeekGroup.tsx         # Weekly task grouping
+│   │   └── TaskCard.tsx          # Individual task display
+│   ├── tabs/TabNav.tsx           # Timeline/Tasks tab switcher
+│   ├── timeline/BaselineTimeline.tsx
 │   └── garden/GardenCanvas.tsx (Phase 3)
 ├── lib/
 │   ├── types.ts          # All type definitions
@@ -127,10 +134,11 @@ data/
 - Succession calculation engine
 - CultivarCard with planting forms
 
-### Phase 2: Task Schedule Dashboard
-- Task generation from plantings
-- TaskList and TaskCalendar components
-- Tab navigation
+### Phase 2: Task Schedule Dashboard ✓
+- Task generation from plantings (on-the-fly, not stored)
+- ScheduleView with weekly task grouping
+- Tab navigation (Timeline | Tasks)
+- Task completion state persisted in tasks.json
 
 ### Phase 3: Garden Bed Layout
 - Bed editor
@@ -162,18 +170,31 @@ type Planting = {
 
 ### Task
 ```typescript
+type TaskType = 'sow_indoor' | 'sow_direct' | 'harden_off' | 'transplant' | 'harvest_start';
+
 type Task = {
-  id: string;
+  id: string;              // Format: `${plantingId}-${type}`
   plantingId: string;
   cultivarId: string;
-  type: TaskType;  // 'sow_indoor' | 'sow_direct' | 'transplant' | 'harvest_start'
+  type: TaskType;
   date: string;
   title: string;
   description?: string;
   completed: boolean;
   completedAt?: string;
 };
+
+// Only completion state is persisted; tasks are generated on-the-fly from plantings
+type TaskCompletion = {
+  id: string;              // Format: `${plantingId}-${type}`
+  plantingId: string;
+  type: TaskType;
+  completed: boolean;
+  completedAt?: string;
+};
 ```
+
+**Task Generation**: Tasks are derived from plantings at runtime (not stored). This ensures tasks automatically update when planting dates change. Only completion state is persisted in `tasks.json`.
 
 ### Cultivar Temperature Fields
 ```typescript
