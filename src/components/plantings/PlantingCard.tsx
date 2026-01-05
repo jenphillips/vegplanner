@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import type { Cultivar, Planting, FrostWindow, Climate } from '@/lib/types';
 import { recalculatePlantingForMethodChange } from '@/lib/succession';
 import { PlantingTimeline } from './PlantingTimeline';
@@ -51,15 +50,8 @@ export function PlantingCard({
   isSelected,
   onSelect,
 }: PlantingCardProps) {
-  const [confirmDelete, setConfirmDelete] = useState(false);
-
   const handleDelete = () => {
-    if (confirmDelete) {
-      onDelete(planting.id);
-    } else {
-      setConfirmDelete(true);
-      setTimeout(() => setConfirmDelete(false), 3000);
-    }
+    onDelete(planting.id);
   };
 
   const handleSowDateUpdate = (
@@ -195,10 +187,10 @@ export function PlantingCard({
         )}
         <button
           onClick={handleDelete}
-          className={`${styles.deleteButton} ${confirmDelete ? styles.deleteConfirm : ''}`}
-          title={confirmDelete ? 'Click again to confirm' : 'Delete planting'}
+          className={styles.deleteButton}
+          title="Delete planting"
         >
-          {confirmDelete ? '✓' : '×'}
+          ×
         </button>
       </div>
       {planting.notes && <p className={styles.notes}>{planting.notes}</p>}
