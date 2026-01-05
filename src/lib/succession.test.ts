@@ -6,6 +6,7 @@ import {
   isGrowingPeriodViable,
   createPlantingFromWindow,
   getNextSuccessionNumber,
+  recalculatePlantingForMethodChange,
   type PlantingWindow,
   type SuccessionResult,
 } from './succession';
@@ -1752,6 +1753,338 @@ describe('drag-related edge cases', () => {
         // Gap should be substantial (at least a month)
         expect(gapDays).toBeGreaterThan(30);
       }
+    });
+  });
+});
+
+// ============================================
+// preferredMethod Tests
+// ============================================
+
+describe('preferredMethod support', () => {
+  it('uses preferredMethod when sowMethod is "either"', () => {
+    const eitherWithPreference: Cultivar = {
+      ...beetCultivar,
+      id: 'either-prefer-transplant',
+      sowMethod: 'either',
+      preferredMethod: 'transplant',
+      indoorLeadWeeksMin: 4,
+      indoorLeadWeeksMax: 6,
+      transplantAfterLsfDays: -7,
+    };
+
+    const result = calculateSuccessionWindows(
+      eitherWithPreference,
+      defaultFrostWindow,
+      sussexClimate
+    );
+
+    expect(result.windows.length).toBeGreaterThan(0);
+    expect(result.windows[0].method).toBe('transplant');
+    expect(result.windows[0].transplantDate).toBeDefined();
+  });
+
+  it('defaults to direct when preferredMethod is not set', () => {
+    const eitherNoPreference: Cultivar = {
+      ...beetCultivar,
+      id: 'either-no-pref',
+      sowMethod: 'either',
+      // No preferredMethod set
+    };
+
+    const result = calculateSuccessionWindows(
+      eitherNoPreference,
+      defaultFrostWindow,
+      sussexClimate
+    );
+
+    expect(result.windows.length).toBeGreaterThan(0);
+    expect(result.windows[0].method).toBe('direct');
+    expect(result.windows[0].transplantDate).toBeUndefined();
+  });
+
+  it('uses preferredMethod in calculateNextSuccession', () => {
+    const eitherWithPreference: Cultivar = {
+      ...beetCultivar,
+      id: 'either-prefer-transplant',
+      sowMethod: 'either',
+      preferredMethod: 'transplant',
+      indoorLeadWeeksMin: 4,
+      indoorLeadWeeksMax: 6,
+      transplantAfterLsfDays: -7,
+    };
+
+    const result = calculateNextSuccession(
+      eitherWithPreference,
+      defaultFrostWindow,
+      sussexClimate,
+      []
+    );
+
+    expect(result).not.toBeNull();
+    expect(result?.method).toBe('transplant');
+  });
+
+  it('uses preferredMethod in calculateAvailableWindowsAfter', () => {
+    const eitherWithPreference: Cultivar = {
+      ...beetCultivar,
+      id: 'either-prefer-transplant',
+      sowMethod: 'either',
+      preferredMethod: 'transplant',
+      indoorLeadWeeksMin: 4,
+      indoorLeadWeeksMax: 6,
+      transplantAfterLsfDays: -7,
+    };
+
+    const result = calculateAvailableWindowsAfter(
+      eitherWithPreference,
+      defaultFrostWindow,
+      sussexClimate,
+      '2025-06-01',
+      []
+    );
+
+    expect(result.length).toBeGreaterThan(0);
+    result.forEach((w) => {
+      expect(w.method).toBe('transplant');
+    });
+  });
+});
+
+// ============================================
+// recalculatePlantingForMethodChange Tests
+// ============================================
+
+describe('recalculatePlantingForMethodChange', () => {
+  // Cultivar that supports both methods
+  const eitherCultivar: Cultivar = {
+    id: 'spinach-either',
+    crop: 'Spinach',
+    variety: 'Test',
+    germDaysMin: 5,
+    germDaysMax: 10,
+    maturityDays: 45,
+    maturityBasis: 'from_sow',
+    sowMethod: 'either',
+    preferredMethod: 'direct',
+    directAfterLsfDays: -28,
+    transplantAfterLsfDays: -14,
+    indoorLeadWeeksMin: 3,
+    indoorLeadWeeksMax: 4,
+    frostSensitive: false,
+    maxGrowingTempC: 21,
+    harvestDurationDays: 21,
+    harvestStyle: 'continuous',
+  };
+
+  describe('direct to transplant', () => {
+    it('keeps sowDate and adds transplantDate', () => {
+      const directPlanting: Planting = {
+        id: 'p1',
+        cultivarId: eitherCultivar.id,
+        label: 'Spinach #1',
+        quantity: 10,
+        sowDate: '2025-04-01',
+        harvestStart: '2025-05-16',
+        harvestEnd: '2025-06-06',
+        method: 'direct',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      };
+
+      const updates = recalculatePlantingForMethodChange(
+        directPlanting,
+        'transplant',
+        eitherCultivar,
+        defaultFrostWindow,
+        sussexClimate
+      );
+
+      expect(updates.sowDate).toBe('2025-04-01'); // Unchanged
+      expect(updates.transplantDate).toBeDefined();
+      // transplantDate = sowDate + 3 weeks (indoorLeadWeeksMin)
+      expect(updates.transplantDate).toBe('2025-04-22');
+    });
+
+    it('recalculates harvestStart based on maturityBasis', () => {
+      const directPlanting: Planting = {
+        id: 'p1',
+        cultivarId: eitherCultivar.id,
+        label: 'Spinach #1',
+        quantity: 10,
+        sowDate: '2025-04-01',
+        harvestStart: '2025-05-16',
+        harvestEnd: '2025-06-06',
+        method: 'direct',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      };
+
+      const updates = recalculatePlantingForMethodChange(
+        directPlanting,
+        'transplant',
+        eitherCultivar,
+        defaultFrostWindow,
+        sussexClimate
+      );
+
+      // maturityBasis is 'from_sow', so harvestStart = sowDate + maturityDays
+      // 2025-04-01 + 45 days = 2025-05-16
+      expect(updates.harvestStart).toBe('2025-05-16');
+    });
+
+    it('clears sowDateOverride', () => {
+      const directPlanting: Planting = {
+        id: 'p1',
+        cultivarId: eitherCultivar.id,
+        label: 'Spinach #1',
+        quantity: 10,
+        sowDate: '2025-04-01',
+        sowDateOverride: '2025-04-05', // User adjusted
+        harvestStart: '2025-05-16',
+        harvestEnd: '2025-06-06',
+        method: 'direct',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      };
+
+      const updates = recalculatePlantingForMethodChange(
+        directPlanting,
+        'transplant',
+        eitherCultivar,
+        defaultFrostWindow,
+        sussexClimate
+      );
+
+      expect(updates.sowDateOverride).toBeUndefined();
+    });
+  });
+
+  describe('transplant to direct', () => {
+    it('uses transplantDate as new sowDate', () => {
+      const transplantPlanting: Planting = {
+        id: 'p1',
+        cultivarId: eitherCultivar.id,
+        label: 'Spinach #1',
+        quantity: 10,
+        sowDate: '2025-04-01',
+        transplantDate: '2025-04-22',
+        harvestStart: '2025-05-16',
+        harvestEnd: '2025-06-06',
+        method: 'transplant',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      };
+
+      const updates = recalculatePlantingForMethodChange(
+        transplantPlanting,
+        'direct',
+        eitherCultivar,
+        defaultFrostWindow,
+        sussexClimate
+      );
+
+      // New sow date should be the old transplant date
+      expect(updates.sowDate).toBe('2025-04-22');
+      expect(updates.transplantDate).toBeUndefined();
+    });
+
+    it('recalculates harvestStart from new sowDate', () => {
+      const transplantPlanting: Planting = {
+        id: 'p1',
+        cultivarId: eitherCultivar.id,
+        label: 'Spinach #1',
+        quantity: 10,
+        sowDate: '2025-04-01',
+        transplantDate: '2025-04-22',
+        harvestStart: '2025-05-16',
+        harvestEnd: '2025-06-06',
+        method: 'transplant',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      };
+
+      const updates = recalculatePlantingForMethodChange(
+        transplantPlanting,
+        'direct',
+        eitherCultivar,
+        defaultFrostWindow,
+        sussexClimate
+      );
+
+      // harvestStart = new sowDate + maturityDays
+      // 2025-04-22 + 45 days = 2025-06-06
+      expect(updates.harvestStart).toBe('2025-06-06');
+    });
+  });
+
+  describe('harvest end calculation', () => {
+    it('respects harvestDurationDays', () => {
+      const directPlanting: Planting = {
+        id: 'p1',
+        cultivarId: eitherCultivar.id,
+        label: 'Spinach #1',
+        quantity: 10,
+        sowDate: '2025-04-01',
+        harvestStart: '2025-05-16',
+        harvestEnd: '2025-06-06',
+        method: 'direct',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      };
+
+      const updates = recalculatePlantingForMethodChange(
+        directPlanting,
+        'transplant',
+        eitherCultivar,
+        defaultFrostWindow,
+        sussexClimate
+      );
+
+      // harvestEnd = harvestStart + harvestDurationDays (21)
+      // 2025-05-16 + 21 = 2025-06-06
+      expect(updates.harvestEnd).toBe('2025-06-06');
+    });
+
+    it('caps harvestEnd at frost deadline for frost-sensitive crops', () => {
+      const frostSensitiveCultivar: Cultivar = {
+        ...eitherCultivar,
+        id: 'frost-sensitive-either',
+        frostSensitive: true,
+        harvestDurationDays: 60, // Long harvest that would exceed frost
+      };
+
+      const latePlanting: Planting = {
+        id: 'p1',
+        cultivarId: frostSensitiveCultivar.id,
+        label: 'Test #1',
+        quantity: 10,
+        sowDate: '2025-07-15',
+        harvestStart: '2025-08-29',
+        harvestEnd: '2025-10-15',
+        method: 'direct',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      };
+
+      const updates = recalculatePlantingForMethodChange(
+        latePlanting,
+        'transplant',
+        frostSensitiveCultivar,
+        defaultFrostWindow,
+        sussexClimate
+      );
+
+      // Should be capped at frost deadline (Sept 15 - 4 days = Sept 11)
+      expect(updates.harvestEnd).toBeDefined();
+      expect(updates.harvestEnd! <= '2025-09-11').toBe(true);
     });
   });
 });

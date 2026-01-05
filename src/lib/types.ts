@@ -19,6 +19,7 @@ export type Cultivar = {
   maturityDays: number;
   maturityBasis: MaturityBasis;
   sowMethod: SowMethod;
+  preferredMethod?: 'direct' | 'transplant'; // For 'either' crops, which method to default to
   indoorLeadWeeksMin?: number | null;
   indoorLeadWeeksMax?: number | null;
   directAfterLsfDays?: number | null;

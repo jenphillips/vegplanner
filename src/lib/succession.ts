@@ -199,7 +199,9 @@ export function calculateSuccessionWindows(
   const skippedPeriods: SuccessionResult['skippedPeriods'] = [];
 
   const method: SowMethod =
-    cultivar.sowMethod === 'either' ? 'direct' : cultivar.sowMethod;
+    cultivar.sowMethod === 'either'
+      ? (cultivar.preferredMethod ?? 'direct')
+      : cultivar.sowMethod;
 
   // Calculate earliest sow date
   const earliestSowDate = calculateEarliestSowDate(cultivar, frostWindow, method);
@@ -591,7 +593,9 @@ export function calculateNextSuccession(
 
   const lastPlanting = cultivarPlantings[cultivarPlantings.length - 1];
   const method: SowMethod =
-    cultivar.sowMethod === 'either' ? 'direct' : cultivar.sowMethod;
+    cultivar.sowMethod === 'either'
+      ? (cultivar.preferredMethod ?? 'direct')
+      : cultivar.sowMethod;
 
   // Helper to check if a proposed window overlaps with any existing planting
   const overlapsExistingPlanting = (harvestStart: string, harvestEnd: string): boolean => {
@@ -704,7 +708,9 @@ export function calculateAvailableWindowsAfter(
   );
 
   const method: SowMethod =
-    cultivar.sowMethod === 'either' ? 'direct' : cultivar.sowMethod;
+    cultivar.sowMethod === 'either'
+      ? (cultivar.preferredMethod ?? 'direct')
+      : cultivar.sowMethod;
 
   // Get the latest viable sow date
   const latestSowDate = calculateLatestSowDate(cultivar, frostWindow, climate);
@@ -790,4 +796,130 @@ export function calculateAvailableWindowsAfter(
   }
 
   return availableWindows;
+}
+
+/**
+ * Recalculate planting dates when switching between direct sow and transplant methods.
+ *
+ * When switching Direct → Transplant:
+ * - Keep sowDate as indoor sow date
+ * - Add transplantDate = sowDate + indoorLeadWeeksMin * 7
+ * - Recalculate harvestStart based on maturityBasis
+ * - Recalculate harvestEnd based on duration/frost
+ *
+ * When switching Transplant → Direct:
+ * - Use transplantDate as new sowDate
+ * - Remove transplantDate
+ * - Recalculate harvestStart = sowDate + maturityDays
+ * - Recalculate harvestEnd
+ *
+ * After recalculating, if the new dates land in an unfavorable temperature window,
+ * auto-adjust to the next viable window for that method.
+ */
+export function recalculatePlantingForMethodChange(
+  planting: Planting,
+  newMethod: 'direct' | 'transplant',
+  cultivar: Cultivar,
+  frostWindow: FrostWindow,
+  climate?: Climate,
+  previousHarvestEnd?: string
+): Partial<Planting> {
+  // Determine the anchor date based on current method
+  let newSowDate: string;
+
+  if (planting.method === 'transplant' && newMethod === 'direct') {
+    // Transplant → Direct: use transplant date as new sow date
+    newSowDate = planting.transplantDate ?? planting.sowDate;
+  } else {
+    // Direct → Transplant or same method: keep sow date
+    newSowDate = planting.sowDate;
+  }
+
+  // Calculate dates for the new method
+  const leadWeeks = ensureNumber(cultivar.indoorLeadWeeksMin, 4);
+  let transplantDate: string | undefined;
+  let harvestStart: string;
+
+  if (newMethod === 'transplant') {
+    transplantDate = addDays(newSowDate, leadWeeks * 7);
+    if (cultivar.maturityBasis === 'from_transplant') {
+      harvestStart = addDays(transplantDate, cultivar.maturityDays);
+    } else {
+      harvestStart = addDays(newSowDate, cultivar.maturityDays);
+    }
+  } else {
+    transplantDate = undefined;
+    harvestStart = addDays(newSowDate, cultivar.maturityDays);
+  }
+
+  // Calculate harvest end
+  const year = new Date(`${frostWindow.firstFallFrost}T00:00:00Z`).getUTCFullYear();
+  const earliestFallFrost = climate?.firstFallFrost?.earliest
+    ? `${year}-${climate.firstFallFrost.earliest}`
+    : frostWindow.firstFallFrost;
+  const typicalFallFrost = climate?.firstFallFrost?.typical
+    ? `${year}-${climate.firstFallFrost.typical}`
+    : frostWindow.firstFallFrost;
+
+  const frostDeadline = cultivar.frostSensitive
+    ? addDays(earliestFallFrost, -FROST_BUFFER_DAYS)
+    : addDays(typicalFallFrost, 21);
+
+  let harvestEnd: string;
+  if (cultivar.harvestDurationDays != null) {
+    const durationEnd = addDays(harvestStart, cultivar.harvestDurationDays);
+    harvestEnd = durationEnd > frostDeadline ? frostDeadline : durationEnd;
+  } else if (cultivar.harvestStyle === 'continuous') {
+    harvestEnd = frostDeadline;
+  } else {
+    // Single harvest with no explicit duration: use style-based default
+    const defaultDuration = 7;
+    harvestEnd = addDays(harvestStart, defaultDuration);
+  }
+
+  // Check if the new dates are temperature-viable
+  const outdoorStart = transplantDate ?? newSowDate;
+
+  if (climate) {
+    const tempCheck = isGrowingPeriodViable(outdoorStart, harvestStart, cultivar, climate);
+
+    if (!tempCheck.viable) {
+      // Try to find the next viable window for this method
+      // We need to create a modified cultivar that forces the specific method
+      const methodCultivar = {
+        ...cultivar,
+        sowMethod: newMethod as SowMethod,
+      };
+
+      const afterDate = previousHarvestEnd ?? addDays(newSowDate, -1);
+      const availableWindows = calculateAvailableWindowsAfter(
+        methodCultivar,
+        frostWindow,
+        climate,
+        afterDate,
+        [] // Don't check for overlaps - we're replacing this planting
+      );
+
+      if (availableWindows.length > 0) {
+        const nextWindow = availableWindows[0];
+        return {
+          sowDate: nextWindow.sowDate,
+          sowDateOverride: undefined, // Clear override since we're recalculating
+          transplantDate: nextWindow.transplantDate,
+          harvestStart: nextWindow.harvestStart,
+          harvestEnd: nextWindow.harvestEnd,
+        };
+      }
+      // No viable window found - return calculated dates anyway
+      // The timeline will show them in an unfavorable period
+    }
+  }
+
+  return {
+    sowDate: newSowDate,
+    sowDateOverride: undefined, // Clear override since timing context changed
+    transplantDate,
+    harvestStart,
+    harvestEnd,
+  };
 }

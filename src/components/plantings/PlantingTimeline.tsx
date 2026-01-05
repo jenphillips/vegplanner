@@ -31,8 +31,17 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
   // Check if this is a draggable transplant crop
   const isTransplant = planting.method === 'transplant' && planting.transplantDate;
   const isDirectSow = planting.method === 'direct';
-  const canDragTransplant = isTransplant && cultivar && onUpdateSowDate;
+
+  // For crops that support both methods ("either"), use shift-based dragging even for transplants
+  // This allows more flexibility - the transplant date follows sow date + lead weeks
+  const isEitherCrop = cultivar?.sowMethod === 'either';
+
+  // Traditional transplant drag (fixed transplant date, adjust sow within lead-week range)
+  const canDragTransplant = isTransplant && cultivar && onUpdateSowDate && !isEitherCrop;
+
+  // Shift-based drag for direct sow OR "either" crops in transplant mode
   const canDragDirectSow = isDirectSow && onShiftPlanting;
+  const canDragTransplantShift = isTransplant && isEitherCrop && onShiftPlanting;
 
   // Calculate drag bounds based on indoor lead weeks (for transplants)
   const dragBounds = useMemo(() => {
@@ -51,12 +60,12 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
   // Type for a viable shift range (contiguous range of valid shift days)
   type ViableRange = { minShift: number; maxShift: number };
 
-  // Calculate shift bounds for direct sow crops
+  // Calculate shift bounds for direct sow crops AND "either" crops in transplant mode
   // - Can't shift earlier than when harvest start equals previous planting's harvest end
   // - Can't shift later than when sow date reaches the latest viable sow date for the season
   // - Can't shift into temperature-unfavorable periods (handled by temperatureShiftBounds)
   const shiftBounds = useMemo(() => {
-    if (!canDragDirectSow) return null;
+    if (!canDragDirectSow && !canDragTransplantShift) return null;
 
     const harvestStart = new Date(`${planting.harvestStart}T00:00:00Z`);
     const sowDate = new Date(`${planting.sowDate}T00:00:00Z`);
@@ -96,15 +105,16 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     const maxShiftLater = Math.floor((latestSowDate.getTime() - sowDate.getTime()) / (1000 * 60 * 60 * 24));
 
     return { minShift: -maxShiftEarlier, maxShift: Math.max(0, maxShiftLater) };
-  }, [canDragDirectSow, frost.lastSpringFrost, frost.firstFallFrost, climate, cultivar, planting.sowDate, planting.harvestStart, previousHarvestEnd]);
+  }, [canDragDirectSow, canDragTransplantShift, frost.lastSpringFrost, frost.firstFallFrost, climate, cultivar, planting.sowDate, planting.harvestStart, previousHarvestEnd]);
 
-  // Calculate temperature-aware shift bounds for direct sow crops
+  // Calculate temperature-aware shift bounds for direct sow AND transplant "either" crops
   // This finds ALL viable ranges (e.g., spring and fall windows for heat-sensitive crops)
   // to allow "jumping" over hot periods when dragging
   const temperatureShiftBounds = useMemo(() => {
-    if (!canDragDirectSow || !climate || !cultivar || !shiftBounds) return null;
+    if ((!canDragDirectSow && !canDragTransplantShift) || !climate || !cultivar || !shiftBounds) return null;
 
-    // For direct sow, the outdoor growing period is from sow date to harvest start
+    // For direct sow, outdoor period starts at sow date
+    // For transplant, outdoor period starts at transplant date
     const outdoorStart = planting.transplantDate ?? planting.sowDate;
 
     // Helper to check if a shift is temperature-viable
@@ -148,7 +158,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
       minShift: ranges.length > 0 ? ranges[0].minShift : 0,
       maxShift: ranges.length > 0 ? ranges[ranges.length - 1].maxShift : 0,
     };
-  }, [canDragDirectSow, climate, cultivar, shiftBounds, planting.transplantDate, planting.sowDate, planting.harvestStart]);
+  }, [canDragDirectSow, canDragTransplantShift, climate, cultivar, shiftBounds, planting.transplantDate, planting.sowDate, planting.harvestStart]);
 
   // Track previous shift value to detect drag direction for range jumping
   const prevShiftRef = useRef<number>(0);
@@ -352,7 +362,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
   }, [cultivar, planting, frostDeadline]);
 
   // Track drag type to distinguish between transplant and direct sow drags
-  const [dragType, setDragType] = useState<'transplant' | 'directSow' | null>(null);
+  const [dragType, setDragType] = useState<'transplant' | 'directSow' | 'transplantShift' | null>(null);
 
   // Mouse handlers for transplant crops (adjust indoor start date)
   const handleTransplantMouseDown = useCallback((e: React.MouseEvent) => {
@@ -376,6 +386,18 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     prevShiftRef.current = 0; // Reset direction tracking for new drag
   }, [canDragDirectSow]);
 
+  // Mouse handlers for transplant "either" crops (shift entire planting, transplant follows sow)
+  const handleTransplantShiftMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!canDragTransplantShift) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragType('transplantShift');
+    setDragStartX(e.clientX);
+    setShiftDays(0);
+    prevShiftRef.current = 0;
+  }, [canDragTransplantShift]);
+
   // Use refs to access latest values in event handlers without re-attaching listeners
   const dragStateRef = useRef({ dragType, dragStartX, dragSowDate, shiftDays });
   dragStateRef.current = { dragType, dragStartX, dragSowDate, shiftDays };
@@ -394,7 +416,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
       if (dragType === 'transplant') {
         const newDate = pixelToDate(e.clientX);
         if (newDate) setDragSowDate(newDate);
-      } else if (dragType === 'directSow' && dragStartX !== null) {
+      } else if ((dragType === 'directSow' || dragType === 'transplantShift') && dragStartX !== null) {
         const deltaX = e.clientX - dragStartX;
         const days = pixelToDays(deltaX);
         setShiftDays(days);
@@ -410,7 +432,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
         if (newHarvest) {
           onUpdateSowDate(planting.id, dragSowDate, newHarvest.harvestStart, newHarvest.harvestEnd);
         }
-      } else if (dragType === 'directSow' && shiftDays !== 0 && onShiftPlanting) {
+      } else if ((dragType === 'directSow' || dragType === 'transplantShift') && shiftDays !== 0 && onShiftPlanting) {
         onShiftPlanting(planting.id, shiftDays);
       }
 
@@ -511,8 +533,10 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     const { clampPct } = staticTimeline;
 
     // For direct sow shifting, calculate shifted dates during drag
-    const isShifting = isDirectSow && shiftDays !== 0;
+    // For both direct sow and transplant "either" crops, apply shift during drag
+    const isShifting = (isDirectSow || (isTransplant && isEitherCrop)) && shiftDays !== 0;
     const shiftedSowDate = isShifting ? addDays(planting.sowDate, shiftDays) : planting.sowDate;
+    const shiftedTransplantDate = isShifting && planting.transplantDate ? addDays(planting.transplantDate, shiftDays) : planting.transplantDate;
     const shiftedHarvestStart = isShifting ? addDays(planting.harvestStart, shiftDays) : planting.harvestStart;
 
     // Calculate shifted harvest end, accounting for frost deadline extension
@@ -539,8 +563,9 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
       ? shiftedSowDate
       : (dragSowDate ?? planting.sowDateOverride ?? planting.sowDate);
     const sowLeft = clampPct(effectiveSowDate);
-    const sowWidth = planting.transplantDate
-      ? clampPct(planting.transplantDate) - sowLeft
+    const effectiveTransplantDate = shiftedTransplantDate ?? planting.transplantDate;
+    const sowWidth = effectiveTransplantDate
+      ? clampPct(effectiveTransplantDate) - sowLeft
       : 2;
 
     // Drag bounds for transplants
@@ -548,12 +573,12 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     const dragBoundRight = dragBounds ? clampPct(dragBounds.latestSow) : null;
 
     // Transplant marker
-    const transplantLeft = planting.transplantDate
-      ? clampPct(planting.transplantDate)
+    const transplantLeft = effectiveTransplantDate
+      ? clampPct(effectiveTransplantDate)
       : null;
 
-    // Growing period
-    const growingStart = planting.transplantDate || (isShifting ? shiftedSowDate : planting.sowDate);
+    // Growing period - starts at transplant date (if transplant) or sow date (if direct)
+    const growingStart = effectiveTransplantDate || (isShifting ? shiftedSowDate : planting.sowDate);
     const effectiveHarvestStart = isShifting ? shiftedHarvestStart : planting.harvestStart;
     const growingLeft = clampPct(growingStart);
     const growingWidth = clampPct(effectiveHarvestStart) - growingLeft;
@@ -566,7 +591,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     // Shift bounds for direct sow crops (temperature-aware)
     // Show all viable ranges (e.g., spring and fall windows for heat-sensitive crops)
     const shiftBoundRanges: Array<{ left: number; right: number }> = [];
-    if (isDirectSow && temperatureShiftBounds && temperatureShiftBounds.ranges.length > 0) {
+    if ((isDirectSow || (isTransplant && isEitherCrop)) && temperatureShiftBounds && temperatureShiftBounds.ranges.length > 0) {
       const currentGrowingStart = planting.transplantDate ?? planting.sowDate;
       const growingDays = Math.round(
         (new Date(`${planting.harvestStart}T00:00:00Z`).getTime() -
@@ -594,7 +619,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
       dragBoundRight,
       shiftBoundRanges,
     };
-  }, [staticTimeline, planting, dragSowDate, dragBounds, isDirectSow, shiftDays, temperatureShiftBounds, cultivar, frostDeadline]);
+  }, [staticTimeline, planting, dragSowDate, dragBounds, isDirectSow, isTransplant, isEitherCrop, shiftDays, temperatureShiftBounds, cultivar, frostDeadline]);
 
   // Get the effective sow date for display
   const effectiveSowDate = dragSowDate ?? planting.sowDateOverride ?? planting.sowDate;
@@ -685,7 +710,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
 
         {/* Shift bounds indicators for direct sow (shown when dragging) */}
         {/* Shows all viable ranges - e.g., spring and fall windows for heat-sensitive crops */}
-        {isDragging && dragType === 'directSow' && barPositions.shiftBoundRanges.map((range, idx) => (
+        {isDragging && (dragType === 'directSow' || dragType === 'transplantShift') && barPositions.shiftBoundRanges.map((range, idx) => (
           <div
             key={idx}
             className={styles.shiftBounds}
@@ -698,13 +723,15 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
 
         {/* Sow period bar */}
         <div
-          className={`${styles.barSow} ${canDragTransplant ? styles.barSowDraggable : ''} ${isDragging && canDragTransplant ? styles.barSowDragging : ''}`}
+          className={`${styles.barSow} ${(canDragTransplant || canDragTransplantShift) ? styles.barSowDraggable : ''} ${isDragging && (canDragTransplant || canDragTransplantShift) ? styles.barSowDragging : ''}`}
           style={{
             left: `${barPositions.sow.left}%`,
             width: `${barPositions.sow.width}%`,
           }}
-          title={`Sow: ${effectiveSowDate}${planting.sowDateOverride ? ' (adjusted)' : ''}`}
-          onMouseDown={handleTransplantMouseDown}
+          title={canDragTransplantShift
+            ? `Sow indoors: ${effectiveSowDate} (drag to shift planting${shiftDays !== 0 ? `: ${shiftDays > 0 ? '+' : ''}${shiftDays} days` : ''})`
+            : `Sow: ${effectiveSowDate}${planting.sowDateOverride ? ' (adjusted)' : ''}`}
+          onMouseDown={canDragTransplantShift ? handleTransplantShiftMouseDown : handleTransplantMouseDown}
         >
           {/* Drag handle on left edge for transplants */}
           {canDragTransplant && (
@@ -714,24 +741,24 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
 
         {/* Growing period bar */}
         <div
-          className={`${styles.barGrowing} ${canDragDirectSow ? styles.barDirectSowDraggable : ''} ${isDragging && canDragDirectSow ? styles.barDirectSowDragging : ''}`}
+          className={`${styles.barGrowing} ${(canDragDirectSow || canDragTransplantShift) ? styles.barDirectSowDraggable : ''} ${isDragging && (canDragDirectSow || canDragTransplantShift) ? styles.barDirectSowDragging : ''}`}
           style={{
             left: `${barPositions.growing.left}%`,
             width: `${barPositions.growing.width}%`,
           }}
-          title={canDragDirectSow ? `Growing (drag to shift planting${shiftDays !== 0 ? `: ${shiftDays > 0 ? '+' : ''}${shiftDays} days` : ''})` : 'Growing'}
-          onMouseDown={handleDirectSowMouseDown}
+          title={(canDragDirectSow || canDragTransplantShift) ? `Growing (drag to shift planting${shiftDays !== 0 ? `: ${shiftDays > 0 ? '+' : ''}${shiftDays} days` : ''})` : 'Growing'}
+          onMouseDown={canDragTransplantShift ? handleTransplantShiftMouseDown : handleDirectSowMouseDown}
         />
 
         {/* Harvest period bar */}
         <div
-          className={`${styles.barHarvest} ${canDragDirectSow ? styles.barDirectSowDraggable : ''} ${isDragging && canDragDirectSow ? styles.barDirectSowDragging : ''}`}
+          className={`${styles.barHarvest} ${(canDragDirectSow || canDragTransplantShift) ? styles.barDirectSowDraggable : ''} ${isDragging && (canDragDirectSow || canDragTransplantShift) ? styles.barDirectSowDragging : ''}`}
           style={{
             left: `${barPositions.harvest.left}%`,
             width: `${barPositions.harvest.width}%`,
           }}
-          title={canDragDirectSow ? `Harvest (drag to shift planting${shiftDays !== 0 ? `: ${shiftDays > 0 ? '+' : ''}${shiftDays} days` : ''})` : `Harvest: ${planting.harvestStart} – ${planting.harvestEnd}`}
-          onMouseDown={handleDirectSowMouseDown}
+          title={(canDragDirectSow || canDragTransplantShift) ? `Harvest (drag to shift planting${shiftDays !== 0 ? `: ${shiftDays > 0 ? '+' : ''}${shiftDays} days` : ''})` : `Harvest: ${planting.harvestStart} – ${planting.harvestEnd}`}
+          onMouseDown={canDragTransplantShift ? handleTransplantShiftMouseDown : handleDirectSowMouseDown}
         />
 
         {/* Transplant marker */}

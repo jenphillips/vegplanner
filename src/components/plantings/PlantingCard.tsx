@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import type { Cultivar, Planting, FrostWindow, Climate } from '@/lib/types';
+import { recalculatePlantingForMethodChange } from '@/lib/succession';
 import { PlantingTimeline } from './PlantingTimeline';
+import { MethodToggle } from './MethodToggle';
 import styles from './PlantingCard.module.css';
 
 type PlantingCardProps = {
@@ -98,10 +100,33 @@ export function PlantingCard({
     }
   };
 
+  const handleMethodChange = (newMethod: 'direct' | 'transplant') => {
+    if (newMethod === planting.method) return;
+
+    const updates = recalculatePlantingForMethodChange(
+      planting,
+      newMethod,
+      cultivar,
+      frost,
+      climate,
+      previousHarvestEnd
+    );
+
+    onUpdate(planting.id, {
+      method: newMethod,
+      ...updates,
+    });
+  };
+
   const handleShiftPlanting = (id: string, shiftDays: number) => {
     const newSowDate = addDays(planting.sowDate, shiftDays);
     const newHarvestStart = addDays(planting.harvestStart, shiftDays);
     let newHarvestEnd = addDays(planting.harvestEnd, shiftDays);
+
+    // For transplant plantings, also shift the transplant date
+    const newTransplantDate = planting.transplantDate
+      ? addDays(planting.transplantDate, shiftDays)
+      : undefined;
 
     // Recalculate harvest end based on cultivar settings and frost deadline
     const frostDeadline = calculateFrostDeadline();
@@ -122,6 +147,7 @@ export function PlantingCard({
 
     onUpdate(id, {
       sowDate: newSowDate,
+      transplantDate: newTransplantDate,
       harvestStart: newHarvestStart,
       harvestEnd: newHarvestEnd,
     });
@@ -161,6 +187,12 @@ export function PlantingCard({
           onUpdateSowDate={handleSowDateUpdate}
           onShiftPlanting={handleShiftPlanting}
         />
+        {cultivar.sowMethod === 'either' && (
+          <MethodToggle
+            currentMethod={planting.method as 'direct' | 'transplant'}
+            onChange={handleMethodChange}
+          />
+        )}
         <button
           onClick={handleDelete}
           className={`${styles.deleteButton} ${confirmDelete ? styles.deleteConfirm : ''}`}
