@@ -571,6 +571,40 @@ export function getNextSuccessionNumber(
 }
 
 /**
+ * Renumber plantings for a crop so succession numbers match chronological order.
+ * Returns updated plantings with corrected successionNumber and label fields.
+ */
+export function renumberPlantingsForCrop(
+  allPlantings: Planting[],
+  cropName: string,
+  cultivarId: string
+): Planting[] {
+  const cultivarPlantings = allPlantings.filter(
+    (p) => p.cultivarId === cultivarId
+  );
+  const otherPlantings = allPlantings.filter(
+    (p) => p.cultivarId !== cultivarId
+  );
+
+  // Sort by sow date chronologically
+  const sorted = [...cultivarPlantings].sort((a, b) =>
+    a.sowDate.localeCompare(b.sowDate)
+  );
+
+  // Renumber based on chronological position
+  const renumbered = sorted.map((planting, index) => {
+    const newNumber = index + 1;
+    return {
+      ...planting,
+      successionNumber: newNumber,
+      label: `${cropName} #${newNumber}`,
+    };
+  });
+
+  return [...otherPlantings, ...renumbered];
+}
+
+/**
  * Calculate the next succession planting window based on existing plantings.
  * Targets harvest continuity: new harvest should start when previous ends.
  * Skips temperature-unfavorable periods and finds the next viable window.

@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 import { useDataFile } from './useDataFile';
 import type { Planting } from '@/lib/types';
+import { renumberPlantingsForCrop } from '@/lib/succession';
 
 export function usePlantings() {
-  const { data, loading, error, add, update, remove, refetch } =
+  const { data, loading, error, add, update, remove, save, refetch } =
     useDataFile<Planting>('plantings');
 
   const addPlanting = useCallback(
@@ -40,6 +41,50 @@ export function usePlantings() {
     [data]
   );
 
+  const renumberPlantings = useCallback(
+    async (cropName: string, cultivarId: string) => {
+      const renumbered = renumberPlantingsForCrop(data, cropName, cultivarId);
+      await save(renumbered);
+    },
+    [data, save]
+  );
+
+  const updateAndRenumber = useCallback(
+    async (
+      id: string,
+      updates: Partial<Planting>,
+      cropName: string,
+      cultivarId: string
+    ) => {
+      // Apply update first, then renumber in one save operation
+      const updated = data.map((item) =>
+        item.id === id ? { ...item, ...updates } : item
+      );
+      const renumbered = renumberPlantingsForCrop(updated, cropName, cultivarId);
+      await save(renumbered);
+    },
+    [data, save]
+  );
+
+  const addAndRenumber = useCallback(
+    async (
+      planting: Omit<Planting, 'id' | 'createdAt'>,
+      cropName: string
+    ) => {
+      const newPlanting: Planting = {
+        ...planting,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+      };
+      // Add new planting, then renumber all plantings for this cultivar
+      const withNew = [...data, newPlanting];
+      const renumbered = renumberPlantingsForCrop(withNew, cropName, planting.cultivarId);
+      await save(renumbered);
+      return newPlanting;
+    },
+    [data, save]
+  );
+
   return {
     plantings: data,
     loading,
@@ -48,6 +93,9 @@ export function usePlantings() {
     updatePlanting,
     deletePlanting,
     getPlantingsForCultivar,
+    renumberPlantings,
+    updateAndRenumber,
+    addAndRenumber,
     refetch,
   };
 }

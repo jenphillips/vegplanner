@@ -51,9 +51,10 @@ export default function Home() {
   const {
     plantings,
     loading: plantingsLoading,
-    addPlanting,
     updatePlanting,
     deletePlanting,
+    updateAndRenumber,
+    addAndRenumber,
   } = usePlantings();
 
   // Get unique cultivars from plans, sorted alphabetically by crop then variety
@@ -71,15 +72,29 @@ export default function Home() {
   }, []);
 
   const handleAddPlanting = async (
-    planting: Parameters<typeof addPlanting>[0]
+    planting: Parameters<typeof addAndRenumber>[0]
   ) => {
-    await addPlanting(planting);
+    const cultivar = data.cultivars.find((c) => c.id === planting.cultivarId);
+    if (cultivar) {
+      await addAndRenumber(planting, cultivar.crop);
+    }
   };
 
   const handleUpdatePlanting = async (
     id: string,
     updates: Parameters<typeof updatePlanting>[1]
   ) => {
+    // Renumber plantings if sow date changed (to keep succession numbers chronological)
+    if ('sowDate' in updates || 'sowDateOverride' in updates) {
+      const planting = plantings.find((p) => p.id === id);
+      if (planting) {
+        const cultivar = data.cultivars.find((c) => c.id === planting.cultivarId);
+        if (cultivar) {
+          await updateAndRenumber(id, updates, cultivar.crop, cultivar.id);
+          return;
+        }
+      }
+    }
     await updatePlanting(id, updates);
   };
 
