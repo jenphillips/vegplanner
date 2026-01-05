@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Cultivar, FrostWindow, Climate, Planting } from '@/lib/types';
 import {
   calculateSuccessionWindows,
@@ -32,8 +32,30 @@ export function CultivarCard({
   onDeletePlanting,
   forceExpanded,
 }: CultivarCardProps) {
-  const [localExpanded, setLocalExpanded] = useState(false);
-  const expanded = forceExpanded ?? localExpanded;
+  const [localExpanded, setLocalExpanded] = useState(forceExpanded ?? false);
+  const [hasManualOverride, setHasManualOverride] = useState(false);
+  const prevForceExpanded = useRef(forceExpanded);
+
+  // When forceExpanded changes (user clicks Expand All / Collapse All),
+  // reset the manual override so the global setting takes effect
+  useEffect(() => {
+    if (prevForceExpanded.current !== forceExpanded) {
+      setHasManualOverride(false);
+      if (forceExpanded !== undefined) {
+        setLocalExpanded(forceExpanded);
+      }
+      prevForceExpanded.current = forceExpanded;
+    }
+  }, [forceExpanded]);
+
+  // If the user has manually toggled this card, use local state;
+  // otherwise, defer to forceExpanded (if set) or local state
+  const expanded = hasManualOverride ? localExpanded : (forceExpanded ?? localExpanded);
+
+  const handleToggleExpanded = () => {
+    setLocalExpanded(!expanded);
+    setHasManualOverride(true);
+  };
   const [quantity, setQuantity] = useState(10);
   const [selectedPlantingId, setSelectedPlantingId] = useState<string | null>(null);
 
@@ -151,10 +173,10 @@ export function CultivarCard({
     <div className={styles.card}>
       <div
         className={styles.header}
-        onClick={() => setLocalExpanded(!localExpanded)}
+        onClick={handleToggleExpanded}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && setLocalExpanded(!localExpanded)}
+        onKeyDown={(e) => e.key === 'Enter' && handleToggleExpanded()}
       >
         <div className={styles.titleRow}>
           <h3 className={styles.title}>
