@@ -42,8 +42,8 @@ export function usePlantings() {
   );
 
   const renumberPlantings = useCallback(
-    async (cropName: string, cultivarId: string) => {
-      const renumbered = renumberPlantingsForCrop(data, cropName, cultivarId);
+    async (cropName: string, cultivarId: string, variety?: string) => {
+      const renumbered = renumberPlantingsForCrop(data, cropName, cultivarId, variety);
       await save(renumbered);
     },
     [data, save]
@@ -54,13 +54,14 @@ export function usePlantings() {
       id: string,
       updates: Partial<Planting>,
       cropName: string,
-      cultivarId: string
+      cultivarId: string,
+      variety?: string
     ) => {
       // Apply update first, then renumber in one save operation
       const updated = data.map((item) =>
         item.id === id ? { ...item, ...updates } : item
       );
-      const renumbered = renumberPlantingsForCrop(updated, cropName, cultivarId);
+      const renumbered = renumberPlantingsForCrop(updated, cropName, cultivarId, variety);
       await save(renumbered);
     },
     [data, save]
@@ -69,7 +70,8 @@ export function usePlantings() {
   const addAndRenumber = useCallback(
     async (
       planting: Omit<Planting, 'id' | 'createdAt'>,
-      cropName: string
+      cropName: string,
+      variety?: string
     ) => {
       const newPlanting: Planting = {
         ...planting,
@@ -78,7 +80,7 @@ export function usePlantings() {
       };
       // Add new planting, then renumber all plantings for this cultivar
       const withNew = [...data, newPlanting];
-      const renumbered = renumberPlantingsForCrop(withNew, cropName, planting.cultivarId);
+      const renumbered = renumberPlantingsForCrop(withNew, cropName, planting.cultivarId, variety);
       await save(renumbered);
       return newPlanting;
     },

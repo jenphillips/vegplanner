@@ -6,6 +6,7 @@ import { BaselineTimeline } from '@/components/timeline/BaselineTimeline';
 import { CultivarCard } from '@/components/cultivars/CultivarCard';
 import { TabNav, type Tab } from '@/components/tabs/TabNav';
 import { ScheduleView } from '@/components/schedule/ScheduleView';
+import { CalendarView } from '@/components/calendar/CalendarView';
 import { usePlantings } from '@/hooks/usePlantings';
 import { useTasks } from '@/hooks/useTasks';
 import type { Cultivar, FrostWindow, PlantingPlan, Climate } from '@/lib/types';
@@ -86,7 +87,7 @@ export default function Home() {
   ) => {
     const cultivar = data.cultivars.find((c) => c.id === planting.cultivarId);
     if (cultivar) {
-      await addAndRenumber(planting, cultivar.crop);
+      await addAndRenumber(planting, cultivar.crop, cultivar.variety);
     }
   };
 
@@ -100,7 +101,7 @@ export default function Home() {
       if (planting) {
         const cultivar = data.cultivars.find((c) => c.id === planting.cultivarId);
         if (cultivar) {
-          await updateAndRenumber(id, updates, cultivar.crop, cultivar.id);
+          await updateAndRenumber(id, updates, cultivar.crop, cultivar.id, cultivar.variety);
           return;
         }
       }
@@ -213,6 +214,30 @@ export default function Home() {
             {/* Seasonal Planting Reference (Baseline Vegetables) */}
             <BaselineTimeline frost={data.frost} climate={data.climate} />
           </>
+        )}
+
+        {/* Calendar Tab: Chronological View */}
+        {ready && activeTab === 'calendar' && (
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <h2 className={styles.sectionTitle}>Calendar View</h2>
+                <p className={styles.sectionDesc}>
+                  All plantings ordered chronologically by sow date. Drag to
+                  reschedule individual plantings.
+                </p>
+              </div>
+            </div>
+            <CalendarView
+              plantings={plantings}
+              cultivars={data.cultivars}
+              frost={data.frost}
+              climate={data.climate}
+              onUpdatePlanting={handleUpdatePlanting}
+              onDeletePlanting={handleDeletePlanting}
+              loading={plantingsLoading}
+            />
+          </section>
         )}
 
         {/* Tasks Tab: Schedule View */}

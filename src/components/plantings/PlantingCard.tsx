@@ -179,12 +179,14 @@ export function PlantingCard({
           onUpdateSowDate={handleSowDateUpdate}
           onShiftPlanting={handleShiftPlanting}
         />
-        {cultivar.sowMethod === 'either' && (
-          <MethodToggle
-            currentMethod={planting.method as 'direct' | 'transplant'}
-            onChange={handleMethodChange}
-          />
-        )}
+        <div className={styles.methodToggleSlot}>
+          {cultivar.sowMethod === 'either' && (
+            <MethodToggle
+              currentMethod={planting.method as 'direct' | 'transplant'}
+              onChange={handleMethodChange}
+            />
+          )}
+        </div>
         <button
           onClick={handleDelete}
           className={styles.deleteButton}

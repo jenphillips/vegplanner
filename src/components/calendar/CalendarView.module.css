@@ -1,0 +1,28 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plantings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.loading {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted, #5f6653);
+  font-size: 14px;
+}
+
+.empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted, #5f6653);
+  font-size: 14px;
+  background: var(--panel, #ffffff);
+  border: 1px dashed var(--border, #e5e5de);
+  border-radius: 8px;
+}

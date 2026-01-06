@@ -7,7 +7,7 @@
 
 .spacer {
   flex-shrink: 0;
-  width: 200px;
+  width: 280px;
 }
 
 .labels {
@@ -24,7 +24,12 @@
   white-space: nowrap;
 }
 
-.deletespacer {
+.toggleSpacer {
+  flex-shrink: 0;
+  width: 52px;
+}
+
+.deleteSpacer {
   flex-shrink: 0;
   width: 24px;
 }

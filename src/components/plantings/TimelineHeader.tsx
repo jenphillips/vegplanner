@@ -65,7 +65,8 @@ export function TimelineHeader({ frost }: TimelineHeaderProps) {
           </span>
         ))}
       </div>
-      <div className={styles.deletespacer} />
+      <div className={styles.toggleSpacer} />
+      <div className={styles.deleteSpacer} />
     </div>
   );
 }

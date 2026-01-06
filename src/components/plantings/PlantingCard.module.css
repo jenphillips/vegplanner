@@ -26,7 +26,7 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  min-width: 216px;
+  width: 280px;
 }
 
 .infoSelectable {
@@ -46,6 +46,8 @@
   font-size: 13px;
   color: var(--text, #1f2614);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .quantity {
@@ -61,6 +63,11 @@
   font-size: 11px;
   color: var(--muted, #5f6653);
   white-space: nowrap;
+}
+
+.methodToggleSlot {
+  flex-shrink: 0;
+  width: 52px;
 }
 
 .deleteButton {
@@ -97,7 +104,7 @@
 
 .notes {
   margin: 4px 0 0;
-  padding-left: 228px;
+  padding-left: 292px;
   font-size: 11px;
   color: var(--muted, #5f6653);
   font-style: italic;

@@ -823,8 +823,14 @@ describe('createPlantingFromWindow', () => {
     expect(planting.cultivarId).toBe(beetCultivar.id);
   });
 
-  it('sets label with crop name and succession number', () => {
+  it('sets label with crop name, variety and succession number', () => {
     const planting = createPlantingFromWindow(window, beetCultivar);
+    expect(planting.label).toBe('Beet - Detroit Dark Red #1');
+  });
+
+  it('sets label without variety when variety is empty', () => {
+    const cultivarNoVariety = { ...beetCultivar, variety: '' };
+    const planting = createPlantingFromWindow(window, cultivarNoVariety);
     expect(planting.label).toBe('Beet #1');
   });
 
@@ -1320,6 +1326,50 @@ describe('renumberPlantingsForCrop', () => {
     // Should return plantings unchanged since no beet plantings
     expect(result.length).toBe(1);
     expect(result[0].cultivarId).toBe('carrot');
+  });
+
+  it('includes variety in label when provided', () => {
+    const plantings: Planting[] = [
+      {
+        id: 'p1',
+        cultivarId: 'beet',
+        label: 'Beet #1',
+        quantity: 10,
+        sowDate: '2025-04-01',
+        harvestStart: '2025-05-26',
+        harvestEnd: '2025-06-02',
+        method: 'direct',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      },
+    ];
+
+    const result = renumberPlantingsForCrop(plantings, 'Beet', 'beet', 'Detroit Dark Red');
+
+    expect(result[0].label).toBe('Beet - Detroit Dark Red #1');
+  });
+
+  it('omits variety from label when variety is empty', () => {
+    const plantings: Planting[] = [
+      {
+        id: 'p1',
+        cultivarId: 'beet',
+        label: 'Beet - Old Variety #1',
+        quantity: 10,
+        sowDate: '2025-04-01',
+        harvestStart: '2025-05-26',
+        harvestEnd: '2025-06-02',
+        method: 'direct',
+        status: 'planned',
+        successionNumber: 1,
+        createdAt: '2025-01-01',
+      },
+    ];
+
+    const result = renumberPlantingsForCrop(plantings, 'Beet', 'beet', '');
+
+    expect(result[0].label).toBe('Beet #1');
   });
 });
 

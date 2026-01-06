@@ -540,7 +540,9 @@ export function createPlantingFromWindow(
 ): Omit<Planting, 'id' | 'createdAt'> {
   return {
     cultivarId: cultivar.id,
-    label: `${cultivar.crop} #${window.successionNumber}`,
+    label: cultivar.variety
+      ? `${cultivar.crop} - ${cultivar.variety} #${window.successionNumber}`
+      : `${cultivar.crop} #${window.successionNumber}`,
     quantity,
     sowDate: window.sowDate,
     transplantDate: window.transplantDate,
@@ -577,7 +579,8 @@ export function getNextSuccessionNumber(
 export function renumberPlantingsForCrop(
   allPlantings: Planting[],
   cropName: string,
-  cultivarId: string
+  cultivarId: string,
+  variety?: string
 ): Planting[] {
   const cultivarPlantings = allPlantings.filter(
     (p) => p.cultivarId === cultivarId
@@ -594,10 +597,13 @@ export function renumberPlantingsForCrop(
   // Renumber based on chronological position
   const renumbered = sorted.map((planting, index) => {
     const newNumber = index + 1;
+    const label = variety
+      ? `${cropName} - ${variety} #${newNumber}`
+      : `${cropName} #${newNumber}`;
     return {
       ...planting,
       successionNumber: newNumber,
-      label: `${cropName} #${newNumber}`,
+      label,
     };
   });
 
