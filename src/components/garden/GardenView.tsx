@@ -14,7 +14,7 @@ import {
 } from '@/lib/gardenLayout';
 import type { PlacementSuggestion } from '@/lib/types';
 import { BedEditor } from './BedEditor';
-import { BedCanvas } from './BedCanvas';
+import { UnifiedGardenCanvas } from './UnifiedGardenCanvas';
 import type { Planting, Cultivar, GardenBed, PlantingPlacement } from '@/lib/types';
 import styles from './GardenView.module.css';
 
@@ -28,22 +28,6 @@ type GardenViewProps = {
 type Units = 'metric' | 'imperial';
 
 // Unit conversion helpers
-function cmToDisplay(cm: number, units: Units): string {
-  if (units === 'metric') {
-    if (cm >= 100) {
-      return `${(cm / 100).toFixed(1)}m`;
-    }
-    return `${Math.round(cm)}cm`;
-  }
-  // Imperial: convert to inches or feet
-  const inches = cm / 2.54;
-  if (inches >= 12) {
-    const feet = inches / 12;
-    return `${feet.toFixed(1)}ft`;
-  }
-  return `${Math.round(inches)}in`;
-}
-
 function dimensionsToDisplay(widthCm: number, heightCm: number, units: Units): string {
   if (units === 'metric') {
     return `${Math.round(widthCm)}×${Math.round(heightCm)}cm`;
@@ -145,6 +129,12 @@ export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: 
   const unplacedPlantings = useMemo(
     () => inGroundPlantings.filter((p) => !placedPlantingIds.has(p.id)),
     [inGroundPlantings, placedPlantingIds]
+  );
+
+  // Filter placements to only those for in-ground plantings
+  const visiblePlacements = useMemo(
+    () => placements.filter((p) => inGroundPlantings.some((pl) => pl.id === p.plantingId)),
+    [placements, inGroundPlantings]
   );
 
   // Create cultivar lookup map for footprint calculations
@@ -486,41 +476,22 @@ export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: 
               </button>
             </div>
           ) : (
-            <div className={styles.bedsContainer}>
-              {beds.map((bed) => {
-                const bedPlacements = placements.filter(
-                  (p) => p.bedId === bed.id
-                );
-                // Only show placements for plantings that are in ground
-                const visiblePlacements = bedPlacements.filter((p) =>
-                  inGroundPlantings.some((pl) => pl.id === p.plantingId)
-                );
-
-                // Get suggestions for this bed
-                const bedSuggestions = autoLayoutSuggestions?.filter(
-                  (s) => s.bedId === bed.id
-                ) ?? [];
-
-                return (
-                  <BedCanvas
-                    key={bed.id}
-                    bed={bed}
-                    placements={visiblePlacements}
-                    plantings={inGroundPlantings}
-                    cultivars={cultivars}
-                    scale={scale}
-                    units={units}
-                    suggestions={bedSuggestions}
-                    onEditBed={() => handleEditBed(bed)}
-                    onDeleteBed={() => handleDeleteBed(bed)}
-                    onPlacementCreate={handlePlacementCreate}
-                    onPlacementUpdate={handlePlacementUpdate}
-                    onPlacementDelete={handlePlacementDelete}
-                    onPlantingQuantityUpdate={handlePlantingQuantityUpdate}
-                  />
-                );
-              })}
-            </div>
+            <UnifiedGardenCanvas
+              beds={beds}
+              placements={visiblePlacements}
+              plantings={inGroundPlantings}
+              cultivars={cultivars}
+              scale={scale}
+              units={units}
+              suggestions={autoLayoutSuggestions ?? []}
+              onEditBed={handleEditBed}
+              onDeleteBed={handleDeleteBed}
+              onUpdateBed={updateBed}
+              onPlacementCreate={handlePlacementCreate}
+              onPlacementUpdate={handlePlacementUpdate}
+              onPlacementDelete={handlePlacementDelete}
+              onPlantingQuantityUpdate={handlePlantingQuantityUpdate}
+            />
           )}
         </div>
 

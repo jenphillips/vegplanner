@@ -179,6 +179,9 @@ export type GardenBed = {
   lengthCm: number;
   sunExposure: 'full' | 'partial' | 'shade';
   notes?: string;
+  // Position on unified garden canvas (in cm from top-left)
+  positionX?: number;
+  positionY?: number;
 };
 
 export type PlantingPlacement = {
