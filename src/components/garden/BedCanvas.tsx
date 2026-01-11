@@ -1018,6 +1018,28 @@ export function BedCanvas({
                       style={{ cursor: 'nwse-resize' }}
                       onMouseDown={(e) => handleResizeStart(e, footprint, 'se')}
                     />
+                    {/* Delete button */}
+                    <g
+                      style={{ cursor: 'pointer' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPlacementDelete(footprint.placement.id);
+                        setSelectedPlacement(null);
+                      }}
+                    >
+                      <circle
+                        cx={x + width + 4}
+                        cy={y - 4}
+                        r={8}
+                        fill="#ef4444"
+                      />
+                      <path
+                        d={`M${x + width + 1},${y - 7} L${x + width + 7},${y - 1} M${x + width + 7},${y - 7} L${x + width + 1},${y - 1}`}
+                        stroke="white"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                      />
+                    </g>
                   </>
                 )}
               </g>
@@ -1122,20 +1144,6 @@ export function BedCanvas({
           </div>
         )}
 
-        {/* Selected placement actions */}
-        {selectedPlacement && (
-          <div className={styles.selectionActions}>
-            <button
-              className={styles.removeButton}
-              onClick={() => {
-                onPlacementDelete(selectedPlacement);
-                setSelectedPlacement(null);
-              }}
-            >
-              Remove from bed
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Bed notes */}
