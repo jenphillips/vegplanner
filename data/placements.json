@@ -1,20 +1,34 @@
 [
   {
-    "plantingId": "e4cbe05b-8f33-4856-9759-d57585aa3ef2",
+    "plantingId": "6006da37-a018-41c4-8dd2-790c289062a7",
+    "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
+    "xCm": 0,
+    "yCm": 60,
+    "spacingCm": 15,
+    "id": "55ba693b-3afd-419a-9a7b-e694616cda9a"
+  },
+  {
+    "plantingId": "f53ac084-cca5-41a8-b08a-14664f595697",
     "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
     "xCm": 0,
     "yCm": 0,
-    "spacingCm": 10,
-    "id": "c0f096cb-cd7c-448a-b2b7-39164460e76b",
-    "cols": 2
+    "spacingCm": 20,
+    "id": "ebd6dd8e-03a4-4c0a-b453-08e3ece80db9"
   },
   {
-    "plantingId": "69157e4c-3530-4c6f-b201-7f4253b2b32c",
+    "plantingId": "0ccfce68-5b8d-4770-b7d3-e4897b4f7e82",
     "bedId": "3733de2c-174c-4f9c-8f2e-0c8a649e75f2",
     "xCm": 0,
     "yCm": 0,
-    "spacingCm": 60,
-    "cols": 1,
-    "id": "ce347a43-5732-4a1b-a4d9-345ab9a05933"
+    "spacingCm": 20,
+    "id": "99518df1-9053-47f0-9ea0-a74ecd25f695"
+  },
+  {
+    "plantingId": "9841ac84-c7c2-4328-b163-f82e26ab44d6",
+    "bedId": "c5b84767-e442-480b-bb9e-9d9235478055",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 20,
+    "id": "5858f93d-57e9-4327-b869-06ab69e59ede"
   }
 ]

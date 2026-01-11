@@ -64,28 +64,55 @@ export function useDataFile<T extends { id: string }>(
 
   const add = useCallback(
     async (item: T) => {
-      const newData = [...data, item];
-      await save(newData);
+      setData((currentData) => {
+        const newData = [...currentData, item];
+        fetch(`/api/data/${collection}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newData),
+        }).catch((err) => {
+          setError(err instanceof Error ? err.message : 'Unknown error');
+        });
+        return newData;
+      });
     },
-    [data, save]
+    [collection]
   );
 
   const update = useCallback(
     async (id: string, updates: Partial<T>) => {
-      const newData = data.map((item) =>
-        item.id === id ? { ...item, ...updates } : item
-      );
-      await save(newData);
+      setData((currentData) => {
+        const newData = currentData.map((item) =>
+          item.id === id ? { ...item, ...updates } : item
+        );
+        fetch(`/api/data/${collection}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newData),
+        }).catch((err) => {
+          setError(err instanceof Error ? err.message : 'Unknown error');
+        });
+        return newData;
+      });
     },
-    [data, save]
+    [collection]
   );
 
   const remove = useCallback(
     async (id: string) => {
-      const newData = data.filter((item) => item.id !== id);
-      await save(newData);
+      setData((currentData) => {
+        const newData = currentData.filter((item) => item.id !== id);
+        fetch(`/api/data/${collection}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newData),
+        }).catch((err) => {
+          setError(err instanceof Error ? err.message : 'Unknown error');
+        });
+        return newData;
+      });
     },
-    [data, save]
+    [collection]
   );
 
   return {
