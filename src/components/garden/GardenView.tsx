@@ -1,0 +1,613 @@
+'use client';
+
+import { useMemo, useState, useEffect } from 'react';
+import { useGardenBeds } from '@/hooks/useGardenBeds';
+import { usePlacements } from '@/hooks/usePlacements';
+import {
+  filterPlantingsInGround,
+  getSeasonDateRange,
+  calculateFootprint,
+  getValidRectangleConfigs,
+  getCropColor,
+  autoLayout,
+  checkCollisions,
+} from '@/lib/gardenLayout';
+import type { PlacementSuggestion } from '@/lib/types';
+import { BedEditor } from './BedEditor';
+import { BedCanvas } from './BedCanvas';
+import type { Planting, Cultivar, GardenBed, PlantingPlacement } from '@/lib/types';
+import styles from './GardenView.module.css';
+
+type GardenViewProps = {
+  plantings: Planting[];
+  cultivars: Cultivar[];
+  loading?: boolean;
+  onUpdatePlanting?: (id: string, updates: Partial<Planting>) => void;
+};
+
+type Units = 'metric' | 'imperial';
+
+// Unit conversion helpers
+function cmToDisplay(cm: number, units: Units): string {
+  if (units === 'metric') {
+    if (cm >= 100) {
+      return `${(cm / 100).toFixed(1)}m`;
+    }
+    return `${Math.round(cm)}cm`;
+  }
+  // Imperial: convert to inches or feet
+  const inches = cm / 2.54;
+  if (inches >= 12) {
+    const feet = inches / 12;
+    return `${feet.toFixed(1)}ft`;
+  }
+  return `${Math.round(inches)}in`;
+}
+
+function dimensionsToDisplay(widthCm: number, heightCm: number, units: Units): string {
+  if (units === 'metric') {
+    return `${Math.round(widthCm)}×${Math.round(heightCm)}cm`;
+  }
+  const widthIn = Math.round(widthCm / 2.54);
+  const heightIn = Math.round(heightCm / 2.54);
+  return `${widthIn}×${heightIn}in`;
+}
+
+function spacingToDisplay(cm: number, units: Units): string {
+  if (units === 'metric') {
+    return `${Math.round(cm)}cm spacing`;
+  }
+  return `${Math.round(cm / 2.54)}in spacing`;
+}
+
+// Zoom levels: pixels per cm
+const ZOOM_LEVELS = [1, 1.5, 2, 2.5, 3];
+const DEFAULT_ZOOM_INDEX = 2; // 2 pixels per cm
+
+// localStorage key for unit preference
+const UNITS_STORAGE_KEY = 'vegplanner-garden-units';
+
+function getStoredUnits(): Units {
+  if (typeof window === 'undefined') return 'metric';
+  const stored = localStorage.getItem(UNITS_STORAGE_KEY);
+  if (stored === 'imperial') return 'imperial';
+  return 'metric';
+}
+
+export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: GardenViewProps) {
+  const {
+    beds,
+    loading: bedsLoading,
+    addBed,
+    updateBed,
+    deleteBed,
+  } = useGardenBeds();
+  const {
+    placements,
+    loading: placementsLoading,
+    addPlacement,
+    updatePlacement,
+    deletePlacement,
+  } = usePlacements();
+
+  // Editor state
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editingBed, setEditingBed] = useState<GardenBed | null>(null);
+
+  // Auto-layout state
+  const [autoLayoutSuggestions, setAutoLayoutSuggestions] = useState<PlacementSuggestion[] | null>(null);
+
+  // Units state - initialize from localStorage
+  const [units, setUnits] = useState<Units>(() => getStoredUnits());
+
+  // Persist units preference to localStorage
+  useEffect(() => {
+    localStorage.setItem(UNITS_STORAGE_KEY, units);
+  }, [units]);
+
+  // Zoom state
+  const [zoomIndex, setZoomIndex] = useState(DEFAULT_ZOOM_INDEX);
+  const scale = ZOOM_LEVELS[zoomIndex];
+  const zoomPercent = Math.round(scale * 50); // 2px/cm = 100%
+
+  // Get season date range for the scrubber
+  const seasonRange = useMemo(
+    () => getSeasonDateRange(plantings),
+    [plantings]
+  );
+
+  // Default to today or middle of season
+  const defaultDate = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    if (!seasonRange) return today;
+    if (today >= seasonRange.start && today <= seasonRange.end) return today;
+    // Return middle of season if today is outside range
+    const startMs = new Date(seasonRange.start).getTime();
+    const endMs = new Date(seasonRange.end).getTime();
+    const midMs = startMs + (endMs - startMs) / 2;
+    return new Date(midMs).toISOString().split('T')[0];
+  }, [seasonRange]);
+
+  const [selectedDate, setSelectedDate] = useState(defaultDate);
+
+  // Filter plantings to those in ground on selected date
+  const inGroundPlantings = useMemo(
+    () => filterPlantingsInGround(plantings, selectedDate),
+    [plantings, selectedDate]
+  );
+
+  // Get unplaced plantings (in ground but not in any bed)
+  const placedPlantingIds = useMemo(
+    () => new Set(placements.map((p) => p.plantingId)),
+    [placements]
+  );
+
+  const unplacedPlantings = useMemo(
+    () => inGroundPlantings.filter((p) => !placedPlantingIds.has(p.id)),
+    [inGroundPlantings, placedPlantingIds]
+  );
+
+  // Create cultivar lookup map for footprint calculations
+  const cultivarMap = useMemo(
+    () => new Map(cultivars.map((c) => [c.id, c])),
+    [cultivars]
+  );
+
+  // Check which unplaced plantings are too large for any available bed space
+  const tooLargePlantingIds = useMemo(() => {
+    const tooLarge = new Set<string>();
+
+    for (const planting of unplacedPlantings) {
+      const cultivar = cultivarMap.get(planting.cultivarId);
+      const spacing = cultivar?.spacingCm ?? 30;
+      const quantity = planting.quantity ?? 1;
+
+      // Get ALL valid rectangle configurations (not just the default square-ish one)
+      const allConfigs = getValidRectangleConfigs(quantity, spacing);
+
+      let canFitSomewhere = false;
+
+      for (const bed of beds) {
+        if (canFitSomewhere) break;
+
+        // Get existing placements in this bed (for in-ground plantings only)
+        const bedPlacements = placements.filter(
+          (p) => p.bedId === bed.id && inGroundPlantings.some((pl) => pl.id === p.plantingId)
+        );
+
+        // Build footprints for existing placements
+        const existingFootprints = bedPlacements.map((placement) => {
+          const pl = inGroundPlantings.find((p) => p.id === placement.plantingId);
+          const cv = pl ? cultivarMap.get(pl.cultivarId) : undefined;
+          const qty = pl?.quantity ?? 1;
+          const sp = cv?.spacingCm ?? 30;
+          const fp = calculateFootprint(qty, sp);
+          return {
+            xCm: placement.xCm,
+            yCm: placement.yCm,
+            widthCm: fp.widthCm,
+            heightCm: fp.heightCm,
+          };
+        });
+
+        // Try all configurations and both orientations for each
+        for (const config of allConfigs) {
+          if (canFitSomewhere) break;
+
+          // Try normal and rotated orientations
+          const orientations = [
+            { w: config.widthCm, h: config.heightCm },
+            { w: config.heightCm, h: config.widthCm },
+          ];
+
+          for (const { w, h } of orientations) {
+            if (canFitSomewhere) break;
+
+            // Skip if this orientation doesn't fit in the bed at all
+            if (w > bed.widthCm || h > bed.lengthCm) continue;
+
+            // Scan for a valid position
+            const step = 5;
+            for (let y = 0; y <= bed.lengthCm - h && !canFitSomewhere; y += step) {
+              for (let x = 0; x <= bed.widthCm - w && !canFitSomewhere; x += step) {
+                const candidate = { xCm: x, yCm: y, widthCm: w, heightCm: h };
+                const collision = checkCollisions(candidate, existingFootprints.map((f, i) => ({ id: String(i), ...f })));
+                if (!collision.hasCollision) {
+                  canFitSomewhere = true;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (!canFitSomewhere && beds.length > 0) {
+        tooLarge.add(planting.id);
+      }
+    }
+
+    return tooLarge;
+  }, [unplacedPlantings, beds, placements, inGroundPlantings, cultivarMap]);
+
+  const isLoading = loading || bedsLoading || placementsLoading;
+
+  const handleAddBed = () => {
+    setEditingBed(null);
+    setIsEditorOpen(true);
+  };
+
+  const handleEditBed = (bed: GardenBed) => {
+    setEditingBed(bed);
+    setIsEditorOpen(true);
+  };
+
+  const handleDeleteBed = async (bed: GardenBed) => {
+    const placementsInBed = placements.filter((p) => p.bedId === bed.id);
+    if (placementsInBed.length > 0) {
+      const confirmed = window.confirm(
+        `This bed has ${placementsInBed.length} planting(s) placed in it. Delete anyway?`
+      );
+      if (!confirmed) return;
+    }
+    await deleteBed(bed.id);
+  };
+
+  const handleSaveBed = async (bedData: Omit<GardenBed, 'id'>) => {
+    if (editingBed) {
+      await updateBed(editingBed.id, bedData);
+    } else {
+      await addBed(bedData);
+    }
+    setIsEditorOpen(false);
+    setEditingBed(null);
+  };
+
+  const handleCancelEditor = () => {
+    setIsEditorOpen(false);
+    setEditingBed(null);
+  };
+
+  const handleZoomIn = () => {
+    if (zoomIndex < ZOOM_LEVELS.length - 1) {
+      setZoomIndex(zoomIndex + 1);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (zoomIndex > 0) {
+      setZoomIndex(zoomIndex - 1);
+    }
+  };
+
+  const handleToggleUnits = () => {
+    setUnits(units === 'metric' ? 'imperial' : 'metric');
+  };
+
+  // Auto-layout handlers
+  const handleAutoLayout = () => {
+    // Build quantity map for the algorithm (default to 1 for unspecified quantities)
+    const plantingQuantities = new Map(
+      unplacedPlantings.map((p) => [p.id, p.quantity ?? 1])
+    );
+
+    const suggestions = autoLayout(
+      unplacedPlantings,
+      beds,
+      placements,
+      cultivars,
+      plantingQuantities
+    );
+
+    if (suggestions.length === 0) {
+      alert('Could not find space for any plantings. Try adding more beds or removing existing placements.');
+      return;
+    }
+
+    setAutoLayoutSuggestions(suggestions);
+  };
+
+  const handleApplyAutoLayout = async () => {
+    if (!autoLayoutSuggestions) return;
+
+    // Create all placements
+    for (const suggestion of autoLayoutSuggestions) {
+      await addPlacement({
+        plantingId: suggestion.plantingId,
+        bedId: suggestion.bedId,
+        xCm: suggestion.xCm,
+        yCm: suggestion.yCm,
+        spacingCm: suggestion.spacingCm,
+      });
+    }
+
+    setAutoLayoutSuggestions(null);
+  };
+
+  const handleCancelAutoLayout = () => {
+    setAutoLayoutSuggestions(null);
+  };
+
+  // Placement handlers
+  const handlePlacementCreate = async (placement: Omit<PlantingPlacement, 'id'>) => {
+    await addPlacement(placement);
+  };
+
+  const handlePlacementUpdate = async (id: string, updates: Partial<PlantingPlacement>) => {
+    await updatePlacement(id, updates);
+  };
+
+  const handlePlacementDelete = async (id: string) => {
+    await deletePlacement(id);
+  };
+
+  // Handler for quantity updates from canvas resize
+  const handlePlantingQuantityUpdate = (plantingId: string, quantity: number) => {
+    onUpdatePlanting?.(plantingId, { quantity });
+  };
+
+  // Drag handlers for sidebar cards
+  const handleDragStart = (e: React.DragEvent, planting: Planting) => {
+    const cultivar = cultivarMap.get(planting.cultivarId);
+    const dragData = {
+      plantingId: planting.id,
+      quantity: planting.quantity ?? 1,
+      spacingCm: cultivar?.spacingCm ?? 30,
+      cropName: cultivar?.crop ?? 'Unknown',
+    };
+    e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+    e.dataTransfer.effectAllowed = 'move';
+
+    // Create a custom drag image
+    const dragEl = e.currentTarget as HTMLElement;
+    if (dragEl) {
+      e.dataTransfer.setDragImage(dragEl, dragEl.offsetWidth / 2, dragEl.offsetHeight / 2);
+    }
+  };
+
+  // Format date for display
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>Loading garden layout...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.container}>
+      {/* Toolbar */}
+      <div className={styles.toolbar}>
+        <button className={styles.toolbarButton} onClick={handleAddBed}>
+          + Add Bed
+        </button>
+        <button
+          className={styles.toolbarButton}
+          disabled={unplacedPlantings.length === 0 || beds.length === 0}
+          onClick={handleAutoLayout}
+        >
+          Auto-Layout
+        </button>
+        <div className={styles.toolbarSpacer} />
+        <button
+          className={styles.unitsToggle}
+          onClick={handleToggleUnits}
+          title="Toggle units"
+        >
+          {units === 'metric' ? 'cm/m' : 'in/ft'}
+        </button>
+        <div className={styles.zoomControls}>
+          <button
+            className={styles.zoomButton}
+            onClick={handleZoomOut}
+            disabled={zoomIndex === 0}
+          >
+            −
+          </button>
+          <span className={styles.zoomLabel}>{zoomPercent}%</span>
+          <button
+            className={styles.zoomButton}
+            onClick={handleZoomIn}
+            disabled={zoomIndex === ZOOM_LEVELS.length - 1}
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* Date Scrubber */}
+      {seasonRange ? (
+        <div className={styles.dateScrubber}>
+          <div className={styles.dateDisplay}>
+            <span className={styles.dateValue}>{formatDate(selectedDate)}</span>
+          </div>
+          <div className={styles.sliderContainer}>
+            <span className={styles.sliderLabel}>{formatDate(seasonRange.start)}</span>
+            <input
+              type="range"
+              min={new Date(seasonRange.start).getTime()}
+              max={new Date(seasonRange.end).getTime()}
+              value={new Date(selectedDate).getTime()}
+              onChange={(e) => {
+                const date = new Date(parseInt(e.target.value));
+                setSelectedDate(date.toISOString().split('T')[0]);
+              }}
+              className={styles.dateSlider}
+            />
+            <span className={styles.sliderLabel}>{formatDate(seasonRange.end)}</span>
+          </div>
+        </div>
+      ) : (
+        <div className={styles.noPlantingsNotice}>
+          No plantings scheduled yet. Add plantings in the Timeline tab to see them here.
+        </div>
+      )}
+
+      {/* Auto-Layout Confirmation Bar */}
+      {autoLayoutSuggestions && (
+        <div className={styles.autoLayoutBar}>
+          <span className={styles.autoLayoutInfo}>
+            Auto-layout found positions for {autoLayoutSuggestions.length} planting(s).
+            Preview shown below.
+          </span>
+          <div className={styles.autoLayoutActions}>
+            <button
+              className={styles.cancelAutoLayoutButton}
+              onClick={handleCancelAutoLayout}
+            >
+              Cancel
+            </button>
+            <button
+              className={styles.applyAutoLayoutButton}
+              onClick={handleApplyAutoLayout}
+            >
+              Apply Layout
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className={styles.mainArea}>
+        {/* Canvas Area */}
+        <div className={styles.canvasArea}>
+          {beds.length === 0 ? (
+            <div className={styles.emptyState}>
+              <h3>No garden beds yet</h3>
+              <p>Create your first garden bed to start placing plantings.</p>
+              <button className={styles.primaryButton} onClick={handleAddBed}>
+                + Create First Bed
+              </button>
+            </div>
+          ) : (
+            <div className={styles.bedsContainer}>
+              {beds.map((bed) => {
+                const bedPlacements = placements.filter(
+                  (p) => p.bedId === bed.id
+                );
+                // Only show placements for plantings that are in ground
+                const visiblePlacements = bedPlacements.filter((p) =>
+                  inGroundPlantings.some((pl) => pl.id === p.plantingId)
+                );
+
+                // Get suggestions for this bed
+                const bedSuggestions = autoLayoutSuggestions?.filter(
+                  (s) => s.bedId === bed.id
+                ) ?? [];
+
+                return (
+                  <BedCanvas
+                    key={bed.id}
+                    bed={bed}
+                    placements={visiblePlacements}
+                    plantings={inGroundPlantings}
+                    cultivars={cultivars}
+                    scale={scale}
+                    units={units}
+                    suggestions={bedSuggestions}
+                    onEditBed={() => handleEditBed(bed)}
+                    onDeleteBed={() => handleDeleteBed(bed)}
+                    onPlacementCreate={handlePlacementCreate}
+                    onPlacementUpdate={handlePlacementUpdate}
+                    onPlacementDelete={handlePlacementDelete}
+                    onPlantingQuantityUpdate={handlePlantingQuantityUpdate}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar - Unplaced Plantings */}
+        <div className={styles.sidebar}>
+          <h3 className={styles.sidebarTitle}>Unplaced Plantings</h3>
+          {unplacedPlantings.length === 0 ? (
+            <p className={styles.sidebarEmpty}>
+              {inGroundPlantings.length === 0
+                ? 'No plantings in ground on this date.'
+                : 'All in-ground plantings are placed in beds.'}
+            </p>
+          ) : (
+            <div className={styles.unplacedList}>
+              {unplacedPlantings.map((planting) => {
+                const cultivar = cultivarMap.get(planting.cultivarId);
+                const spacing = cultivar?.spacingCm ?? 30;
+                const quantity = planting.quantity ?? 1;
+                const footprint = calculateFootprint(quantity, spacing);
+                const color = getCropColor(cultivar?.crop ?? '');
+                const isTooLarge = tooLargePlantingIds.has(planting.id);
+
+                return (
+                  <div
+                    key={planting.id}
+                    className={`${styles.unplacedCard} ${isTooLarge ? styles.tooLarge : ''}`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, planting)}
+                  >
+                    <div
+                      className={styles.unplacedColorBar}
+                      style={{ backgroundColor: color }}
+                    />
+                    <div className={styles.unplacedContent}>
+                      <div className={styles.unplacedMain}>
+                        <span className={styles.unplacedLabel}>
+                          {planting.label}
+                        </span>
+                        {planting.quantity != null && (
+                          <span className={styles.unplacedQuantity}>
+                            ×{planting.quantity}
+                          </span>
+                        )}
+                      </div>
+                      <div className={styles.unplacedMeta}>
+                        <span className={styles.unplacedFootprint}>
+                          {dimensionsToDisplay(footprint.widthCm, footprint.heightCm, units)}
+                        </span>
+                        {cultivar?.spacingCm && (
+                          <span className={styles.unplacedSpacing}>
+                            {spacingToDisplay(cultivar.spacingCm, units)}
+                          </span>
+                        )}
+                      </div>
+                      {isTooLarge && (
+                        <div className={styles.unplacedWarning}>
+                          <span>Too large for available bed space</span>
+                          <button
+                            className={styles.resetQuantityButton}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onUpdatePlanting?.(planting.id, { quantity: undefined });
+                            }}
+                            title="Reset quantity so you can place and resize on canvas"
+                          >
+                            Reset size
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bed Editor Modal */}
+      {isEditorOpen && (
+        <BedEditor
+          bed={editingBed}
+          units={units}
+          onSave={handleSaveBed}
+          onCancel={handleCancelEditor}
+        />
+      )}
+    </div>
+  );
+}

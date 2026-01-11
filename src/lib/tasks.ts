@@ -19,6 +19,8 @@ export function generateTasksFromPlanting(
 ): GeneratedTask[] {
   const tasks: GeneratedTask[] = [];
   const displaySowDate = planting.sowDateOverride ?? planting.sowDate;
+  // Format quantity for display, handling undefined
+  const quantityStr = planting.quantity != null ? String(planting.quantity) : 'some';
 
   if (planting.method === 'transplant') {
     // Sow indoor task
@@ -29,7 +31,7 @@ export function generateTasksFromPlanting(
       type: 'sow_indoor',
       date: displaySowDate,
       title: `Start ${planting.label} indoors`,
-      description: `Sow ${planting.quantity} seeds`,
+      description: `Sow ${quantityStr} seeds`,
     });
 
     // Harden off and transplant tasks (only if transplant date exists)
@@ -51,7 +53,7 @@ export function generateTasksFromPlanting(
         type: 'transplant',
         date: planting.transplantDate,
         title: `Transplant ${planting.label}`,
-        description: `Plant out ${planting.quantity} seedlings`,
+        description: `Plant out ${quantityStr} seedlings`,
       });
     }
   } else {
@@ -63,7 +65,7 @@ export function generateTasksFromPlanting(
       type: 'sow_direct',
       date: displaySowDate,
       title: `Direct sow ${planting.label}`,
-      description: `Sow ${planting.quantity} seeds outdoors`,
+      description: `Sow ${quantityStr} seeds outdoors`,
     });
   }
 

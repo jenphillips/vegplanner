@@ -841,9 +841,9 @@ describe('createPlantingFromWindow', () => {
     expect(planting.harvestEnd).toBe(window.harvestEnd);
   });
 
-  it('sets default quantity of 1', () => {
+  it('leaves quantity undefined when not specified', () => {
     const planting = createPlantingFromWindow(window, beetCultivar);
-    expect(planting.quantity).toBe(1);
+    expect(planting.quantity).toBeUndefined();
   });
 
   it('accepts custom quantity', () => {

@@ -2,7 +2,7 @@
 
 import styles from './TabNav.module.css';
 
-export type Tab = 'timeline' | 'calendar' | 'tasks';
+export type Tab = 'timeline' | 'calendar' | 'tasks' | 'garden';
 
 type TabNavProps = {
   activeTab: Tab;
@@ -29,6 +29,12 @@ export function TabNav({ activeTab, onTabChange }: TabNavProps) {
         onClick={() => onTabChange('tasks')}
       >
         Tasks
+      </button>
+      <button
+        className={`${styles.tab} ${activeTab === 'garden' ? styles.active : ''}`}
+        onClick={() => onTabChange('garden')}
+      >
+        Garden
       </button>
     </nav>
   );

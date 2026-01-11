@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Raised Bed 1",
+    "widthCm": 91,
+    "lengthCm": 213,
+    "sunExposure": "full",
+    "id": "35ca7212-ab5b-44ac-862f-8f1e45845c4a"
+  },
+  {
+    "name": "Raised Bed 2",
+    "widthCm": 91,
+    "lengthCm": 213,
+    "sunExposure": "full",
+    "id": "3733de2c-174c-4f9c-8f2e-0c8a649e75f2"
+  },
+  {
+    "name": "Raised Bed 3",
+    "widthCm": 91,
+    "lengthCm": 213,
+    "sunExposure": "full",
+    "id": "c5b84767-e442-480b-bb9e-9d9235478055"
+  }
+]

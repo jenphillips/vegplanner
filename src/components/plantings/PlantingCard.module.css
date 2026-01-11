@@ -59,6 +59,11 @@
   white-space: nowrap;
 }
 
+.quantityUnset {
+  color: var(--muted, #999);
+  font-style: normal;
+}
+
 .dateRange {
   font-size: 11px;
   color: var(--muted, #5f6653);

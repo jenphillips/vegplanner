@@ -34,6 +34,8 @@ export type Cultivar = {
   optimalTempMinC?: number | null; // Optimal growing range low
   optimalTempMaxC?: number | null; // Optimal growing range high
   tempMarginC?: number | null; // Per-crop temperature buffer override (default: 2)
+  // Spacing for garden bed layout
+  spacingCm?: number; // Space between plants in cm (e.g., 60 for tomatoes, 10 for lettuce)
   notes?: string;
 };
 
@@ -126,7 +128,7 @@ export type Planting = {
   id: string;
   cultivarId: string;
   label: string; // "Spinach #1", "Tomato - Early"
-  quantity: number; // Number of plants/seeds
+  quantity?: number; // Number of plants/seeds (optional - canvas is authoritative when placed)
   sowDate: string; // Calculated ISO date
   sowDateOverride?: string; // User-adjusted sow date (earlier indoor start for transplants)
   transplantDate?: string; // If transplant method
@@ -186,4 +188,33 @@ export type PlantingPlacement = {
   xCm: number;
   yCm: number;
   spacingCm: number;
+  cols?: number; // Optional: override default square-ish layout
+};
+
+// Calculated footprint for rendering (not persisted)
+export type PlantingFootprintData = {
+  plantingId: string;
+  bedId: string;
+  xCm: number;
+  yCm: number;
+  widthCm: number;
+  heightCm: number;
+  rows: number;
+  cols: number;
+};
+
+// Collision detection result
+export type CollisionResult = {
+  hasCollision: boolean;
+  overlappingPlacements: string[];
+};
+
+// Auto-layout suggestion
+export type PlacementSuggestion = {
+  plantingId: string;
+  bedId: string;
+  xCm: number;
+  yCm: number;
+  spacingCm: number;
+  score: number;
 };

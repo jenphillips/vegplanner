@@ -536,14 +536,14 @@ function calculateNextSowDateForContinuousHarvest(
 export function createPlantingFromWindow(
   window: PlantingWindow,
   cultivar: Cultivar,
-  quantity: number = 1
+  quantity?: number
 ): Omit<Planting, 'id' | 'createdAt'> {
   return {
     cultivarId: cultivar.id,
     label: cultivar.variety
       ? `${cultivar.crop} - ${cultivar.variety} #${window.successionNumber}`
       : `${cultivar.crop} #${window.successionNumber}`,
-    quantity,
+    quantity, // Optional - will be set when placed in garden bed
     sowDate: window.sowDate,
     transplantDate: window.transplantDate,
     harvestStart: window.harvestStart,

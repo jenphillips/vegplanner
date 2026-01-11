@@ -64,6 +64,7 @@
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
+      "spacingCm": 60,
       "notes": "Indeterminate, F1, prune to single leader if desired."
     },
     {
@@ -88,6 +89,7 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
+      "spacingCm": 10,
       "notes": "White beet, sweet flavor; cold-tolerant so ok before LSF."
     },
     {
@@ -108,6 +110,7 @@
       "maxGrowingTempC": 32,
       "optimalTempMinC": 18,
       "optimalTempMaxC": 26,
+      "spacingCm": 10,
       "notes": "Reliable early bush bean; do not plant in cold soil."
     },
     {
@@ -132,6 +135,7 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 20,
+      "spacingCm": 20,
       "notes": "Mini romaine; succession-friendly. Shade/row cover in heat; tolerates light frost."
     },
     {
@@ -156,6 +160,7 @@
       "maxGrowingTempC": 21,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 18,
+      "spacingCm": 15,
       "notes": "Smooth leaf, bolt-tolerant. Cold hardy; good for early/late plantings. Bolts above 21°C."
     },
     {
@@ -180,6 +185,7 @@
       "maxGrowingTempC": 25,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
+      "spacingCm": 20,
       "notes": "Chinese broccoli; tender stems/shoots. Prefers cool weather; avoid heat stress."
     }
   ],

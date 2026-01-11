@@ -2,7 +2,7 @@
   {
     "cultivarId": "tomato-sungold",
     "label": "Tomato - Sungold #1",
-    "quantity": 10,
+    "quantity": 3,
     "sowDate": "2025-04-13",
     "transplantDate": "2025-05-25",
     "harvestStart": "2025-07-21",
@@ -122,7 +122,7 @@
   {
     "cultivarId": "bean-provider",
     "label": "Bean, Bush - Provider #1",
-    "quantity": 10,
+    "quantity": 14,
     "sowDate": "2025-06-08",
     "harvestStart": "2025-07-28",
     "harvestEnd": "2025-08-18",
@@ -135,7 +135,7 @@
   {
     "cultivarId": "bean-provider",
     "label": "Bean, Bush - Provider #2",
-    "quantity": 10,
+    "quantity": 14,
     "sowDate": "2025-06-29",
     "harvestStart": "2025-08-18",
     "harvestEnd": "2025-09-08",

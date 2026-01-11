@@ -56,7 +56,7 @@ export function CultivarCard({
     setLocalExpanded(!expanded);
     setHasManualOverride(true);
   };
-  const [quantity, setQuantity] = useState(10);
+  const [quantity, setQuantity] = useState<number | null>(10);
   const [selectedPlantingId, setSelectedPlantingId] = useState<string | null>(null);
 
   const cultivarPlantings = plantings
@@ -66,7 +66,7 @@ export function CultivarCard({
   const handleGenerateInitial = () => {
     const firstWindow = allWindows.windows[0];
     if (firstWindow) {
-      const planting = createPlantingFromWindow(firstWindow, cultivar, quantity);
+      const planting = createPlantingFromWindow(firstWindow, cultivar, quantity ?? undefined);
       onAddPlanting(planting);
     }
   };
@@ -97,7 +97,7 @@ export function CultivarCard({
     }
 
     if (nextWindow) {
-      const planting = createPlantingFromWindow(nextWindow, cultivar, quantity);
+      const planting = createPlantingFromWindow(nextWindow, cultivar, quantity ?? undefined);
       onAddPlanting(planting);
     }
   };
@@ -205,16 +205,21 @@ export function CultivarCard({
           <div className={styles.controls}>
             <div className={styles.actionRow}>
               <label htmlFor={`qty-${cultivar.id}`}>
-                {cultivarPlantings.length === 0 ? 'Plants per planting:' : 'Plants per succession:'}
+                {cultivarPlantings.length === 0 ? 'Initial plants (optional):' : 'Plants per succession:'}
               </label>
               <input
                 id={`qty-${cultivar.id}`}
                 type="number"
                 min={1}
                 max={1000}
-                value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                value={quantity ?? ''}
+                placeholder="Auto"
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  setQuantity(isNaN(val) ? null : Math.max(1, val));
+                }}
                 className={styles.quantityInput}
+                title="Leave empty to set quantity when placing in garden bed"
               />
               {cultivarPlantings.length === 0 ? (
                 <button

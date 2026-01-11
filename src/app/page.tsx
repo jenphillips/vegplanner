@@ -7,6 +7,7 @@ import { CultivarCard } from '@/components/cultivars/CultivarCard';
 import { TabNav, type Tab } from '@/components/tabs/TabNav';
 import { ScheduleView } from '@/components/schedule/ScheduleView';
 import { CalendarView } from '@/components/calendar/CalendarView';
+import { GardenView } from '@/components/garden/GardenView';
 import { usePlantings } from '@/hooks/usePlantings';
 import { useTasks } from '@/hooks/useTasks';
 import type { Cultivar, FrostWindow, PlantingPlan, Climate } from '@/lib/types';
@@ -257,6 +258,27 @@ export default function Home() {
               cultivars={data.cultivars}
               onToggleComplete={toggleTaskComplete}
               loading={tasksLoading}
+            />
+          </section>
+        )}
+
+        {/* Garden Tab: Bed Layout */}
+        {ready && activeTab === 'garden' && (
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <h2 className={styles.sectionTitle}>Garden Layout</h2>
+                <p className={styles.sectionDesc}>
+                  Visualize your garden beds and see which plantings are in the
+                  ground at any point in the season.
+                </p>
+              </div>
+            </div>
+            <GardenView
+              plantings={plantings}
+              cultivars={data.cultivars}
+              loading={plantingsLoading}
+              onUpdatePlanting={handleUpdatePlanting}
             />
           </section>
         )}

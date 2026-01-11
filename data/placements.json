@@ -1,0 +1,20 @@
+[
+  {
+    "plantingId": "e4cbe05b-8f33-4856-9759-d57585aa3ef2",
+    "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
+    "xCm": 5,
+    "yCm": 5,
+    "spacingCm": 10,
+    "id": "c0f096cb-cd7c-448a-b2b7-39164460e76b",
+    "cols": 2
+  },
+  {
+    "plantingId": "69157e4c-3530-4c6f-b201-7f4253b2b32c",
+    "bedId": "3733de2c-174c-4f9c-8f2e-0c8a649e75f2",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 60,
+    "cols": 1,
+    "id": "ce347a43-5732-4a1b-a4d9-345ab9a05933"
+  }
+]

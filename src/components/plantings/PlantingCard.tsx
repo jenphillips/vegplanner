@@ -165,7 +165,9 @@ export function PlantingCard({
           onKeyDown={onSelect ? (e) => e.key === 'Enter' && handleInfoClick() : undefined}
         >
           <span className={styles.label}>{planting.label}</span>
-          <span className={styles.quantity}>{planting.quantity}</span>
+          <span className={styles.quantity}>
+            {planting.quantity != null ? planting.quantity : <em className={styles.quantityUnset}>—</em>}
+          </span>
           <span className={styles.dateRange}>
             {formatDate(displaySowDate)} → {formatDate(planting.harvestEnd)}
           </span>
