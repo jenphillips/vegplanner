@@ -14,9 +14,12 @@ import {
 } from '@/lib/gardenLayout';
 import type { PlacementSuggestion } from '@/lib/types';
 import { BedEditor } from './BedEditor';
-import { UnifiedGardenCanvas } from './UnifiedGardenCanvas';
+import { UnifiedGardenCanvas, ZOOM_LEVELS } from './UnifiedGardenCanvas';
 import type { Planting, Cultivar, GardenBed, PlantingPlacement } from '@/lib/types';
 import styles from './GardenView.module.css';
+
+// Base scale: 2 pixels per cm at zoom level 1 (must match UnifiedGardenCanvas)
+const BASE_SCALE = 2;
 
 type GardenViewProps = {
   plantings: Planting[];
@@ -44,9 +47,8 @@ function spacingToDisplay(cm: number, units: Units): string {
   return `${Math.round(cm / 2.54)}in spacing`;
 }
 
-// Zoom levels: pixels per cm
-const ZOOM_LEVELS = [1, 1.5, 2, 2.5, 3];
-const DEFAULT_ZOOM_INDEX = 2; // 2 pixels per cm
+// Default zoom index (index 5 = 1.0 = 100% = 2 pixels per cm)
+const DEFAULT_ZOOM_INDEX = 5;
 
 // localStorage key for unit preference
 const UNITS_STORAGE_KEY = 'vegplanner-garden-units';
@@ -89,10 +91,12 @@ export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: 
     localStorage.setItem(UNITS_STORAGE_KEY, units);
   }, [units]);
 
-  // Zoom state
-  const [zoomIndex, setZoomIndex] = useState(DEFAULT_ZOOM_INDEX);
-  const scale = ZOOM_LEVELS[zoomIndex];
-  const zoomPercent = Math.round(scale * 50); // 2px/cm = 100%
+  // Zoom state - scale is pixels per cm (continuous for smooth wheel zoom)
+  const [scale, setScale] = useState(ZOOM_LEVELS[DEFAULT_ZOOM_INDEX] * BASE_SCALE);
+  const zoomPercent = Math.round((scale / BASE_SCALE) * 100);
+
+  // Lock beds state - prevents accidental dragging
+  const [bedsLocked, setBedsLocked] = useState(true);
 
   // Get season date range for the scrubber
   const seasonRange = useMemo(
@@ -257,16 +261,62 @@ export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: 
     setEditingBed(null);
   };
 
+  const minScale = ZOOM_LEVELS[0] * BASE_SCALE;
+  const maxScale = ZOOM_LEVELS[ZOOM_LEVELS.length - 1] * BASE_SCALE;
+
   const handleZoomIn = () => {
-    if (zoomIndex < ZOOM_LEVELS.length - 1) {
-      setZoomIndex(zoomIndex + 1);
+    // Find next zoom level up from current scale
+    const currentZoomLevel = scale / BASE_SCALE;
+    const nextLevel = ZOOM_LEVELS.find(z => z > currentZoomLevel + 0.01);
+    if (nextLevel) {
+      setScale(nextLevel * BASE_SCALE);
     }
   };
 
   const handleZoomOut = () => {
-    if (zoomIndex > 0) {
-      setZoomIndex(zoomIndex - 1);
+    // Find next zoom level down from current scale
+    const currentZoomLevel = scale / BASE_SCALE;
+    const prevLevel = [...ZOOM_LEVELS].reverse().find(z => z < currentZoomLevel - 0.01);
+    if (prevLevel) {
+      setScale(prevLevel * BASE_SCALE);
     }
+  };
+
+  // Handle zoom changes from canvas (wheel zoom)
+  const handleZoomChange = (newScale: number) => {
+    setScale(newScale);
+  };
+
+  // Zoom to fit all beds in the viewport
+  const handleZoomToFit = () => {
+    if (beds.length === 0) return;
+
+    // Calculate bounds of all beds
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    beds.forEach((bed) => {
+      const x = bed.positionX ?? 0;
+      const y = bed.positionY ?? 0;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + bed.widthCm);
+      maxY = Math.max(maxY, y + bed.lengthCm);
+    });
+
+    // Add padding (50cm on each side)
+    const padding = 100;
+    const contentWidth = maxX - minX + padding;
+    const contentHeight = maxY - minY + padding;
+
+    // Get approximate canvas area size (rough estimate)
+    const canvasAreaWidth = window.innerWidth - 400; // Account for sidebar
+    const canvasAreaHeight = window.innerHeight - 300; // Account for toolbar, etc.
+
+    // Calculate scale that fits content in viewport
+    const scaleX = canvasAreaWidth / contentWidth;
+    const scaleY = canvasAreaHeight / contentHeight;
+    const fitScale = Math.max(minScale, Math.min(maxScale, Math.min(scaleX, scaleY)));
+
+    setScale(fitScale);
   };
 
   const handleToggleUnits = () => {
@@ -387,6 +437,13 @@ export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: 
         </button>
         <div className={styles.toolbarSpacer} />
         <button
+          className={`${styles.lockToggle} ${bedsLocked ? styles.locked : ''}`}
+          onClick={() => setBedsLocked(!bedsLocked)}
+          title={bedsLocked ? 'Unlock beds to allow dragging' : 'Lock beds to prevent accidental moves'}
+        >
+          {bedsLocked ? '🔒' : '🔓'}
+        </button>
+        <button
           className={styles.unitsToggle}
           onClick={handleToggleUnits}
           title="Toggle units"
@@ -397,17 +454,27 @@ export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: 
           <button
             className={styles.zoomButton}
             onClick={handleZoomOut}
-            disabled={zoomIndex === 0}
+            disabled={scale <= minScale}
+            title="Zoom out"
           >
             −
           </button>
-          <span className={styles.zoomLabel}>{zoomPercent}%</span>
+          <span className={styles.zoomLabel} title="Ctrl+scroll to zoom">{zoomPercent}%</span>
           <button
             className={styles.zoomButton}
             onClick={handleZoomIn}
-            disabled={zoomIndex === ZOOM_LEVELS.length - 1}
+            disabled={scale >= maxScale}
+            title="Zoom in"
           >
             +
+          </button>
+          <button
+            className={styles.zoomButton}
+            onClick={handleZoomToFit}
+            disabled={beds.length === 0}
+            title="Zoom to fit (Ctrl+0)"
+          >
+            ⊡
           </button>
         </div>
       </div>
@@ -483,6 +550,7 @@ export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: 
               cultivars={cultivars}
               scale={scale}
               units={units}
+              bedsLocked={bedsLocked}
               suggestions={autoLayoutSuggestions ?? []}
               onEditBed={handleEditBed}
               onDeleteBed={handleDeleteBed}
@@ -491,6 +559,7 @@ export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: 
               onPlacementUpdate={handlePlacementUpdate}
               onPlacementDelete={handlePlacementDelete}
               onPlantingQuantityUpdate={handlePlantingQuantityUpdate}
+              onZoomChange={handleZoomChange}
             />
           )}
         </div>

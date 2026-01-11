@@ -35,6 +35,7 @@ type UnifiedGardenCanvasProps = {
   cultivars: Cultivar[];
   scale: number; // pixels per cm
   units?: Units;
+  bedsLocked?: boolean; // Prevent bed dragging when true
   suggestions?: PlacementSuggestion[]; // Auto-layout preview
   onEditBed: (bed: GardenBed) => void;
   onDeleteBed: (bed: GardenBed) => void;
@@ -43,6 +44,7 @@ type UnifiedGardenCanvasProps = {
   onPlacementUpdate: (id: string, updates: Partial<PlantingPlacement>) => void;
   onPlacementDelete: (id: string) => void;
   onPlantingQuantityUpdate?: (plantingId: string, quantity: number) => void;
+  onZoomChange?: (scale: number) => void;
 };
 
 // Grid line spacing in cm
@@ -62,15 +64,12 @@ function snapToGrid(value: number, gridSize: number): number {
   return Math.round(value / gridSize) * gridSize;
 }
 
-// Unit display helper
-function bedDimensionsDisplay(widthCm: number, lengthCm: number, units: Units): string {
-  if (units === 'metric') {
-    return `${(widthCm / 100).toFixed(1)}m × ${(lengthCm / 100).toFixed(1)}m`;
-  }
-  const widthFt = (widthCm / 2.54 / 12).toFixed(1);
-  const lengthFt = (lengthCm / 2.54 / 12).toFixed(1);
-  return `${widthFt}ft × ${lengthFt}ft`;
-}
+// Zoom configuration - exported for use in GardenView
+// Finer increments for smoother wheel zoom
+export const ZOOM_LEVELS = [0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.25, 1.4, 1.5, 1.75, 2];
+
+// Base scale: 2 pixels per cm at zoom level 1
+const BASE_SCALE = 2;
 
 export function UnifiedGardenCanvas({
   beds,
@@ -79,6 +78,7 @@ export function UnifiedGardenCanvas({
   cultivars,
   scale,
   units = 'metric',
+  bedsLocked = false,
   suggestions = [],
   onEditBed,
   onDeleteBed,
@@ -87,8 +87,9 @@ export function UnifiedGardenCanvas({
   onPlacementUpdate,
   onPlacementDelete,
   onPlantingQuantityUpdate,
+  onZoomChange,
 }: UnifiedGardenCanvasProps) {
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Selection state
   const [selectedPlacement, setSelectedPlacement] = useState<string | null>(null);
@@ -188,6 +189,56 @@ export function UnifiedGardenCanvas({
   const DRAG_THRESHOLD = 3;
   const justFinishedInteraction = useRef(false);
 
+  // Mouse wheel zoom handler - must be native event for passive: false to work
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper || !onZoomChange) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Only zoom if Ctrl/Cmd is held (trackpad pinch sets ctrlKey automatically)
+      if (!e.ctrlKey && !e.metaKey) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const rect = wrapper.getBoundingClientRect();
+
+      // Get mouse position relative to wrapper viewport
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      // Calculate the point in content coordinates before zoom
+      const contentX = (wrapper.scrollLeft + mouseX) / scale;
+      const contentY = (wrapper.scrollTop + mouseY) / scale;
+
+      // Calculate smooth continuous zoom (no snapping)
+      const zoomMultiplier = 1 - (e.deltaY * 0.002);
+      const minScale = ZOOM_LEVELS[0] * BASE_SCALE;
+      const maxScale = ZOOM_LEVELS[ZOOM_LEVELS.length - 1] * BASE_SCALE;
+      const newScale = Math.max(minScale, Math.min(maxScale, scale * zoomMultiplier));
+
+      // Only update if scale changed meaningfully
+      if (Math.abs(newScale - scale) < 0.001) return;
+
+      // Calculate new scroll position to keep mouse point stable
+      const newScrollLeft = contentX * newScale - mouseX;
+      const newScrollTop = contentY * newScale - mouseY;
+
+      // Update zoom
+      onZoomChange(newScale);
+
+      // After React re-renders, adjust scroll position
+      requestAnimationFrame(() => {
+        wrapper.scrollLeft = Math.max(0, newScrollLeft);
+        wrapper.scrollTop = Math.max(0, newScrollTop);
+      });
+    };
+
+    // Must use passive: false to allow preventDefault() on wheel events
+    wrapper.addEventListener('wheel', handleWheel, { passive: false });
+    return () => wrapper.removeEventListener('wheel', handleWheel);
+  }, [scale, onZoomChange]);
+
   // Build lookup maps
   const plantingMap = useMemo(
     () => new Map(plantings.map((p) => [p.id, p])),
@@ -224,25 +275,55 @@ export function UnifiedGardenCanvas({
     };
   }, [beds]);
 
-  // Calculate SVG dimensions
-  const svgWidth = canvasBounds.width * scale;
-  const svgHeight = canvasBounds.height * scale;
+  // Track wrapper size for minimum SVG dimensions
+  const [wrapperSize, setWrapperSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const updateSize = () => {
+      setWrapperSize({
+        width: wrapper.clientWidth,
+        height: wrapper.clientHeight,
+      });
+    };
+
+    updateSize();
+    const resizeObserver = new ResizeObserver(updateSize);
+    resizeObserver.observe(wrapper);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  // Content size at current zoom
+  const contentWidth = canvasBounds.width * scale;
+  const contentHeight = canvasBounds.height * scale;
+
+  // SVG should fill wrapper or fit content, whichever is larger
+  const svgWidth = Math.max(contentWidth, wrapperSize.width);
+  const svgHeight = Math.max(contentHeight, wrapperSize.height);
+
+  // Offset to center content when smaller than wrapper
+  const offsetX = Math.max(0, (wrapperSize.width - contentWidth) / 2);
+  const offsetY = Math.max(0, (wrapperSize.height - contentHeight) / 2);
 
   // Convert canvas coordinates to SVG coordinates
-  const toSvgX = useCallback((cmX: number) => (cmX - canvasBounds.minX) * scale, [canvasBounds.minX, scale]);
-  const toSvgY = useCallback((cmY: number) => (cmY - canvasBounds.minY) * scale, [canvasBounds.minY, scale]);
+  const toSvgX = useCallback((cmX: number) => offsetX + (cmX - canvasBounds.minX) * scale, [canvasBounds.minX, scale, offsetX]);
+  const toSvgY = useCallback((cmY: number) => offsetY + (cmY - canvasBounds.minY) * scale, [canvasBounds.minY, scale, offsetY]);
 
   // Convert mouse position to cm coordinates
   const getPositionCm = useCallback((e: React.MouseEvent | React.DragEvent): { xCm: number; yCm: number } => {
-    if (!canvasRef.current) return { xCm: 0, yCm: 0 };
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    if (!wrapperRef.current) return { xCm: 0, yCm: 0 };
+    const rect = wrapperRef.current.getBoundingClientRect();
+    // Position in SVG coordinates (accounting for scroll)
+    const svgX = e.clientX - rect.left + wrapperRef.current.scrollLeft;
+    const svgY = e.clientY - rect.top + wrapperRef.current.scrollTop;
+    // Convert to cm (subtract offset, then divide by scale)
     return {
-      xCm: x / scale + canvasBounds.minX,
-      yCm: y / scale + canvasBounds.minY,
+      xCm: (svgX - offsetX) / scale + canvasBounds.minX,
+      yCm: (svgY - offsetY) / scale + canvasBounds.minY,
     };
-  }, [scale, canvasBounds.minX, canvasBounds.minY]);
+  }, [scale, canvasBounds.minX, canvasBounds.minY, offsetX, offsetY]);
 
   // Find which bed a point is in
   const findBedAtPoint = useCallback((xCm: number, yCm: number): GardenBed | null => {
@@ -447,7 +528,7 @@ export function UnifiedGardenCanvas({
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    const rect = canvasRef.current?.getBoundingClientRect();
+    const rect = wrapperRef.current?.getBoundingClientRect();
     if (rect) {
       const { clientX, clientY } = e;
       if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
@@ -524,6 +605,9 @@ export function UnifiedGardenCanvas({
   // --- BED MOVE HANDLERS ---
 
   const handleBedMoveStart = (e: React.MouseEvent, bed: GardenBed) => {
+    // Don't allow dragging if beds are locked
+    if (bedsLocked) return;
+
     e.stopPropagation();
     e.preventDefault();
 
@@ -834,7 +918,7 @@ export function UnifiedGardenCanvas({
       aria-label="Unified garden canvas"
     >
       <div
-        ref={canvasRef}
+        ref={wrapperRef}
         className={`${styles.canvasWrapper} ${dragOver ? styles.dragOver : ''} ${(movingPlacement && hasDragged) || movingBed || resizing ? styles.interacting : ''}`}
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
@@ -892,6 +976,14 @@ export function UnifiedGardenCanvas({
 
             const sunIcon = bed.sunExposure === 'full' ? '☀️' : bed.sunExposure === 'partial' ? '⛅' : '☁️';
 
+            // Label font size scales with zoom to prevent overlap when zoomed out
+            // At BASE_SCALE (2px/cm), use 12px. Scale proportionally but cap at minimum 8px.
+            const zoomRatio = scale / BASE_SCALE;
+            const labelFontSize = Math.max(8, Math.round(12 * zoomRatio));
+            const labelYOffset = labelFontSize + 4;
+            // Hide labels entirely if they'd be too small to read
+            const showLabel = labelFontSize >= 8;
+
             return (
               <g key={bed.id}>
                 {/* Selection highlight */}
@@ -920,7 +1012,7 @@ export function UnifiedGardenCanvas({
                   strokeWidth={2}
                   strokeDasharray={isBeingMoved ? '6 3' : 'none'}
                   rx={4}
-                  style={{ cursor: 'move' }}
+                  style={{ cursor: bedsLocked ? 'default' : 'move' }}
                   onClick={(e) => handleBedClick(e, bed.id)}
                   onMouseDown={(e) => handleBedMoveStart(e, bed)}
                 />
@@ -940,16 +1032,18 @@ export function UnifiedGardenCanvas({
                 ))}
 
                 {/* Bed label */}
-                <text
-                  x={svgX + 8}
-                  y={svgY - 8}
-                  fill="#5c4d3d"
-                  fontSize={12}
-                  fontWeight={600}
-                  style={{ pointerEvents: 'none' }}
-                >
-                  {bed.name} {sunIcon} ({bedDimensionsDisplay(bed.widthCm, bed.lengthCm, units)})
-                </text>
+                {showLabel && (
+                  <text
+                    x={svgX + 8}
+                    y={svgY - labelYOffset}
+                    fill="#5c4d3d"
+                    fontSize={labelFontSize}
+                    fontWeight={600}
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    {bed.name} {sunIcon}
+                  </text>
+                )}
 
                 {/* Bed actions when selected */}
                 {isSelected && !isBeingMoved && (
