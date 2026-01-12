@@ -103,6 +103,9 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
   // Lock beds state - prevents accidental dragging
   const [bedsLocked, setBedsLocked] = useState(true);
 
+  // Allow overlapping placements (for companion planting)
+  const [allowOverlap, setAllowOverlap] = useState(false);
+
   // Plant type filter
   const [plantTypeFilter, setPlantTypeFilter] = useState<PlantTypeFilterValue>('all');
 
@@ -455,7 +458,14 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
           {bedsLocked ? '🔒' : '🔓'}
         </button>
         <button
-          className={styles.unitsToggle}
+          className={`${styles.toolbarButton} ${allowOverlap ? styles.active : ''}`}
+          onClick={() => setAllowOverlap(!allowOverlap)}
+          title={allowOverlap ? 'Overlapping allowed (companion planting mode)' : 'Click to allow overlapping placements'}
+        >
+          {allowOverlap ? 'Overlap' : 'No Overlap'}
+        </button>
+        <button
+          className={styles.toolbarButton}
           onClick={handleToggleUnits}
           title="Toggle units"
         >
@@ -546,6 +556,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
               scale={scale}
               units={units}
               bedsLocked={bedsLocked}
+              allowOverlap={allowOverlap}
               suggestions={autoLayoutSuggestions ?? []}
               selectedDate={selectedDate}
               onEditBed={handleEditBed}

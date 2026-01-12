@@ -8,9 +8,12 @@ import {
   calculateQuantityFromDimensions,
   getValidRectangleConfigs,
   getCropColor,
-  checkCollisions,
+  checkCollisionsWithTiming,
   fitsInBed,
   isPlantingInHarvest,
+  calculateGrowthFactor,
+  calculatePlantDotRadius,
+  getInGroundDateRange,
 } from '@/lib/gardenLayout';
 import type {
   GardenBed,
@@ -39,6 +42,7 @@ type UnifiedGardenCanvasProps = {
   scale: number; // pixels per cm
   units?: Units;
   bedsLocked?: boolean; // Prevent bed dragging when true
+  allowOverlap?: boolean; // Allow overlapping placements (disable collision detection)
   suggestions?: PlacementSuggestion[]; // Auto-layout preview
   selectedDate?: string; // ISO date for harvest indicator
   onEditBed: (bed: GardenBed) => void;
@@ -83,6 +87,7 @@ export function UnifiedGardenCanvas({
   scale,
   units = 'metric',
   bedsLocked = false,
+  allowOverlap = false,
   suggestions = [],
   selectedDate,
   onEditBed,
@@ -125,6 +130,7 @@ export function UnifiedGardenCanvas({
     color: string;
     startMouseX: number;
     startMouseY: number;
+    dateRange: { start: string; end: string } | null;
   } | null>(null);
   const [movePreview, setMovePreview] = useState<{
     xCm: number;
@@ -177,6 +183,7 @@ export function UnifiedGardenCanvas({
     quantity: number;
     spacingCm: number;
     color: string;
+    dateRange: { start: string; end: string } | null;
   } | null>(null);
   const [resizePreview, setResizePreview] = useState<{
     xCm: number;
@@ -362,6 +369,14 @@ export function UnifiedGardenCanvas({
         ? isPlantingInHarvest(planting, selectedDate)
         : false;
 
+      // Calculate growth factor for dynamic dot sizing
+      const growthFactor = planting && selectedDate
+        ? calculateGrowthFactor(planting, cultivar, selectedDate)
+        : 1.0; // Default to mature size if no date context
+
+      // Get date range for time-aware collision detection
+      const dateRange = planting ? getInGroundDateRange(planting) : null;
+
       return {
         placement,
         planting,
@@ -373,6 +388,8 @@ export function UnifiedGardenCanvas({
         cols,
         color: getCropColor(cultivar?.family, cultivar?.crop ?? ''),
         isHarvesting,
+        growthFactor,
+        dateRange,
         // Absolute position on canvas
         absoluteX: bedX + placement.xCm,
         absoluteY: bedY + placement.yCm,
@@ -408,13 +425,15 @@ export function UnifiedGardenCanvas({
   }, [suggestions, plantingMap, cultivarMap, beds]);
 
   // Check if a placement is valid within a specific bed
+  // Supports time-aware collision detection when plantingId and date ranges are available
   const isPlacementValid = useCallback((
     bedId: string,
     xCm: number,
     yCm: number,
     widthCm: number,
     heightCm: number,
-    excludeId?: string
+    excludeId?: string,
+    newPlantingDateRange?: { start: string; end: string } | null
   ): boolean => {
     const bed = beds.find((b) => b.id === bedId);
     if (!bed) return false;
@@ -437,9 +456,25 @@ export function UnifiedGardenCanvas({
         heightCm: f.heightCm,
       }));
 
-    const collision = checkCollisions(candidate, bedPlacements, excludeId);
+    // Build date ranges map for time-aware collision detection
+    const existingDateRanges = new Map<string, { start: string; end: string }>();
+    for (const f of footprints) {
+      if (f.placement.bedId === bedId && f.dateRange) {
+        existingDateRanges.set(f.placement.id, f.dateRange);
+      }
+    }
+
+    // Use time-aware collision detection
+    const collision = checkCollisionsWithTiming(
+      candidate,
+      newPlantingDateRange ?? null,
+      bedPlacements,
+      existingDateRanges,
+      excludeId,
+      { ignoreCollisions: allowOverlap }
+    );
     return !collision.hasCollision;
-  }, [beds, footprints]);
+  }, [beds, footprints, allowOverlap]);
 
   // Find best fitting config for a placement
   const findBestFittingConfig = useCallback((
@@ -448,7 +483,8 @@ export function UnifiedGardenCanvas({
     spacingCm: number,
     cursorXCm: number,
     cursorYCm: number,
-    excludeId?: string
+    excludeId?: string,
+    plantingDateRange?: { start: string; end: string } | null
   ) => {
     const bed = beds.find((b) => b.id === bedId);
     if (!bed) return null;
@@ -472,7 +508,7 @@ export function UnifiedGardenCanvas({
         const centeredX = Math.max(0, snapToGrid(relX - w / 2, SNAP_CM));
         const centeredY = Math.max(0, snapToGrid(relY - h / 2, SNAP_CM));
 
-        if (isPlacementValid(bedId, centeredX, centeredY, w, h, excludeId)) {
+        if (isPlacementValid(bedId, centeredX, centeredY, w, h, excludeId, plantingDateRange)) {
           return { widthCm: w, heightCm: h, cols, xCm: centeredX, yCm: centeredY, valid: true };
         }
       }
@@ -510,7 +546,11 @@ export function UnifiedGardenCanvas({
         return;
       }
 
-      const bestFit = findBestFittingConfig(bed.id, data.quantity, data.spacingCm, xCm, yCm);
+      // Get planting's date range for time-aware collision detection
+      const planting = plantingMap.get(data.plantingId);
+      const plantingDateRange = planting ? getInGroundDateRange(planting) : null;
+
+      const bestFit = findBestFittingConfig(bed.id, data.quantity, data.spacingCm, xCm, yCm, undefined, plantingDateRange);
       if (!bestFit) {
         setDragPreview(null);
         return;
@@ -564,7 +604,11 @@ export function UnifiedGardenCanvas({
       const bed = findBedAtPoint(xCm, yCm);
       if (!bed) return;
 
-      const bestFit = findBestFittingConfig(bed.id, data.quantity, data.spacingCm, xCm, yCm);
+      // Get planting's date range for time-aware collision detection
+      const planting = plantingMap.get(data.plantingId);
+      const plantingDateRange = planting ? getInGroundDateRange(planting) : null;
+
+      const bestFit = findBestFittingConfig(bed.id, data.quantity, data.spacingCm, xCm, yCm, undefined, plantingDateRange);
       if (bestFit && bestFit.valid) {
         onPlacementCreate({
           plantingId: data.plantingId,
@@ -603,6 +647,7 @@ export function UnifiedGardenCanvas({
       color: footprint.color,
       startMouseX: e.clientX,
       startMouseY: e.clientY,
+      dateRange: footprint.dateRange,
     });
     setMovePreview({
       xCm: footprint.placement.xCm,
@@ -666,6 +711,7 @@ export function UnifiedGardenCanvas({
       quantity,
       spacingCm: footprint.placement.spacingCm,
       color: footprint.color,
+      dateRange: footprint.dateRange,
     });
     setSelectedPlacement(footprint.placement.id);
   };
@@ -707,7 +753,8 @@ export function UnifiedGardenCanvas({
           clampedY,
           movingPlacement.widthCm,
           movingPlacement.heightCm,
-          movingPlacement.id
+          movingPlacement.id,
+          movingPlacement.dateRange
         );
 
         setMovePreview({ xCm: clampedX, yCm: clampedY, valid });
@@ -785,7 +832,8 @@ export function UnifiedGardenCanvas({
         newYCm,
         actualWidthCm,
         actualHeightCm,
-        resizing.placementId
+        resizing.placementId,
+        resizing.dateRange
       );
 
       setResizePreview({
@@ -1129,7 +1177,7 @@ export function UnifiedGardenCanvas({
 
           {/* Planting footprints */}
           {footprints.map((footprint) => {
-            const { placement, planting, widthCm, heightCm, rows, cols, color, bed, isHarvesting } = footprint;
+            const { placement, planting, widthCm, heightCm, rows, cols, color, bed, isHarvesting, growthFactor } = footprint;
             if (!bed) return null;
 
             const isBeingMoved = movingPlacement?.id === placement.id;
@@ -1233,13 +1281,13 @@ export function UnifiedGardenCanvas({
                   onMouseDown={(e) => handlePlacementMoveStart(e, footprint)}
                 />
 
-                {/* Plant dots */}
+                {/* Plant dots - size based on growth stage */}
                 {dots.map((dot, i) => (
                   <circle
                     key={i}
                     cx={dot.cx}
                     cy={dot.cy}
-                    r={Math.min(placement.spacingCm * scale * 0.3, 8)}
+                    r={calculatePlantDotRadius(placement.spacingCm, scale, growthFactor)}
                     fill={isInvalid ? '#ef4444' : color}
                     fillOpacity={0.6}
                     style={{ pointerEvents: 'none' }}

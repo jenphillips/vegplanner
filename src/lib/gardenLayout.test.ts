@@ -5,10 +5,15 @@ import {
   isPlantingInGround,
   filterPlantingsInGround,
   checkCollisions,
+  checkCollisionsWithTiming,
   fitsInBed,
   getCropColor,
   getSeasonDateRange,
   autoLayout,
+  calculateGrowthFactor,
+  calculatePlantDotRadius,
+  dateRangesOverlap,
+  getInGroundDateRange,
 } from './gardenLayout';
 import type { Planting, GardenBed, PlantingPlacement, Cultivar } from './types';
 
@@ -400,8 +405,8 @@ describe('autoLayout', () => {
     name: `Bed ${id}`,
     widthCm,
     lengthCm,
-    xPosition: 0,
-    yPosition: 0,
+    positionX: 0,
+    positionY: 0,
     sunExposure: 'full',
   });
 
@@ -410,16 +415,11 @@ describe('autoLayout', () => {
     crop: 'Test Crop',
     variety: 'Test Variety',
     spacingCm,
-    daysToMaturity: 60,
-    method: 'direct',
-    sowIndoorsWeeks: 0,
-    transplantAfterFrost: 0,
-    sowAfterFrost: 0,
-    frostSensitivity: 'tolerant',
-    plantingWindowEarlyStart: 0,
-    plantingWindowEarlyEnd: 0,
-    plantingWindowLateStart: 0,
-    plantingWindowLateEnd: 0,
+    maturityDays: 60,
+    maturityBasis: 'from_sow',
+    sowMethod: 'direct',
+    germDaysMin: 5,
+    germDaysMax: 10,
   });
 
   it('places a planting in an empty bed', () => {
@@ -525,5 +525,300 @@ describe('autoLayout', () => {
     const suggestions = autoLayout(plantings, beds, [], cultivars, quantities);
 
     expect(suggestions).toHaveLength(0);
+  });
+});
+
+describe('calculateGrowthFactor', () => {
+  const directSowPlanting: Planting = {
+    id: '1',
+    cultivarId: 'lettuce',
+    label: 'Lettuce #1',
+    quantity: 10,
+    sowDate: '2025-05-01',
+    harvestStart: '2025-06-20',
+    harvestEnd: '2025-07-04',
+    method: 'direct',
+    status: 'planned',
+    successionNumber: 1,
+    createdAt: '2025-01-01',
+  };
+
+  const transplantPlanting: Planting = {
+    id: '2',
+    cultivarId: 'tomato',
+    label: 'Tomato #1',
+    quantity: 5,
+    sowDate: '2025-04-01',
+    transplantDate: '2025-06-01',
+    harvestStart: '2025-07-15',
+    harvestEnd: '2025-09-30',
+    method: 'transplant',
+    status: 'planned',
+    successionNumber: 1,
+    createdAt: '2025-01-01',
+  };
+
+  const cultivar: Cultivar = {
+    id: 'lettuce',
+    crop: 'Lettuce',
+    variety: 'Little Gem',
+    spacingCm: 20,
+    maturityDays: 50,
+    maturityBasis: 'from_sow',
+    sowMethod: 'direct',
+    germDaysMin: 5,
+    germDaysMax: 10,
+  };
+
+  it('returns 0.0 for date before sow date (direct sow)', () => {
+    const factor = calculateGrowthFactor(directSowPlanting, cultivar, '2025-04-30');
+    expect(factor).toBe(0.0);
+  });
+
+  it('returns 0.0 on sow date (direct sow)', () => {
+    const factor = calculateGrowthFactor(directSowPlanting, cultivar, '2025-05-01');
+    expect(factor).toBe(0.0);
+  });
+
+  it('returns 0.5 at half maturity (direct sow)', () => {
+    // 25 days after sow date with 50 day maturity = 0.5
+    const factor = calculateGrowthFactor(directSowPlanting, cultivar, '2025-05-26');
+    expect(factor).toBe(0.5);
+  });
+
+  it('returns 1.0 at full maturity (direct sow)', () => {
+    // 50 days after sow date
+    const factor = calculateGrowthFactor(directSowPlanting, cultivar, '2025-06-20');
+    expect(factor).toBe(1.0);
+  });
+
+  it('clamps to 1.0 after maturity', () => {
+    // 60 days after sow date (past maturity)
+    const factor = calculateGrowthFactor(directSowPlanting, cultivar, '2025-06-30');
+    expect(factor).toBe(1.0);
+  });
+
+  it('returns 0.0 before transplant date (transplant)', () => {
+    // Before transplant date, even though sowDate was earlier
+    const factor = calculateGrowthFactor(transplantPlanting, cultivar, '2025-05-15');
+    expect(factor).toBe(0.0);
+  });
+
+  it('returns 0.0 on transplant date (transplant)', () => {
+    const factor = calculateGrowthFactor(transplantPlanting, cultivar, '2025-06-01');
+    expect(factor).toBe(0.0);
+  });
+
+  it('uses default maturity of 60 days if cultivar is undefined', () => {
+    // 30 days after sow date with default 60 day maturity = 0.5
+    const factor = calculateGrowthFactor(directSowPlanting, undefined, '2025-05-31');
+    expect(factor).toBe(0.5);
+  });
+});
+
+describe('calculatePlantDotRadius', () => {
+  it('returns minimum radius at 0% growth', () => {
+    // spacing 30cm, scale 2 px/cm, growth 0.0
+    // mature radius = 30 * 2 * 0.45 = 27
+    // at 0% growth with 0.15 min: 27 * 0.15 = 4.05
+    const radius = calculatePlantDotRadius(30, 2, 0.0);
+    expect(radius).toBeCloseTo(4.05);
+  });
+
+  it('returns full radius at 100% growth', () => {
+    // spacing 30cm, scale 2 px/cm, growth 1.0
+    // mature radius = 30 * 2 * 0.45 = 27
+    const radius = calculatePlantDotRadius(30, 2, 1.0);
+    expect(radius).toBe(27);
+  });
+
+  it('returns intermediate radius at 50% growth', () => {
+    // spacing 30cm, scale 2 px/cm, growth 0.5
+    // mature radius = 27
+    // at 50% growth: 27 * (0.15 + 0.85 * 0.5) = 27 * 0.575 = 15.525
+    const radius = calculatePlantDotRadius(30, 2, 0.5);
+    expect(radius).toBeCloseTo(15.525);
+  });
+
+  it('scales with spacing for large plants', () => {
+    // Large spacing (e.g., tomatoes at 60cm)
+    // spacing 60cm, scale 2 px/cm, growth 1.0
+    // mature radius = 60 * 2 * 0.45 = 54
+    const radius = calculatePlantDotRadius(60, 2, 1.0);
+    expect(radius).toBe(54);
+  });
+
+  it('uses custom minRadiusFraction', () => {
+    // spacing 20cm, scale 2 px/cm, growth 0.0, minFraction 0.3
+    // mature radius = 20 * 2 * 0.45 = 18
+    // at 0% with 0.3 min: 18 * 0.3 = 5.4
+    const radius = calculatePlantDotRadius(20, 2, 0.0, 0.3);
+    expect(radius).toBeCloseTo(5.4);
+  });
+});
+
+describe('dateRangesOverlap', () => {
+  it('returns true for overlapping ranges', () => {
+    const a = { start: '2025-05-01', end: '2025-06-15' };
+    const b = { start: '2025-06-01', end: '2025-07-15' };
+    expect(dateRangesOverlap(a, b)).toBe(true);
+  });
+
+  it('returns true for identical ranges', () => {
+    const a = { start: '2025-05-01', end: '2025-06-15' };
+    const b = { start: '2025-05-01', end: '2025-06-15' };
+    expect(dateRangesOverlap(a, b)).toBe(true);
+  });
+
+  it('returns true when one range contains another', () => {
+    const a = { start: '2025-04-01', end: '2025-08-01' };
+    const b = { start: '2025-05-01', end: '2025-06-01' };
+    expect(dateRangesOverlap(a, b)).toBe(true);
+  });
+
+  it('returns true when ranges touch at boundary', () => {
+    const a = { start: '2025-05-01', end: '2025-06-01' };
+    const b = { start: '2025-06-01', end: '2025-07-01' };
+    expect(dateRangesOverlap(a, b)).toBe(true);
+  });
+
+  it('returns false for non-overlapping ranges', () => {
+    const a = { start: '2025-05-01', end: '2025-06-01' };
+    const b = { start: '2025-07-01', end: '2025-08-01' };
+    expect(dateRangesOverlap(a, b)).toBe(false);
+  });
+});
+
+describe('getInGroundDateRange', () => {
+  it('returns sow date to harvest end for direct sow', () => {
+    const planting: Planting = {
+      id: '1',
+      cultivarId: 'lettuce',
+      label: 'Lettuce #1',
+      quantity: 10,
+      sowDate: '2025-05-01',
+      harvestStart: '2025-06-20',
+      harvestEnd: '2025-07-04',
+      method: 'direct',
+      status: 'planned',
+      successionNumber: 1,
+      createdAt: '2025-01-01',
+    };
+    const range = getInGroundDateRange(planting);
+    expect(range).toEqual({ start: '2025-05-01', end: '2025-07-04' });
+  });
+
+  it('returns transplant date to harvest end for transplant', () => {
+    const planting: Planting = {
+      id: '2',
+      cultivarId: 'tomato',
+      label: 'Tomato #1',
+      quantity: 5,
+      sowDate: '2025-04-01',
+      transplantDate: '2025-06-01',
+      harvestStart: '2025-07-15',
+      harvestEnd: '2025-09-30',
+      method: 'transplant',
+      status: 'planned',
+      successionNumber: 1,
+      createdAt: '2025-01-01',
+    };
+    const range = getInGroundDateRange(planting);
+    expect(range).toEqual({ start: '2025-06-01', end: '2025-09-30' });
+  });
+});
+
+describe('checkCollisionsWithTiming', () => {
+  const existing = [
+    { id: 'a', xCm: 0, yCm: 0, widthCm: 50, heightCm: 50 },
+    { id: 'b', xCm: 100, yCm: 0, widthCm: 50, heightCm: 50 },
+  ];
+
+  it('detects no collision when rectangles are spatially separate', () => {
+    const dateRanges = new Map([
+      ['a', { start: '2025-05-01', end: '2025-06-01' }],
+      ['b', { start: '2025-05-01', end: '2025-06-01' }],
+    ]);
+    const result = checkCollisionsWithTiming(
+      { xCm: 60, yCm: 0, widthCm: 30, heightCm: 30 },
+      { start: '2025-05-01', end: '2025-06-01' },
+      existing,
+      dateRanges
+    );
+    expect(result.hasCollision).toBe(false);
+  });
+
+  it('detects no collision when spatially overlapping but temporally separate', () => {
+    const dateRanges = new Map([
+      ['a', { start: '2025-05-01', end: '2025-06-01' }], // Lettuce harvested June 1
+      ['b', { start: '2025-05-01', end: '2025-06-01' }],
+    ]);
+    // New planting overlaps spatially with 'a' but starts after 'a' ends
+    const result = checkCollisionsWithTiming(
+      { xCm: 25, yCm: 25, widthCm: 30, heightCm: 30 },
+      { start: '2025-06-15', end: '2025-09-01' }, // Tomato planted June 15
+      existing,
+      dateRanges
+    );
+    expect(result.hasCollision).toBe(false);
+  });
+
+  it('detects collision when both spatially and temporally overlapping', () => {
+    const dateRanges = new Map([
+      ['a', { start: '2025-05-01', end: '2025-07-01' }],
+      ['b', { start: '2025-05-01', end: '2025-06-01' }],
+    ]);
+    const result = checkCollisionsWithTiming(
+      { xCm: 25, yCm: 25, widthCm: 30, heightCm: 30 },
+      { start: '2025-06-01', end: '2025-09-01' },
+      existing,
+      dateRanges
+    );
+    expect(result.hasCollision).toBe(true);
+    expect(result.overlappingPlacements).toContain('a');
+  });
+
+  it('returns no collision when ignoreCollisions is true', () => {
+    const dateRanges = new Map([
+      ['a', { start: '2025-05-01', end: '2025-07-01' }],
+    ]);
+    const result = checkCollisionsWithTiming(
+      { xCm: 25, yCm: 25, widthCm: 30, heightCm: 30 },
+      { start: '2025-05-15', end: '2025-09-01' },
+      existing,
+      dateRanges,
+      undefined,
+      { ignoreCollisions: true }
+    );
+    expect(result.hasCollision).toBe(false);
+  });
+
+  it('falls back to spatial-only check when no date range provided', () => {
+    const dateRanges = new Map([
+      ['a', { start: '2025-05-01', end: '2025-06-01' }],
+    ]);
+    // No newDateRange provided - should detect spatial collision
+    const result = checkCollisionsWithTiming(
+      { xCm: 25, yCm: 25, widthCm: 30, heightCm: 30 },
+      null,
+      existing,
+      dateRanges
+    );
+    expect(result.hasCollision).toBe(true);
+    expect(result.overlappingPlacements).toContain('a');
+  });
+
+  it('excludes specified id from collision check', () => {
+    const dateRanges = new Map([
+      ['a', { start: '2025-05-01', end: '2025-07-01' }],
+    ]);
+    const result = checkCollisionsWithTiming(
+      { xCm: 25, yCm: 25, widthCm: 30, heightCm: 30 },
+      { start: '2025-05-15', end: '2025-09-01' },
+      existing,
+      dateRanges,
+      'a'
+    );
+    expect(result.hasCollision).toBe(false);
   });
 });

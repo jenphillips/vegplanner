@@ -531,3 +531,154 @@ export function getSeasonDateRange(plantings: Planting[]): {
 
   return { start: earliest, end: latest };
 }
+
+/**
+ * Calculate growth factor (0.0 to 1.0) based on days since planting vs maturity.
+ * 0.0 = just planted or not yet in ground, 1.0 = mature
+ *
+ * @param planting - The planting object
+ * @param cultivar - The cultivar with maturityDays
+ * @param currentDate - ISO date string (YYYY-MM-DD)
+ * @returns Growth factor clamped to [0, 1]
+ */
+export function calculateGrowthFactor(
+  planting: Planting,
+  cultivar: Cultivar | undefined,
+  currentDate: string
+): number {
+  // Default maturity if cultivar not found
+  const maturityDays = cultivar?.maturityDays ?? 60;
+
+  // Reuse getInGroundDateRange to determine when the plant starts growing
+  const inGroundStart = getInGroundDateRange(planting).start;
+
+  // Parse dates
+  const startMs = new Date(`${inGroundStart}T00:00:00Z`).getTime();
+  const currentMs = new Date(`${currentDate}T00:00:00Z`).getTime();
+
+  // Days since planting was put in ground
+  const daysSincePlanting = (currentMs - startMs) / (1000 * 60 * 60 * 24);
+
+  if (daysSincePlanting <= 0) {
+    return 0.0; // Not yet planted
+  }
+
+  // Clamp to 0-1 range
+  return Math.min(1.0, daysSincePlanting / maturityDays);
+}
+
+/**
+ * Calculate plant dot radius based on growth stage.
+ * At 0% growth: minRadiusFraction of mature size (default 15%)
+ * At 100% growth: full mature radius (45% of spacing, so diameter is 90% of spacing)
+ *
+ * @param spacingCm - Plant spacing in cm
+ * @param scale - Pixels per cm
+ * @param growthFactor - 0.0 to 1.0
+ * @param minRadiusFraction - Minimum radius as fraction of mature size (default 0.15)
+ * @returns Radius in pixels
+ */
+export function calculatePlantDotRadius(
+  spacingCm: number,
+  scale: number,
+  growthFactor: number,
+  minRadiusFraction: number = 0.15
+): number {
+  // Mature radius: 45% of spacing (so diameter is 90% of spacing at maturity)
+  // This means mature plants nearly fill their allocated space
+  const matureRadius = spacingCm * scale * 0.45;
+
+  // Scale based on growth: starts at minRadiusFraction, grows to 1.0
+  const scaleFactor = minRadiusFraction + (1 - minRadiusFraction) * growthFactor;
+
+  return matureRadius * scaleFactor;
+}
+
+/**
+ * Check if two date ranges overlap.
+ * Two ranges overlap if a.start <= b.end AND b.start <= a.end
+ */
+export function dateRangesOverlap(
+  a: { start: string; end: string },
+  b: { start: string; end: string }
+): boolean {
+  return a.start <= b.end && b.start <= a.end;
+}
+
+/**
+ * Check if a placement collides with existing placements, considering temporal overlap.
+ * Two plantings only collide if they overlap both spatially AND temporally.
+ *
+ * @param newPlacement - Candidate placement with dimensions
+ * @param newDateRange - Date range when new planting needs space
+ * @param existingPlacements - Array of existing placements with dimensions
+ * @param existingDateRanges - Map of placement ID to date range
+ * @param excludeId - Optional placement ID to exclude from collision check
+ * @param options - { ignoreCollisions?: boolean } to disable detection entirely
+ */
+export function checkCollisionsWithTiming(
+  newPlacement: { xCm: number; yCm: number; widthCm: number; heightCm: number },
+  newDateRange: { start: string; end: string } | null,
+  existingPlacements: Array<{
+    id: string;
+    xCm: number;
+    yCm: number;
+    widthCm: number;
+    heightCm: number;
+  }>,
+  existingDateRanges: Map<string, { start: string; end: string }>,
+  excludeId?: string,
+  options?: { ignoreCollisions?: boolean }
+): CollisionResult {
+  // If collisions are disabled, return no collision
+  if (options?.ignoreCollisions) {
+    return { hasCollision: false, overlappingPlacements: [] };
+  }
+
+  const overlapping: string[] = [];
+
+  for (const existing of existingPlacements) {
+    if (excludeId && existing.id === excludeId) continue;
+
+    // First check spatial overlap
+    const spatialOverlap = rectanglesOverlap(
+      {
+        x: newPlacement.xCm,
+        y: newPlacement.yCm,
+        width: newPlacement.widthCm,
+        height: newPlacement.heightCm,
+      },
+      {
+        x: existing.xCm,
+        y: existing.yCm,
+        width: existing.widthCm,
+        height: existing.heightCm,
+      }
+    );
+
+    if (!spatialOverlap) continue;
+
+    // If no date ranges provided, fall back to always-overlapping behavior
+    if (!newDateRange) {
+      overlapping.push(existing.id);
+      continue;
+    }
+
+    // Check temporal overlap
+    const existingRange = existingDateRanges.get(existing.id);
+    if (!existingRange) {
+      // No date range info - assume always present (backward compatible)
+      overlapping.push(existing.id);
+      continue;
+    }
+
+    if (dateRangesOverlap(newDateRange, existingRange)) {
+      overlapping.push(existing.id);
+    }
+  }
+
+  return {
+    hasCollision: overlapping.length > 0,
+    overlappingPlacements: overlapping,
+  };
+}
