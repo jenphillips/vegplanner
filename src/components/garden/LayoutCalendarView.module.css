@@ -1,0 +1,32 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plantings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Empty States */
+.empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.875rem;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+}
+
+.noPlantings {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.875rem;
+  background: var(--panel);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+}

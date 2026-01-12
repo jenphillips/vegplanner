@@ -277,8 +277,11 @@ export default function Home() {
             <GardenView
               plantings={plantings}
               cultivars={data.cultivars}
+              frost={data.frost}
+              climate={data.climate}
               loading={plantingsLoading}
               onUpdatePlanting={handleUpdatePlanting}
+              onDeletePlanting={handleDeletePlanting}
             />
           </section>
         )}

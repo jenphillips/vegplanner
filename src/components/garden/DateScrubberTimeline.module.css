@@ -1,0 +1,212 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Info section - matches PlantingCard width */
+.info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 280px;
+}
+
+.dateValue {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text, #1f2614);
+}
+
+.plantingCount {
+  font-size: 11px;
+  color: var(--muted, #5f6653);
+  background: #e8e8e4;
+  padding: 1px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* Timeline track */
+.track {
+  position: relative;
+  height: 20px;
+  background: #f7f8f5;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 4px;
+  overflow: visible;
+  flex: 1;
+  cursor: pointer;
+}
+
+.track:hover {
+  border-color: var(--accent, #2f6f4e);
+}
+
+.trackDragging {
+  cursor: ew-resize;
+  border-color: var(--accent, #2f6f4e);
+}
+
+/* Track background - clips week bands and frost ranges */
+.trackBackground {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Week bands (zebra striping) */
+.weekBands {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.weekBand {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.weekBandLight {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.weekBandDark {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Month tick marks */
+.monthTick {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+/* Frost range */
+.frostRange {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(51, 181, 229, 0.08) 0%,
+    rgba(51, 181, 229, 0.25) 50%,
+    rgba(51, 181, 229, 0.08) 100%
+  );
+  border-left: 1px dashed rgba(51, 181, 229, 0.4);
+  border-right: 1px dashed rgba(51, 181, 229, 0.4);
+  pointer-events: none;
+}
+
+.frostTypical {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #33b5e5;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.frostMarker {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #33b5e5;
+  pointer-events: none;
+}
+
+/* Selected date marker - line with circle on top */
+.dateMarker {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--accent, #2f6f4e);
+  z-index: 5;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Circle handle centered on the line */
+.dateMarker::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: var(--accent, #2f6f4e);
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Subtle glow effect on the line */
+.dateMarker::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 100%;
+  background: rgba(47, 111, 78, 0.15);
+  border-radius: 3px;
+}
+
+/* Spacers to match PlantingCard layout */
+.toggleSpacer {
+  flex-shrink: 0;
+  width: 52px;
+}
+
+.deleteSpacer {
+  flex-shrink: 0;
+  width: 24px;
+}
+
+/* Month labels row */
+.labelsRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.labelsSpacer {
+  flex-shrink: 0;
+  width: 280px;
+}
+
+.labels {
+  flex: 1;
+  position: relative;
+  height: 14px;
+  font-size: 10px;
+  color: var(--muted, #5f6653);
+}
+
+.monthLabel {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}

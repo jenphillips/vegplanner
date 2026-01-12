@@ -30,5 +30,14 @@
     "yCm": 0,
     "spacingCm": 20,
     "id": "5858f93d-57e9-4327-b869-06ab69e59ede"
+  },
+  {
+    "plantingId": "a942ca6e-34ac-4643-8984-b00c0e62ff32",
+    "bedId": "c5b84767-e442-480b-bb9e-9d9235478055",
+    "xCm": 0,
+    "yCm": 65,
+    "spacingCm": 15,
+    "cols": 2,
+    "id": "fa69b521-7377-4c56-899b-015aeddc2eda"
   }
 ]

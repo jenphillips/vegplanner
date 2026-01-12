@@ -12,9 +12,10 @@ import {
   autoLayout,
   checkCollisions,
 } from '@/lib/gardenLayout';
-import type { PlacementSuggestion } from '@/lib/types';
+import type { PlacementSuggestion, FrostWindow, Climate } from '@/lib/types';
 import { BedEditor } from './BedEditor';
 import { UnifiedGardenCanvas, ZOOM_LEVELS } from './UnifiedGardenCanvas';
+import { LayoutCalendarView } from './LayoutCalendarView';
 import type { Planting, Cultivar, GardenBed, PlantingPlacement } from '@/lib/types';
 import styles from './GardenView.module.css';
 
@@ -24,8 +25,11 @@ const BASE_SCALE = 2;
 type GardenViewProps = {
   plantings: Planting[];
   cultivars: Cultivar[];
+  frost: FrostWindow;
+  climate?: Climate;
   loading?: boolean;
   onUpdatePlanting?: (id: string, updates: Partial<Planting>) => void;
+  onDeletePlanting?: (id: string) => void;
 };
 
 type Units = 'metric' | 'imperial';
@@ -60,7 +64,7 @@ function getStoredUnits(): Units {
   return 'metric';
 }
 
-export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: GardenViewProps) {
+export function GardenView({ plantings, cultivars, frost, climate, loading, onUpdatePlanting, onDeletePlanting }: GardenViewProps) {
   const {
     beds,
     loading: bedsLoading,
@@ -404,15 +408,6 @@ export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: 
     }
   };
 
-  // Format date for display
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + 'T00:00:00');
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
   if (isLoading) {
     return (
       <div className={styles.container}>
@@ -479,33 +474,17 @@ export function GardenView({ plantings, cultivars, loading, onUpdatePlanting }: 
         </div>
       </div>
 
-      {/* Date Scrubber */}
-      {seasonRange ? (
-        <div className={styles.dateScrubber}>
-          <div className={styles.dateDisplay}>
-            <span className={styles.dateValue}>{formatDate(selectedDate)}</span>
-          </div>
-          <div className={styles.sliderContainer}>
-            <span className={styles.sliderLabel}>{formatDate(seasonRange.start)}</span>
-            <input
-              type="range"
-              min={new Date(seasonRange.start).getTime()}
-              max={new Date(seasonRange.end).getTime()}
-              value={new Date(selectedDate).getTime()}
-              onChange={(e) => {
-                const date = new Date(parseInt(e.target.value));
-                setSelectedDate(date.toISOString().split('T')[0]);
-              }}
-              className={styles.dateSlider}
-            />
-            <span className={styles.sliderLabel}>{formatDate(seasonRange.end)}</span>
-          </div>
-        </div>
-      ) : (
-        <div className={styles.noPlantingsNotice}>
-          No plantings scheduled yet. Add plantings in the Timeline tab to see them here.
-        </div>
-      )}
+      {/* Calendar Timeline */}
+      <LayoutCalendarView
+        plantings={plantings}
+        cultivars={cultivars}
+        frost={frost}
+        climate={climate}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        onUpdatePlanting={onUpdatePlanting}
+        onDeletePlanting={onDeletePlanting}
+      />
 
       {/* Auto-Layout Confirmation Bar */}
       {autoLayoutSuggestions && (
