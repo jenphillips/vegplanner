@@ -17,6 +17,8 @@ type PlantingCardProps = {
   isSelected?: boolean;
   onSelect?: (id: string) => void;
   disableDrag?: boolean;
+  /** Optional selected date to show as a vertical indicator line (for layout calendar view) */
+  selectedDate?: string;
 };
 
 // TODO: Move status tracking to Tasks scheduler page
@@ -51,6 +53,7 @@ export function PlantingCard({
   isSelected,
   onSelect,
   disableDrag,
+  selectedDate,
 }: PlantingCardProps) {
   const handleDelete = () => {
     onDelete(planting.id);
@@ -182,6 +185,7 @@ export function PlantingCard({
           previousHarvestEnd={previousHarvestEnd}
           onUpdateSowDate={disableDrag ? undefined : handleSowDateUpdate}
           onShiftPlanting={disableDrag ? undefined : handleShiftPlanting}
+          selectedDate={selectedDate}
         />
         <div className={styles.methodToggleSlot}>
           {cultivar.sowMethod === 'either' && (

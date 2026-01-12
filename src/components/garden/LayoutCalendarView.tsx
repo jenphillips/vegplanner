@@ -106,6 +106,7 @@ export function LayoutCalendarView({
                 onUpdate={onUpdatePlanting ?? (() => {})}
                 onDelete={onDeletePlanting ?? (() => {})}
                 disableDrag
+                selectedDate={selectedDate}
               />
             );
           })}

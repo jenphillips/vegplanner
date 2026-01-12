@@ -14,6 +14,8 @@ type PlantingTimelineProps = {
   previousHarvestEnd?: string;
   onUpdateSowDate?: (id: string, sowDateOverride: string, newHarvestStart: string, newHarvestEnd: string) => void;
   onShiftPlanting?: (id: string, shiftDays: number) => void;
+  /** Optional selected date to show as a vertical indicator line (for layout calendar view) */
+  selectedDate?: string;
 };
 
 const addDays = (iso: string, days: number) => {
@@ -22,7 +24,7 @@ const addDays = (iso: string, days: number) => {
   return d.toISOString().slice(0, 10);
 };
 
-export function PlantingTimeline({ planting, frost, climate, cultivar, previousHarvestEnd, onUpdateSowDate, onShiftPlanting }: PlantingTimelineProps) {
+export function PlantingTimeline({ planting, frost, climate, cultivar, previousHarvestEnd, onUpdateSowDate, onShiftPlanting, selectedDate }: PlantingTimelineProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragSowDate, setDragSowDate] = useState<string | null>(null);
@@ -593,6 +595,12 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
   // Get the effective sow date for display
   const effectiveSowDate = dragSowDate ?? planting.sowDateOverride ?? planting.sowDate;
 
+  // Calculate selected date position (for layout calendar view indicator)
+  const selectedDatePosition = useMemo(() => {
+    if (!selectedDate) return null;
+    return staticTimeline.clampPct(selectedDate);
+  }, [selectedDate, staticTimeline]);
+
   return (
     <div className={styles.timeline}>
       <div
@@ -736,6 +744,14 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
             className={styles.markerTransplant}
             style={{ left: `${barPositions.transplant}%` }}
             title={`Transplant: ${planting.transplantDate}`}
+          />
+        )}
+
+        {/* Selected date indicator (for layout calendar view) */}
+        {selectedDatePosition !== null && (
+          <div
+            className={styles.selectedDateIndicator}
+            style={{ left: `${selectedDatePosition}%` }}
           />
         )}
       </div>
