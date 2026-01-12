@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import type { Cultivar, Planting, FrostWindow, Climate } from '@/lib/types';
-import { PlantingCard } from '@/components/plantings/PlantingCard';
+import { PlantingTimeline } from '@/components/plantings/PlantingTimeline';
 import { DateScrubberTimeline } from './DateScrubberTimeline';
 import { filterPlantingsInGround, getSeasonDateRange } from '@/lib/gardenLayout';
 import styles from './LayoutCalendarView.module.css';
@@ -14,8 +14,6 @@ type LayoutCalendarViewProps = {
   climate?: Climate;
   selectedDate: string;
   onDateChange: (date: string) => void;
-  onUpdatePlanting?: (id: string, updates: Partial<Planting>) => void;
-  onDeletePlanting?: (id: string) => void;
 };
 
 export function LayoutCalendarView({
@@ -25,8 +23,6 @@ export function LayoutCalendarView({
   climate,
   selectedDate,
   onDateChange,
-  onUpdatePlanting,
-  onDeletePlanting,
 }: LayoutCalendarViewProps) {
   // Create map for O(1) cultivar lookup
   const cultivarMap = useMemo(
@@ -96,18 +92,19 @@ export function LayoutCalendarView({
             if (!cultivar) return null;
 
             return (
-              <PlantingCard
-                key={planting.id}
-                planting={planting}
-                cultivar={cultivar}
-                frost={frost}
-                climate={climate}
-                previousHarvestEnd={undefined}
-                onUpdate={onUpdatePlanting ?? (() => {})}
-                onDelete={onDeletePlanting ?? (() => {})}
-                disableDrag
-                selectedDate={selectedDate}
-              />
+              <div key={planting.id} className={styles.plantingRow}>
+                <span className={styles.label}>{planting.label}</span>
+                <span className={styles.quantity}>
+                  {planting.quantity ?? <em className={styles.quantityUnset}>—</em>}
+                </span>
+                <PlantingTimeline
+                  planting={planting}
+                  frost={frost}
+                  climate={climate}
+                  cultivar={cultivar}
+                  selectedDate={selectedDate}
+                />
+              </div>
             );
           })}
         </div>

@@ -171,11 +171,11 @@ export function DateScrubberTimeline({
   return (
     <div className={styles.container}>
       <div className={styles.row}>
-        {/* Info section - matches PlantingCard width */}
+        {/* Info section - matches LayoutCalendarView row */}
         <div className={styles.info}>
-          <span className={styles.dateValue}>{formatDateFull(selectedDate)}</span>
+          <span className={`${styles.dateLabel} ${styles.dateValue}`}>{formatDateFull(selectedDate)}</span>
           <span className={styles.plantingCount}>
-            {plantingCount} in ground
+            {plantingCount}
           </span>
         </div>
 
@@ -261,12 +261,6 @@ export function DateScrubberTimeline({
             style={{ left: `${selectedDatePosition}%` }}
           />
         </div>
-
-        {/* Spacer to match method toggle slot */}
-        <div className={styles.toggleSpacer} />
-
-        {/* Spacer to match delete button */}
-        <div className={styles.deleteSpacer} />
       </div>
 
       {/* Month labels row */}
@@ -283,8 +277,6 @@ export function DateScrubberTimeline({
             </span>
           ))}
         </div>
-        <div className={styles.toggleSpacer} />
-        <div className={styles.deleteSpacer} />
       </div>
     </div>
   );

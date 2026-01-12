@@ -508,8 +508,6 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
         climate={climate}
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
-        onUpdatePlanting={onUpdatePlanting}
-        onDeletePlanting={onDeletePlanting}
       />
 
       {/* Auto-Layout Confirmation Bar */}

@@ -7,7 +7,51 @@
 .plantings {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  height: 300px;
+  overflow-y: auto;
+  background: #fafafa;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 6px;
+}
+
+.plantingRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--border, #e5e5de);
+}
+
+.plantingRow:last-child {
+  border-bottom: none;
+}
+
+.label {
+  flex-shrink: 0;
+  width: 180px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text, #1f2614);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quantity {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--muted, #5f6653);
+  background: #e8e8e4;
+  padding: 1px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+  min-width: 24px;
+  text-align: center;
+}
+
+.quantityUnset {
+  color: var(--muted, #999);
+  font-style: normal;
 }
 
 /* Empty States */

@@ -2,7 +2,7 @@
   {
     "plantingId": "f53ac084-cca5-41a8-b08a-14664f595697",
     "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
-    "xCm": 0,
+    "xCm": 20,
     "yCm": 0,
     "spacingCm": 20,
     "id": "ebd6dd8e-03a4-4c0a-b453-08e3ece80db9",
@@ -55,7 +55,8 @@
     "xCm": 0,
     "yCm": 90,
     "spacingCm": 20,
-    "id": "c1783d74-c42f-440a-99c1-b7c3982ffc6f"
+    "id": "c1783d74-c42f-440a-99c1-b7c3982ffc6f",
+    "cols": 4
   },
   {
     "plantingId": "6006da37-a018-41c4-8dd2-790c289062a7",
@@ -69,7 +70,7 @@
   {
     "plantingId": "69157e4c-3530-4c6f-b201-7f4253b2b32c",
     "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
-    "xCm": 20,
+    "xCm": 30,
     "yCm": 0,
     "spacingCm": 60,
     "cols": 1,
