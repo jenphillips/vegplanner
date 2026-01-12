@@ -6,6 +6,7 @@ import {
   filterPlantingsInGround,
   checkCollisions,
   checkCollisionsWithTiming,
+  findOverlappingPlacements,
   fitsInBed,
   getCropColor,
   getSeasonDateRange,
@@ -725,6 +726,79 @@ describe('getInGroundDateRange', () => {
     };
     const range = getInGroundDateRange(planting);
     expect(range).toEqual({ start: '2025-06-01', end: '2025-09-30' });
+  });
+});
+
+describe('findOverlappingPlacements', () => {
+  it('finds placements that overlap spatially', () => {
+    const placements = [
+      { id: 'a', bedId: 'bed1', xCm: 0, yCm: 0, widthCm: 50, heightCm: 50 },
+      { id: 'b', bedId: 'bed1', xCm: 25, yCm: 25, widthCm: 50, heightCm: 50 }, // overlaps with 'a'
+      { id: 'c', bedId: 'bed1', xCm: 100, yCm: 0, widthCm: 50, heightCm: 50 }, // no overlap
+    ];
+    const result = findOverlappingPlacements('a', placements);
+    expect(result).toContain('b');
+    expect(result).not.toContain('c');
+  });
+
+  it('returns empty array when no overlaps exist', () => {
+    const placements = [
+      { id: 'a', bedId: 'bed1', xCm: 0, yCm: 0, widthCm: 50, heightCm: 50 },
+      { id: 'b', bedId: 'bed1', xCm: 100, yCm: 0, widthCm: 50, heightCm: 50 },
+      { id: 'c', bedId: 'bed1', xCm: 0, yCm: 100, widthCm: 50, heightCm: 50 },
+    ];
+    const result = findOverlappingPlacements('a', placements);
+    expect(result).toHaveLength(0);
+  });
+
+  it('ignores placements in different beds', () => {
+    const placements = [
+      { id: 'a', bedId: 'bed1', xCm: 0, yCm: 0, widthCm: 50, heightCm: 50 },
+      { id: 'b', bedId: 'bed2', xCm: 0, yCm: 0, widthCm: 50, heightCm: 50 }, // same position, different bed
+    ];
+    const result = findOverlappingPlacements('a', placements);
+    expect(result).toHaveLength(0);
+  });
+
+  it('excludes the source placement from results', () => {
+    const placements = [
+      { id: 'a', bedId: 'bed1', xCm: 0, yCm: 0, widthCm: 50, heightCm: 50 },
+    ];
+    const result = findOverlappingPlacements('a', placements);
+    expect(result).not.toContain('a');
+    expect(result).toHaveLength(0);
+  });
+
+  it('returns empty array when placement not found', () => {
+    const placements = [
+      { id: 'a', bedId: 'bed1', xCm: 0, yCm: 0, widthCm: 50, heightCm: 50 },
+    ];
+    const result = findOverlappingPlacements('nonexistent', placements);
+    expect(result).toHaveLength(0);
+  });
+
+  it('finds multiple overlapping placements', () => {
+    const placements = [
+      { id: 'a', bedId: 'bed1', xCm: 25, yCm: 25, widthCm: 50, heightCm: 50 }, // center
+      { id: 'b', bedId: 'bed1', xCm: 0, yCm: 0, widthCm: 50, heightCm: 50 }, // overlaps top-left
+      { id: 'c', bedId: 'bed1', xCm: 50, yCm: 0, widthCm: 50, heightCm: 50 }, // overlaps top-right
+      { id: 'd', bedId: 'bed1', xCm: 0, yCm: 50, widthCm: 50, heightCm: 50 }, // overlaps bottom-left
+    ];
+    const result = findOverlappingPlacements('a', placements);
+    expect(result).toHaveLength(3);
+    expect(result).toContain('b');
+    expect(result).toContain('c');
+    expect(result).toContain('d');
+  });
+
+  it('does not count touching edges as overlap', () => {
+    const placements = [
+      { id: 'a', bedId: 'bed1', xCm: 0, yCm: 0, widthCm: 50, heightCm: 50 },
+      { id: 'b', bedId: 'bed1', xCm: 50, yCm: 0, widthCm: 50, heightCm: 50 }, // touches right edge
+      { id: 'c', bedId: 'bed1', xCm: 0, yCm: 50, widthCm: 50, heightCm: 50 }, // touches bottom edge
+    ];
+    const result = findOverlappingPlacements('a', placements);
+    expect(result).toHaveLength(0);
   });
 });
 

@@ -9,6 +9,7 @@ import {
   getValidRectangleConfigs,
   getCropColor,
   checkCollisionsWithTiming,
+  findOverlappingPlacements,
   fitsInBed,
   isPlantingInHarvest,
   calculateGrowthFactor,
@@ -131,6 +132,7 @@ export function UnifiedGardenCanvas({
     startMouseX: number;
     startMouseY: number;
     dateRange: { start: string; end: string } | null;
+    wasAlreadySelected: boolean;
   } | null>(null);
   const [movePreview, setMovePreview] = useState<{
     xCm: number;
@@ -648,6 +650,7 @@ export function UnifiedGardenCanvas({
       startMouseX: e.clientX,
       startMouseY: e.clientY,
       dateRange: footprint.dateRange,
+      wasAlreadySelected: selectedPlacement === footprint.placement.id,
     });
     setMovePreview({
       xCm: footprint.placement.xCm,
@@ -854,6 +857,15 @@ export function UnifiedGardenCanvas({
       justFinishedInteraction.current = true;
     }
 
+    // Handle click on placement (no drag) - cycle through overlapping plantings
+    if (movingPlacement && !hasDragged && movingPlacement.wasAlreadySelected) {
+      const overlapping = getOverlappingPlacements(movingPlacement.id);
+      if (overlapping.length > 0) {
+        setSelectedPlacement(overlapping[0]);
+      }
+      // If no overlapping, keep current selection (don't deselect on click)
+    }
+
     // Apply placement move
     if (movingPlacement && movePreview && movePreview.valid && hasDragged) {
       // Store the committed position to prevent flash-back during async update
@@ -925,6 +937,24 @@ export function UnifiedGardenCanvas({
       setSelectedBed(null);
     }
   };
+
+  // Prepare placement data for overlap detection
+  const placementsWithDimensions = useMemo(() =>
+    footprints.map(fp => ({
+      id: fp.placement.id,
+      bedId: fp.placement.bedId,
+      xCm: fp.placement.xCm,
+      yCm: fp.placement.yCm,
+      widthCm: fp.widthCm,
+      heightCm: fp.heightCm,
+    })),
+    [footprints]
+  );
+
+  // Find all plantings that overlap with the given placement
+  const getOverlappingPlacements = useCallback((placementId: string) => {
+    return findOverlappingPlacements(placementId, placementsWithDimensions);
+  }, [placementsWithDimensions]);
 
   const handleFootprintClick = (e: React.MouseEvent, placementId: string) => {
     e.stopPropagation();
@@ -1175,8 +1205,13 @@ export function UnifiedGardenCanvas({
             />
           )}
 
-          {/* Planting footprints */}
-          {footprints.map((footprint) => {
+          {/* Planting footprints - sort so selected placement renders last (on top) */}
+          {[...footprints].sort((a, b) => {
+            // Selected placement should render last (on top)
+            if (a.placement.id === selectedPlacement) return 1;
+            if (b.placement.id === selectedPlacement) return -1;
+            return 0;
+          }).map((footprint) => {
             const { placement, planting, widthCm, heightCm, rows, cols, color, bed, isHarvesting, growthFactor } = footprint;
             if (!bed) return null;
 

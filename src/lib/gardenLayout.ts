@@ -284,6 +284,41 @@ export function checkCollisions(
 }
 
 /**
+ * Find all placements that spatially overlap with a given placement.
+ * Used for cycling through stacked plantings in the UI.
+ */
+export function findOverlappingPlacements(
+  placementId: string,
+  placements: Array<{
+    id: string;
+    bedId: string;
+    xCm: number;
+    yCm: number;
+    widthCm: number;
+    heightCm: number;
+  }>
+): string[] {
+  const current = placements.find(p => p.id === placementId);
+  if (!current) return [];
+
+  const overlapping: string[] = [];
+
+  for (const other of placements) {
+    if (other.id === placementId) continue;
+    if (other.bedId !== current.bedId) continue;
+
+    if (rectanglesOverlap(
+      { x: current.xCm, y: current.yCm, width: current.widthCm, height: current.heightCm },
+      { x: other.xCm, y: other.yCm, width: other.widthCm, height: other.heightCm }
+    )) {
+      overlapping.push(other.id);
+    }
+  }
+
+  return overlapping;
+}
+
+/**
  * Check if a placement fits within bed boundaries.
  */
 export function fitsInBed(
