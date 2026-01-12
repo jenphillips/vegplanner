@@ -1,0 +1,129 @@
+/* Shared timeline styles used by PlantingTimeline, DateScrubberTimeline, and TimelineHeader */
+
+/* ===========================================
+   Track Base Styles
+   =========================================== */
+
+.track {
+  position: relative;
+  height: 20px;
+  background: #f7f8f5;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 4px;
+}
+
+.trackDragging {
+  cursor: ew-resize;
+}
+
+/* ===========================================
+   Week Bands (Zebra Striping)
+   =========================================== */
+
+.weekBands {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.weekBand {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.weekBandLight {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.weekBandDark {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* ===========================================
+   Month Tick Marks
+   =========================================== */
+
+.monthTick {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+/* ===========================================
+   Frost Indicators
+   =========================================== */
+
+.frostRange {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(51, 181, 229, 0.08) 0%,
+    rgba(51, 181, 229, 0.25) 50%,
+    rgba(51, 181, 229, 0.08) 100%
+  );
+  border-left: 1px dashed rgba(51, 181, 229, 0.4);
+  border-right: 1px dashed rgba(51, 181, 229, 0.4);
+  pointer-events: none;
+}
+
+.frostTypical {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #33b5e5;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.frostMarker {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #33b5e5;
+  pointer-events: none;
+}
+
+/* ===========================================
+   Month Labels
+   =========================================== */
+
+.labels {
+  flex: 1;
+  position: relative;
+  height: 14px;
+  font-size: 10px;
+  color: var(--muted, #5f6653);
+}
+
+.monthLabel {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+/* ===========================================
+   Layout Spacers (for alignment with PlantingCard)
+   =========================================== */
+
+.spacer280 {
+  flex-shrink: 0;
+  width: 280px;
+}
+
+.toggleSpacer {
+  flex-shrink: 0;
+  width: 52px;
+}
+
+.deleteSpacer {
+  flex-shrink: 0;
+  width: 24px;
+}

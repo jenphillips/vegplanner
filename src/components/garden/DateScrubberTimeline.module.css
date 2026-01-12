@@ -40,11 +40,7 @@
 
 /* Timeline track */
 .track {
-  position: relative;
-  height: 20px;
-  background: #f7f8f5;
-  border: 1px solid var(--border, #e5e5de);
-  border-radius: 4px;
+  composes: track from '../plantings/Timeline.module.css';
   overflow: visible;
   flex: 1;
   cursor: pointer;
@@ -55,7 +51,7 @@
 }
 
 .trackDragging {
-  cursor: ew-resize;
+  composes: trackDragging from '../plantings/Timeline.module.css';
   border-color: var(--accent, #2f6f4e);
 }
 
@@ -70,68 +66,37 @@
 
 /* Week bands (zebra striping) */
 .weekBands {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  composes: weekBands from '../plantings/Timeline.module.css';
 }
 
 .weekBand {
-  position: absolute;
-  top: 0;
-  bottom: 0;
+  composes: weekBand from '../plantings/Timeline.module.css';
 }
 
 .weekBandLight {
-  background: rgba(0, 0, 0, 0.02);
+  composes: weekBandLight from '../plantings/Timeline.module.css';
 }
 
 .weekBandDark {
-  background: rgba(0, 0, 0, 0.05);
+  composes: weekBandDark from '../plantings/Timeline.module.css';
 }
 
 /* Month tick marks */
 .monthTick {
-  position: absolute;
-  top: 0;
-  width: 1px;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.2);
-  pointer-events: none;
+  composes: monthTick from '../plantings/Timeline.module.css';
 }
 
-/* Frost range */
+/* Frost indicators */
 .frostRange {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    rgba(51, 181, 229, 0.08) 0%,
-    rgba(51, 181, 229, 0.25) 50%,
-    rgba(51, 181, 229, 0.08) 100%
-  );
-  border-left: 1px dashed rgba(51, 181, 229, 0.4);
-  border-right: 1px dashed rgba(51, 181, 229, 0.4);
-  pointer-events: none;
+  composes: frostRange from '../plantings/Timeline.module.css';
 }
 
 .frostTypical {
-  position: absolute;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  background: #33b5e5;
-  z-index: 1;
-  pointer-events: none;
+  composes: frostTypical from '../plantings/Timeline.module.css';
 }
 
 .frostMarker {
-  position: absolute;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  background: #33b5e5;
-  pointer-events: none;
+  composes: frostMarker from '../plantings/Timeline.module.css';
 }
 
 /* Selected date marker - line with circle on top */
@@ -140,7 +105,7 @@
   top: 0;
   width: 2px;
   height: 100%;
-  background: var(--accent, #2f6f4e);
+  background: #3d3d3d;
   z-index: 5;
   transform: translateX(-50%);
   pointer-events: none;
@@ -155,7 +120,7 @@
   transform: translate(-50%, -50%);
   width: 12px;
   height: 12px;
-  background: var(--accent, #2f6f4e);
+  background: #3d3d3d;
   border: 2px solid white;
   border-radius: 50%;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -170,19 +135,17 @@
   transform: translateX(-50%);
   width: 6px;
   height: 100%;
-  background: rgba(47, 111, 78, 0.15);
+  background: rgba(61, 61, 61, 0.15);
   border-radius: 3px;
 }
 
 /* Spacers to match PlantingCard layout */
 .toggleSpacer {
-  flex-shrink: 0;
-  width: 52px;
+  composes: toggleSpacer from '../plantings/Timeline.module.css';
 }
 
 .deleteSpacer {
-  flex-shrink: 0;
-  width: 24px;
+  composes: deleteSpacer from '../plantings/Timeline.module.css';
 }
 
 /* Month labels row */
@@ -193,20 +156,13 @@
 }
 
 .labelsSpacer {
-  flex-shrink: 0;
-  width: 280px;
+  composes: spacer280 from '../plantings/Timeline.module.css';
 }
 
 .labels {
-  flex: 1;
-  position: relative;
-  height: 14px;
-  font-size: 10px;
-  color: var(--muted, #5f6653);
+  composes: labels from '../plantings/Timeline.module.css';
 }
 
 .monthLabel {
-  position: absolute;
-  transform: translateX(-50%);
-  white-space: nowrap;
+  composes: monthLabel from '../plantings/Timeline.module.css';
 }

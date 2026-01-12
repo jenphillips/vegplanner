@@ -6,30 +6,22 @@
 }
 
 .spacer {
-  flex-shrink: 0;
-  width: 280px;
+  composes: spacer280 from './Timeline.module.css';
 }
 
 .labels {
-  flex: 1;
-  position: relative;
+  composes: labels from './Timeline.module.css';
   height: 16px;
-  font-size: 10px;
-  color: var(--muted, #5f6653);
 }
 
 .monthLabel {
-  position: absolute;
-  transform: translateX(-50%);
-  white-space: nowrap;
+  composes: monthLabel from './Timeline.module.css';
 }
 
 .toggleSpacer {
-  flex-shrink: 0;
-  width: 52px;
+  composes: toggleSpacer from './Timeline.module.css';
 }
 
 .deleteSpacer {
-  flex-shrink: 0;
-  width: 24px;
+  composes: deleteSpacer from './Timeline.module.css';
 }

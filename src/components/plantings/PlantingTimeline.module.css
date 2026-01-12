@@ -7,79 +7,47 @@
 }
 
 .track {
-  position: relative;
-  height: 20px;
-  background: #f7f8f5;
-  border: 1px solid var(--border, #e5e5de);
-  border-radius: 4px;
+  composes: track from './Timeline.module.css';
   overflow: hidden;
 }
 
 .trackDragging {
-  cursor: ew-resize;
+  composes: trackDragging from './Timeline.module.css';
 }
 
 /* Week bands (zebra striping) */
 .weekBands {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  composes: weekBands from './Timeline.module.css';
 }
 
 .weekBand {
-  position: absolute;
-  top: 0;
-  bottom: 0;
+  composes: weekBand from './Timeline.module.css';
 }
 
 .weekBandLight {
-  background: rgba(0, 0, 0, 0.02);
+  composes: weekBandLight from './Timeline.module.css';
 }
 
 .weekBandDark {
-  background: rgba(0, 0, 0, 0.05);
+  composes: weekBandDark from './Timeline.module.css';
 }
 
 /* Month tick marks */
 .monthTick {
-  position: absolute;
-  top: 0;
-  width: 1px;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.2);
+  composes: monthTick from './Timeline.module.css';
 }
 
-/* Frost range */
+/* Frost indicators */
 .frostRange {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    rgba(51, 181, 229, 0.08) 0%,
-    rgba(51, 181, 229, 0.25) 50%,
-    rgba(51, 181, 229, 0.08) 100%
-  );
-  border-left: 1px dashed rgba(51, 181, 229, 0.4);
-  border-right: 1px dashed rgba(51, 181, 229, 0.4);
-  pointer-events: none;
+  composes: frostRange from './Timeline.module.css';
 }
 
 .frostTypical {
-  position: absolute;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  background: #33b5e5;
-  z-index: 1;
+  composes: frostTypical from './Timeline.module.css';
 }
 
 .frostMarker {
-  position: absolute;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  background: #33b5e5;
+  composes: frostMarker from './Timeline.module.css';
 }
 
 /* Drag bounds indicator */
@@ -214,7 +182,5 @@
 }
 
 .monthLabel {
-  position: absolute;
-  transform: translateX(-50%);
-  white-space: nowrap;
+  composes: monthLabel from './Timeline.module.css';
 }
