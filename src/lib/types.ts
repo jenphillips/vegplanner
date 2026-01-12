@@ -14,6 +14,7 @@ export type Cultivar = {
   id: string;
   crop: string;
   variety: string;
+  family?: string; // Botanical family (e.g., 'Solanaceae', 'Brassicaceae') for crop rotation
   plantType?: PlantType; // 'vegetable' (default) or 'flower'
   vendor?: string;
   germDaysMin: number;

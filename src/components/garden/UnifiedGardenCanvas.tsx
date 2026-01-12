@@ -26,6 +26,7 @@ type DragData = {
   quantity: number;
   spacingCm: number;
   cropName: string;
+  family?: string;
 };
 
 type Units = 'metric' | 'imperial';
@@ -370,7 +371,7 @@ export function UnifiedGardenCanvas({
         heightCm,
         rows,
         cols,
-        color: cultivar ? getCropColor(cultivar.crop) : '#95a5a6',
+        color: getCropColor(cultivar?.family, cultivar?.crop ?? ''),
         isHarvesting,
         // Absolute position on canvas
         absoluteX: bedX + placement.xCm,
@@ -399,7 +400,7 @@ export function UnifiedGardenCanvas({
         heightCm,
         rows,
         cols,
-        color: cultivar ? getCropColor(cultivar.crop) : '#95a5a6',
+        color: getCropColor(cultivar?.family, cultivar?.crop ?? ''),
         absoluteX: bedX + suggestion.xCm,
         absoluteY: bedY + suggestion.yCm,
       };
@@ -524,7 +525,7 @@ export function UnifiedGardenCanvas({
         yCm: bedY + bestFit.yCm,
         widthCm: bestFit.widthCm,
         heightCm: bestFit.heightCm,
-        color: getCropColor(data.cropName),
+        color: getCropColor(data.family, data.cropName),
         valid: bestFit.valid,
       });
     } catch {

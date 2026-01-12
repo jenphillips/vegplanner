@@ -24,6 +24,7 @@ type DragData = {
   quantity: number;
   spacingCm: number;
   cropName: string;
+  family?: string;
 };
 
 type Units = 'metric' | 'imperial';
@@ -182,7 +183,7 @@ export function BedCanvas({
         heightCm,
         rows,
         cols,
-        color: cultivar ? getCropColor(cultivar.crop) : '#95a5a6',
+        color: getCropColor(cultivar?.family, cultivar?.crop ?? ''),
       };
     });
   }, [placements, plantingMap, cultivarMap]);
@@ -208,7 +209,7 @@ export function BedCanvas({
         heightCm,
         rows,
         cols,
-        color: cultivar ? getCropColor(cultivar.crop) : '#95a5a6',
+        color: getCropColor(cultivar?.family, cultivar?.crop ?? ''),
       };
     });
   }, [suggestions, plantingMap, cultivarMap]);
@@ -358,7 +359,7 @@ export function BedCanvas({
         yCm: bestFit.yCm,
         widthCm: bestFit.widthCm,
         heightCm: bestFit.heightCm,
-        color: getCropColor(data.cropName),
+        color: getCropColor(data.family, data.cropName),
         valid: bestFit.valid,
       });
     } catch {

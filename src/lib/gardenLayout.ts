@@ -471,33 +471,45 @@ export function autoLayout(
 }
 
 /**
- * Color coding for crops.
+ * Color coding for plant families (for crop rotation planning).
+ * Each family has a base color with shades for visual distinction between crops.
  */
-const CROP_COLORS: Record<string, string> = {
-  Tomato: '#e74c3c',
-  Pepper: '#e67e22',
-  Lettuce: '#27ae60',
-  Spinach: '#2ecc71',
-  Beet: '#8e44ad',
-  Bean: '#f1c40f',
-  Carrot: '#d35400',
-  Squash: '#f39c12',
-  Cucumber: '#1abc9c',
-  'Gai Lan': '#3498db',
-  default: '#95a5a6',
+const FAMILY_COLORS: Record<string, { base: string; shades: string[] }> = {
+  Solanaceae: { base: '#e74c3c', shades: ['#c0392b', '#e74c3c', '#ec7063'] }, // Reds - tomatoes, peppers, potatoes
+  Brassicaceae: { base: '#3498db', shades: ['#2980b9', '#3498db', '#5dade2'] }, // Blues - broccoli, bok choy, arugula
+  Fabaceae: { base: '#f1c40f', shades: ['#d4ac0d', '#f1c40f', '#f4d03f'] }, // Yellows - beans, peas
+  Cucurbitaceae: { base: '#1abc9c', shades: ['#16a085', '#1abc9c', '#48c9b0'] }, // Teals - squash, cucumber
+  Amaranthaceae: { base: '#9b59b6', shades: ['#8e44ad', '#9b59b6', '#af7ac5'] }, // Purples - beet, spinach
+  Asteraceae: { base: '#27ae60', shades: ['#229954', '#27ae60', '#52be80'] }, // Greens - lettuce
+  Apiaceae: { base: '#e67e22', shades: ['#d35400', '#e67e22', '#eb984e'] }, // Oranges - carrots
+  Amaryllidaceae: { base: '#f39c12', shades: ['#d68910', '#f39c12', '#f5b041'] }, // Gold - onions, leeks, shallots
+  default: { base: '#95a5a6', shades: ['#7f8c8d', '#95a5a6', '#bdc3c7'] }, // Grays - unknown
 };
 
 /**
- * Get the color for a crop type.
+ * Simple string hash for consistent shade selection.
  */
-export function getCropColor(cropName: string): string {
-  // Check for partial matches
-  for (const [crop, color] of Object.entries(CROP_COLORS)) {
-    if (crop !== 'default' && cropName.includes(crop)) {
-      return color;
-    }
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0; // Convert to 32bit integer
   }
-  return CROP_COLORS.default;
+  return Math.abs(hash);
+}
+
+/**
+ * Get the color for a crop based on its plant family.
+ * Different crops within the same family get different shades for visual distinction.
+ */
+export function getCropColor(
+  family: string | undefined,
+  cropName: string
+): string {
+  const familyEntry = FAMILY_COLORS[family ?? ''] ?? FAMILY_COLORS.default;
+  // Use cropName hash to pick consistent shade within family
+  const shadeIndex = hashString(cropName) % familyEntry.shades.length;
+  return familyEntry.shades[shadeIndex];
 }
 
 /**

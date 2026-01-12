@@ -411,6 +411,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
       quantity: planting.quantity ?? 1,
       spacingCm: cultivar?.spacingCm ?? 30,
       cropName: cultivar?.crop ?? 'Unknown',
+      family: cultivar?.family,
     };
     e.dataTransfer.setData('application/json', JSON.stringify(dragData));
     e.dataTransfer.effectAllowed = 'move';
@@ -575,7 +576,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
                 const spacing = cultivar?.spacingCm ?? 30;
                 const quantity = planting.quantity ?? 1;
                 const footprint = calculateFootprint(quantity, spacing);
-                const color = getCropColor(cultivar?.crop ?? '');
+                const color = getCropColor(cultivar?.family, cultivar?.crop ?? '');
                 const isTooLarge = tooLargePlantingIds.has(planting.id);
 
                 return (

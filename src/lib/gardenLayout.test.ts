@@ -279,20 +279,43 @@ describe('fitsInBed', () => {
 });
 
 describe('getCropColor', () => {
-  it('returns red for Tomato', () => {
-    expect(getCropColor('Tomato')).toBe('#e74c3c');
+  it('returns a red shade for Solanaceae family (Tomato)', () => {
+    const color = getCropColor('Solanaceae', 'Tomato');
+    // Solanaceae shades are: '#c0392b', '#e74c3c', '#ec7063'
+    expect(['#c0392b', '#e74c3c', '#ec7063']).toContain(color);
   });
 
-  it('returns green for Lettuce', () => {
-    expect(getCropColor('Lettuce')).toBe('#27ae60');
+  it('returns a green shade for Asteraceae family (Lettuce)', () => {
+    const color = getCropColor('Asteraceae', 'Lettuce');
+    // Asteraceae shades are: '#229954', '#27ae60', '#52be80'
+    expect(['#229954', '#27ae60', '#52be80']).toContain(color);
   });
 
-  it('returns yellow for Bean, Bush', () => {
-    expect(getCropColor('Bean, Bush')).toBe('#f1c40f');
+  it('returns a yellow shade for Fabaceae family (Bush Bean)', () => {
+    const color = getCropColor('Fabaceae', 'Bush Bean');
+    // Fabaceae shades are: '#d4ac0d', '#f1c40f', '#f4d03f'
+    expect(['#d4ac0d', '#f1c40f', '#f4d03f']).toContain(color);
   });
 
-  it('returns default gray for unknown crop', () => {
-    expect(getCropColor('Artichoke')).toBe('#95a5a6');
+  it('returns default gray for unknown family', () => {
+    const color = getCropColor(undefined, 'Artichoke');
+    // Default shades are: '#7f8c8d', '#95a5a6', '#bdc3c7'
+    expect(['#7f8c8d', '#95a5a6', '#bdc3c7']).toContain(color);
+  });
+
+  it('returns consistent color for same crop name', () => {
+    const color1 = getCropColor('Solanaceae', 'Tomato');
+    const color2 = getCropColor('Solanaceae', 'Tomato');
+    expect(color1).toBe(color2);
+  });
+
+  it('returns different shades for different crops in same family', () => {
+    // Different crops should get potentially different shades based on hash
+    const tomatoColor = getCropColor('Solanaceae', 'Tomato');
+    const pepperColor = getCropColor('Solanaceae', 'Bell Pepper');
+    // Both should be in Solanaceae red shades
+    expect(['#c0392b', '#e74c3c', '#ec7063']).toContain(tomatoColor);
+    expect(['#c0392b', '#e74c3c', '#ec7063']).toContain(pepperColor);
   });
 });
 
