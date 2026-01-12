@@ -55,14 +55,20 @@ function spacingToDisplay(cm: number, units: Units): string {
 // Default zoom index (index 5 = 1.0 = 100% = 2 pixels per cm)
 const DEFAULT_ZOOM_INDEX = 5;
 
-// localStorage key for unit preference
+// localStorage keys for preferences
 const UNITS_STORAGE_KEY = 'vegplanner-garden-units';
+const ALLOW_OVERLAP_STORAGE_KEY = 'vegplanner-garden-allow-overlap';
 
 function getStoredUnits(): Units {
   if (typeof window === 'undefined') return 'metric';
   const stored = localStorage.getItem(UNITS_STORAGE_KEY);
   if (stored === 'imperial') return 'imperial';
   return 'metric';
+}
+
+function getStoredAllowOverlap(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(ALLOW_OVERLAP_STORAGE_KEY) === 'true';
 }
 
 export function GardenView({ plantings, cultivars, frost, climate, loading, onUpdatePlanting, onDeletePlanting }: GardenViewProps) {
@@ -103,8 +109,13 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
   // Lock beds state - prevents accidental dragging
   const [bedsLocked, setBedsLocked] = useState(true);
 
-  // Allow overlapping placements (for companion planting)
-  const [allowOverlap, setAllowOverlap] = useState(false);
+  // Allow overlapping placements (for companion planting) - persist preference
+  const [allowOverlap, setAllowOverlap] = useState(() => getStoredAllowOverlap());
+
+  // Persist allowOverlap preference to localStorage
+  useEffect(() => {
+    localStorage.setItem(ALLOW_OVERLAP_STORAGE_KEY, String(allowOverlap));
+  }, [allowOverlap]);
 
   // Plant type filter
   const [plantTypeFilter, setPlantTypeFilter] = useState<PlantTypeFilterValue>('all');

@@ -435,7 +435,8 @@ export function UnifiedGardenCanvas({
     widthCm: number,
     heightCm: number,
     excludeId?: string,
-    newPlantingDateRange?: { start: string; end: string } | null
+    newPlantingDateRange?: { start: string; end: string } | null,
+    ignoreCollisions?: boolean
   ): boolean => {
     const bed = beds.find((b) => b.id === bedId);
     if (!bed) return false;
@@ -445,6 +446,11 @@ export function UnifiedGardenCanvas({
     // Check bed bounds
     if (!fitsInBed(candidate, { widthCm: bed.widthCm, lengthCm: bed.lengthCm })) {
       return false;
+    }
+
+    // Skip collision check if requested (e.g., during resize operations)
+    if (ignoreCollisions) {
+      return true;
     }
 
     // Check collisions with existing placements in the same bed
@@ -829,6 +835,8 @@ export function UnifiedGardenCanvas({
       newXCm = snapToGrid(Math.max(0, newXCm), SNAP_CM);
       newYCm = snapToGrid(Math.max(0, newYCm), SNAP_CM);
 
+      // For resize: only validate bed bounds, skip collision check
+      // This allows resizing plantings that already overlap
       const valid = isPlacementValid(
         resizing.bedId,
         newXCm,
@@ -836,7 +844,8 @@ export function UnifiedGardenCanvas({
         actualWidthCm,
         actualHeightCm,
         resizing.placementId,
-        resizing.dateRange
+        resizing.dateRange,
+        true // ignoreCollisions - allow resize even when overlapping
       );
 
       setResizePreview({
