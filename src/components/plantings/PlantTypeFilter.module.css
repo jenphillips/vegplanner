@@ -1,0 +1,32 @@
+.filter {
+  display: flex;
+  background: #e8e8e4;
+  border-radius: 4px;
+  padding: 2px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.option {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted, #5f6653);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.option:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--text, #1f2614);
+}
+
+.active {
+  background: #fff;
+  color: var(--text, #1f2614);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}

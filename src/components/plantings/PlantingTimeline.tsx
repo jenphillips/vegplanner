@@ -62,6 +62,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
 
   // Calculate shift bounds for direct sow crops AND "either" crops in transplant mode
   // - Can't shift earlier than when harvest start equals previous planting's harvest end
+  // - Can't shift earlier than frost-based limits (directAfterLsfDays or transplantAfterLsfDays)
   // - Can't shift later than when sow date reaches the latest viable sow date for the season
   // - Can't shift into temperature-unfavorable periods (handled by temperatureShiftBounds)
   const shiftBounds = useMemo(() => {
@@ -80,6 +81,29 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
       // First planting: constrain to season start
       const seasonStart = new Date(`${year}-03-01T00:00:00Z`);
       maxShiftEarlier = Math.floor((sowDate.getTime() - seasonStart.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
+    // Apply frost-based constraints for frost-SENSITIVE crops only
+    // Frost-tolerant crops (beets, gai lan, etc.) can be planted before last frost
+    // For sensitive transplants, the transplant date can't go before lastSpringFrost + transplantAfterLsfDays
+    // For sensitive direct sow, the sow date can't go before lastSpringFrost + directAfterLsfDays
+    if (cultivar?.frostSensitive) {
+      const lastFrost = new Date(`${frost.lastSpringFrost}T00:00:00Z`);
+
+      if (canDragTransplantShift && planting.transplantDate) {
+        // Transplant mode: constrain transplant date based on transplantAfterLsfDays
+        const transplantAfterDays = cultivar.transplantAfterLsfDays ?? 0;
+        const earliestTransplant = new Date(lastFrost.getTime() + transplantAfterDays * 24 * 60 * 60 * 1000);
+        const currentTransplant = new Date(`${planting.transplantDate}T00:00:00Z`);
+        const maxShiftForFrost = Math.floor((currentTransplant.getTime() - earliestTransplant.getTime()) / (1000 * 60 * 60 * 24));
+        maxShiftEarlier = Math.min(maxShiftEarlier, maxShiftForFrost);
+      } else if (canDragDirectSow) {
+        // Direct sow mode: constrain sow date based on directAfterLsfDays
+        const directAfterDays = cultivar.directAfterLsfDays ?? 0;
+        const earliestSow = new Date(lastFrost.getTime() + directAfterDays * 24 * 60 * 60 * 1000);
+        const maxShiftForFrost = Math.floor((sowDate.getTime() - earliestSow.getTime()) / (1000 * 60 * 60 * 24));
+        maxShiftEarlier = Math.min(maxShiftEarlier, maxShiftForFrost);
+      }
     }
 
     // Maximum shift later: constrain to end of season

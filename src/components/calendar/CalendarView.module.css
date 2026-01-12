@@ -4,6 +4,12 @@
   gap: 8px;
 }
 
+.filterRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
 .plantings {
   display: flex;
   flex-direction: column;

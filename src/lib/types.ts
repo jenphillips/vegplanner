@@ -8,11 +8,13 @@ export type SowMethod = 'direct' | 'transplant' | 'either';
 export type MaturityBasis = 'from_sow' | 'from_transplant';
 export type Season = 'spring' | 'fall';
 export type HarvestStyle = 'single' | 'continuous';
+export type PlantType = 'vegetable' | 'flower';
 
 export type Cultivar = {
   id: string;
   crop: string;
   variety: string;
+  plantType?: PlantType; // 'vegetable' (default) or 'flower'
   vendor?: string;
   germDaysMin: number;
   germDaysMax: number;

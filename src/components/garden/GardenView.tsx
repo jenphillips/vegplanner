@@ -16,6 +16,7 @@ import type { PlacementSuggestion, FrostWindow, Climate } from '@/lib/types';
 import { BedEditor } from './BedEditor';
 import { UnifiedGardenCanvas, ZOOM_LEVELS } from './UnifiedGardenCanvas';
 import { LayoutCalendarView } from './LayoutCalendarView';
+import { PlantTypeFilter, type PlantTypeFilterValue } from '@/components/plantings/PlantTypeFilter';
 import type { Planting, Cultivar, GardenBed, PlantingPlacement } from '@/lib/types';
 import styles from './GardenView.module.css';
 
@@ -102,6 +103,9 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
   // Lock beds state - prevents accidental dragging
   const [bedsLocked, setBedsLocked] = useState(true);
 
+  // Plant type filter
+  const [plantTypeFilter, setPlantTypeFilter] = useState<PlantTypeFilterValue>('all');
+
   // Get season date range for the scrubber
   const seasonRange = useMemo(
     () => getSeasonDateRange(plantings),
@@ -122,11 +126,26 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
 
   const [selectedDate, setSelectedDate] = useState(defaultDate);
 
-  // Filter plantings to those in ground on selected date
-  const inGroundPlantings = useMemo(
-    () => filterPlantingsInGround(plantings, selectedDate),
-    [plantings, selectedDate]
+  // Create cultivar lookup map for filtering and footprint calculations
+  const cultivarMap = useMemo(
+    () => new Map(cultivars.map((c) => [c.id, c])),
+    [cultivars]
   );
+
+  // Filter all plantings by plant type (for the calendar view)
+  const filteredPlantings = useMemo(() => {
+    if (plantTypeFilter === 'all') return plantings;
+    return plantings.filter((p) => {
+      const cultivar = cultivarMap.get(p.cultivarId);
+      return (cultivar?.plantType ?? 'vegetable') === plantTypeFilter;
+    });
+  }, [plantings, plantTypeFilter, cultivarMap]);
+
+  // Filter plantings to those in ground on selected date, then by plant type
+  const inGroundPlantings = useMemo(() => {
+    const inGround = filterPlantingsInGround(filteredPlantings, selectedDate);
+    return inGround;
+  }, [filteredPlantings, selectedDate]);
 
   // Get unplaced plantings (in ground but not in any bed)
   const placedPlantingIds = useMemo(
@@ -143,12 +162,6 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
   const visiblePlacements = useMemo(
     () => placements.filter((p) => inGroundPlantings.some((pl) => pl.id === p.plantingId)),
     [placements, inGroundPlantings]
-  );
-
-  // Create cultivar lookup map for footprint calculations
-  const cultivarMap = useMemo(
-    () => new Map(cultivars.map((c) => [c.id, c])),
-    [cultivars]
   );
 
   // Check which unplaced plantings are too large for any available bed space
@@ -430,6 +443,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
         >
           Auto-Layout
         </button>
+        <PlantTypeFilter value={plantTypeFilter} onChange={setPlantTypeFilter} />
         <div className={styles.toolbarSpacer} />
         <button
           className={`${styles.lockToggle} ${bedsLocked ? styles.locked : ''}`}
@@ -476,7 +490,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
 
       {/* Calendar Timeline */}
       <LayoutCalendarView
-        plantings={plantings}
+        plantings={filteredPlantings}
         cultivars={cultivars}
         frost={frost}
         climate={climate}

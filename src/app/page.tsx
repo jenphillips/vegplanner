@@ -53,7 +53,7 @@ const daysBetweenExclusive = (startIso: string, endIso: string) => {
 
 export default function Home() {
   const [expandAll, setExpandAll] = useState(true);
-  const [activeTab, setActiveTab] = useState<Tab>('timeline');
+  const [activeTab, setActiveTab] = useState<Tab>('vegetables');
   const {
     plantings,
     loading: plantingsLoading,
@@ -82,6 +82,15 @@ export default function Home() {
         return a.variety.localeCompare(b.variety);
       });
   }, []);
+
+  // Filter cultivars by plant type
+  const vegetableCultivars = useMemo(() => {
+    return plannedCultivars.filter((c) => (c.plantType ?? 'vegetable') === 'vegetable');
+  }, [plannedCultivars]);
+
+  const flowerCultivars = useMemo(() => {
+    return plannedCultivars.filter((c) => c.plantType === 'flower');
+  }, [plannedCultivars]);
 
   const handleAddPlanting = async (
     planting: Parameters<typeof addAndRenumber>[0]
@@ -175,13 +184,13 @@ export default function Home() {
           </div>
         )}
 
-        {/* Timeline Tab: Cultivar Cards with Planting Management */}
-        {ready && activeTab === 'timeline' && (
+        {/* Vegetables Tab: Vegetable Cultivar Cards with Planting Management */}
+        {ready && activeTab === 'vegetables' && (
           <>
             <section className={styles.section}>
               <div className={styles.sectionHeader}>
                 <div>
-                  <h2 className={styles.sectionTitle}>Cultivars & Plantings</h2>
+                  <h2 className={styles.sectionTitle}>Vegetable Cultivars & Plantings</h2>
                   <p className={styles.sectionDesc}>
                     Click a cultivar to expand and manage succession plantings. The
                     app will automatically calculate optimal sowing dates based on
@@ -196,7 +205,7 @@ export default function Home() {
                 </button>
               </div>
               <div className={styles.cultivarGrid}>
-                {plannedCultivars.map((cultivar) => (
+                {vegetableCultivars.map((cultivar) => (
                   <CultivarCard
                     key={cultivar.id}
                     cultivar={cultivar}
@@ -214,6 +223,44 @@ export default function Home() {
 
             {/* Seasonal Planting Reference (Baseline Vegetables) */}
             <BaselineTimeline frost={data.frost} climate={data.climate} />
+          </>
+        )}
+
+        {/* Flowers Tab: Flower Cultivar Cards with Planting Management */}
+        {ready && activeTab === 'flowers' && (
+          <>
+            <section className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2 className={styles.sectionTitle}>Flower Cultivars & Plantings</h2>
+                  <p className={styles.sectionDesc}>
+                    Click a cultivar to expand and manage succession plantings for
+                    continuous blooms throughout the season.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setExpandAll(!expandAll)}
+                  className={styles.expandButton}
+                >
+                  {expandAll ? 'Collapse All' : 'Expand All'}
+                </button>
+              </div>
+              <div className={styles.cultivarGrid}>
+                {flowerCultivars.map((cultivar) => (
+                  <CultivarCard
+                    key={cultivar.id}
+                    cultivar={cultivar}
+                    frost={data.frost}
+                    climate={data.climate}
+                    plantings={plantings}
+                    onAddPlanting={handleAddPlanting}
+                    onUpdatePlanting={handleUpdatePlanting}
+                    onDeletePlanting={handleDeletePlanting}
+                    forceExpanded={expandAll ? true : undefined}
+                  />
+                ))}
+              </div>
+            </section>
           </>
         )}
 
