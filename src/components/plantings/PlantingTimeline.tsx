@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import type { Planting, FrostWindow, Climate, Cultivar } from '@/lib/types';
 import { isGrowingPeriodViable } from '@/lib/succession';
+import { calculateShiftBounds } from '@/lib/dragConstraints';
 import styles from './PlantingTimeline.module.css';
 
 type PlantingTimelineProps = {
@@ -61,75 +62,19 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
   type ViableRange = { minShift: number; maxShift: number };
 
   // Calculate shift bounds for direct sow crops AND "either" crops in transplant mode
-  // - Can't shift earlier than when harvest start equals previous planting's harvest end
-  // - Can't shift earlier than frost-based limits (directAfterLsfDays or transplantAfterLsfDays)
-  // - Can't shift later than when sow date reaches the latest viable sow date for the season
-  // - Can't shift into temperature-unfavorable periods (handled by temperatureShiftBounds)
+  // Uses extracted function for testability - see dragConstraints.test.ts
   const shiftBounds = useMemo(() => {
     if (!canDragDirectSow && !canDragTransplantShift) return null;
 
-    const harvestStart = new Date(`${planting.harvestStart}T00:00:00Z`);
-    const sowDate = new Date(`${planting.sowDate}T00:00:00Z`);
-    const year = new Date(`${frost.lastSpringFrost}T00:00:00Z`).getUTCFullYear();
-
-    // Maximum shift earlier: harvest start can go back to previous harvest end (or season start if first planting)
-    let maxShiftEarlier: number;
-    if (previousHarvestEnd) {
-      const prevEnd = new Date(`${previousHarvestEnd}T00:00:00Z`);
-      maxShiftEarlier = Math.floor((harvestStart.getTime() - prevEnd.getTime()) / (1000 * 60 * 60 * 24));
-    } else {
-      // First planting: constrain to season start
-      const seasonStart = new Date(`${year}-03-01T00:00:00Z`);
-      maxShiftEarlier = Math.floor((sowDate.getTime() - seasonStart.getTime()) / (1000 * 60 * 60 * 24));
-    }
-
-    // Apply frost-based constraints for frost-SENSITIVE crops only
-    // Frost-tolerant crops (beets, gai lan, etc.) can be planted before last frost
-    // For sensitive transplants, the transplant date can't go before lastSpringFrost + transplantAfterLsfDays
-    // For sensitive direct sow, the sow date can't go before lastSpringFrost + directAfterLsfDays
-    if (cultivar?.frostSensitive) {
-      const lastFrost = new Date(`${frost.lastSpringFrost}T00:00:00Z`);
-
-      if (canDragTransplantShift && planting.transplantDate) {
-        // Transplant mode: constrain transplant date based on transplantAfterLsfDays
-        const transplantAfterDays = cultivar.transplantAfterLsfDays ?? 0;
-        const earliestTransplant = new Date(lastFrost.getTime() + transplantAfterDays * 24 * 60 * 60 * 1000);
-        const currentTransplant = new Date(`${planting.transplantDate}T00:00:00Z`);
-        const maxShiftForFrost = Math.floor((currentTransplant.getTime() - earliestTransplant.getTime()) / (1000 * 60 * 60 * 24));
-        maxShiftEarlier = Math.min(maxShiftEarlier, maxShiftForFrost);
-      } else if (canDragDirectSow) {
-        // Direct sow mode: constrain sow date based on directAfterLsfDays
-        const directAfterDays = cultivar.directAfterLsfDays ?? 0;
-        const earliestSow = new Date(lastFrost.getTime() + directAfterDays * 24 * 60 * 60 * 1000);
-        const maxShiftForFrost = Math.floor((sowDate.getTime() - earliestSow.getTime()) / (1000 * 60 * 60 * 24));
-        maxShiftEarlier = Math.min(maxShiftEarlier, maxShiftForFrost);
-      }
-    }
-
-    // Maximum shift later: constrain to end of season
-    // Calculate the frost deadline (when harvest must end)
-    const FROST_BUFFER_DAYS = 4;
-    let frostDeadline: Date;
-    if (cultivar?.frostSensitive) {
-      const earliestFrost = climate?.firstFallFrost?.earliest
-        ? `${year}-${climate.firstFallFrost.earliest}`
-        : frost.firstFallFrost;
-      frostDeadline = new Date(`${addDays(earliestFrost, -FROST_BUFFER_DAYS)}T00:00:00Z`);
-    } else {
-      const typicalFrost = climate?.firstFallFrost?.typical
-        ? `${year}-${climate.firstFallFrost.typical}`
-        : frost.firstFallFrost;
-      frostDeadline = new Date(`${addDays(typicalFrost, 21)}T00:00:00Z`);
-    }
-
-    // Latest sow date = frost deadline - maturity days
-    // We need harvest to start before frost deadline, so latest sow = frostDeadline - maturityDays
-    const maturityDays = cultivar?.maturityDays ?? 60;
-    const latestSowDate = new Date(frostDeadline.getTime() - maturityDays * 24 * 60 * 60 * 1000);
-    const maxShiftLater = Math.floor((latestSowDate.getTime() - sowDate.getTime()) / (1000 * 60 * 60 * 24));
-
-    return { minShift: -maxShiftEarlier, maxShift: Math.max(0, maxShiftLater) };
-  }, [canDragDirectSow, canDragTransplantShift, frost.lastSpringFrost, frost.firstFallFrost, climate, cultivar, planting.sowDate, planting.harvestStart, previousHarvestEnd]);
+    return calculateShiftBounds({
+      planting,
+      cultivar,
+      frost,
+      climate,
+      previousHarvestEnd,
+      isTransplantMode: !!canDragTransplantShift,
+    });
+  }, [canDragDirectSow, canDragTransplantShift, frost, climate, cultivar, planting, previousHarvestEnd]);
 
   // Calculate temperature-aware shift bounds for direct sow AND transplant "either" crops
   // This finds ALL viable ranges (e.g., spring and fall windows for heat-sensitive crops)
