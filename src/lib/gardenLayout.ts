@@ -641,6 +641,129 @@ export function dateRangesOverlap(
 }
 
 /**
+ * Find the nearest valid position for a placement that avoids collisions.
+ * Searches outward from the target position in a spiral pattern.
+ *
+ * @param targetX - Target X position in cm (bed-relative)
+ * @param targetY - Target Y position in cm (bed-relative)
+ * @param placement - Dimensions of the placement
+ * @param bed - Bed dimensions
+ * @param existingPlacements - Other placements to avoid
+ * @param existingDateRanges - Map of placement ID to date range
+ * @param newDateRange - Date range of the placement being moved
+ * @param excludeId - Placement ID to exclude from collision check (self)
+ * @param step - Grid step size for searching (default 5cm)
+ * @returns Nearest valid position or null if none found
+ */
+export function findNearestValidPosition(
+  targetX: number,
+  targetY: number,
+  placement: { widthCm: number; heightCm: number },
+  bed: { widthCm: number; lengthCm: number },
+  existingPlacements: Array<{
+    id: string;
+    xCm: number;
+    yCm: number;
+    widthCm: number;
+    heightCm: number;
+  }>,
+  existingDateRanges: Map<string, { start: string; end: string }>,
+  newDateRange: { start: string; end: string } | null,
+  excludeId?: string,
+  step: number = 5
+): { xCm: number; yCm: number } | null {
+  // Helper to check if a position is valid
+  const isValidPosition = (x: number, y: number): boolean => {
+    // Check bed bounds
+    if (x < 0 || y < 0 ||
+        x + placement.widthCm > bed.widthCm ||
+        y + placement.heightCm > bed.lengthCm) {
+      return false;
+    }
+
+    // Check collisions
+    const collision = checkCollisionsWithTiming(
+      { xCm: x, yCm: y, widthCm: placement.widthCm, heightCm: placement.heightCm },
+      newDateRange,
+      existingPlacements,
+      existingDateRanges,
+      excludeId
+    );
+    return !collision.hasCollision;
+  };
+
+  // Clamp target to bed bounds first
+  const clampedX = Math.max(0, Math.min(targetX, bed.widthCm - placement.widthCm));
+  const clampedY = Math.max(0, Math.min(targetY, bed.lengthCm - placement.heightCm));
+
+  // Snap to grid
+  const snappedX = Math.round(clampedX / step) * step;
+  const snappedY = Math.round(clampedY / step) * step;
+
+  // If target position is already valid, return it
+  if (isValidPosition(snappedX, snappedY)) {
+    return { xCm: snappedX, yCm: snappedY };
+  }
+
+  // Search outward in a spiral pattern
+  // Maximum search radius based on bed size
+  const maxRadius = Math.max(bed.widthCm, bed.lengthCm);
+
+  let bestPosition: { xCm: number; yCm: number } | null = null;
+  let bestDistance = Infinity;
+
+  // Search in expanding rings around the target
+  for (let radius = step; radius <= maxRadius; radius += step) {
+    // Check positions at this radius in all 4 directions
+    const candidates = [
+      { x: snappedX, y: snappedY - radius }, // up
+      { x: snappedX, y: snappedY + radius }, // down
+      { x: snappedX - radius, y: snappedY }, // left
+      { x: snappedX + radius, y: snappedY }, // right
+      // Diagonals
+      { x: snappedX - radius, y: snappedY - radius },
+      { x: snappedX + radius, y: snappedY - radius },
+      { x: snappedX - radius, y: snappedY + radius },
+      { x: snappedX + radius, y: snappedY + radius },
+    ];
+
+    // Also check positions along the edges of the square at this radius
+    for (let offset = step; offset < radius; offset += step) {
+      candidates.push(
+        { x: snappedX - radius, y: snappedY - offset },
+        { x: snappedX - radius, y: snappedY + offset },
+        { x: snappedX + radius, y: snappedY - offset },
+        { x: snappedX + radius, y: snappedY + offset },
+        { x: snappedX - offset, y: snappedY - radius },
+        { x: snappedX + offset, y: snappedY - radius },
+        { x: snappedX - offset, y: snappedY + radius },
+        { x: snappedX + offset, y: snappedY + radius }
+      );
+    }
+
+    for (const candidate of candidates) {
+      if (isValidPosition(candidate.x, candidate.y)) {
+        const distance = Math.sqrt(
+          Math.pow(candidate.x - snappedX, 2) + Math.pow(candidate.y - snappedY, 2)
+        );
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestPosition = { xCm: candidate.x, yCm: candidate.y };
+        }
+      }
+    }
+
+    // If we found a valid position at this radius, return the best one
+    // (no need to search further since distance will only increase)
+    if (bestPosition) {
+      return bestPosition;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Check if a placement collides with existing placements, considering temporal overlap.
  * Two plantings only collide if they overlap both spatially AND temporally.
  *

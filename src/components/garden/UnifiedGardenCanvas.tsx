@@ -10,6 +10,7 @@ import {
   getCropColor,
   checkCollisionsWithTiming,
   findOverlappingPlacements,
+  findNearestValidPosition,
   fitsInBed,
   isPlantingInHarvest,
   calculateGrowthFactor,
@@ -876,16 +877,70 @@ export function UnifiedGardenCanvas({
     }
 
     // Apply placement move
-    if (movingPlacement && movePreview && movePreview.valid && hasDragged) {
+    if (movingPlacement && movePreview && hasDragged) {
+      let finalX = movePreview.xCm;
+      let finalY = movePreview.yCm;
+
+      // If the position is invalid (collision), find the nearest valid position
+      if (!movePreview.valid && !allowOverlap) {
+        const bed = beds.find((b) => b.id === movingPlacement.bedId);
+        if (bed) {
+          // Get existing placements in this bed for collision check
+          const bedPlacements = footprints
+            .filter((f) => f.placement.bedId === movingPlacement.bedId)
+            .map((f) => ({
+              id: f.placement.id,
+              xCm: f.placement.xCm,
+              yCm: f.placement.yCm,
+              widthCm: f.widthCm,
+              heightCm: f.heightCm,
+            }));
+
+          // Build date ranges map
+          const existingDateRanges = new Map<string, { start: string; end: string }>();
+          for (const f of footprints) {
+            if (f.placement.bedId === movingPlacement.bedId && f.dateRange) {
+              existingDateRanges.set(f.placement.id, f.dateRange);
+            }
+          }
+
+          const nearestValid = findNearestValidPosition(
+            movePreview.xCm,
+            movePreview.yCm,
+            { widthCm: movingPlacement.widthCm, heightCm: movingPlacement.heightCm },
+            { widthCm: bed.widthCm, lengthCm: bed.lengthCm },
+            bedPlacements,
+            existingDateRanges,
+            movingPlacement.dateRange,
+            movingPlacement.id
+          );
+
+          if (nearestValid) {
+            finalX = nearestValid.xCm;
+            finalY = nearestValid.yCm;
+          } else {
+            // No valid position found - don't move at all
+            setMovingPlacement(null);
+            setMovePreview(null);
+            setMovingBed(null);
+            setBedMovePreview(null);
+            setResizing(null);
+            setResizePreview(null);
+            setHasDragged(false);
+            return;
+          }
+        }
+      }
+
       // Store the committed position to prevent flash-back during async update
       setCommittedMove({
         placementId: movingPlacement.id,
-        xCm: movePreview.xCm,
-        yCm: movePreview.yCm,
+        xCm: finalX,
+        yCm: finalY,
       });
       onPlacementUpdate(movingPlacement.id, {
-        xCm: movePreview.xCm,
-        yCm: movePreview.yCm,
+        xCm: finalX,
+        yCm: finalY,
       });
     }
 

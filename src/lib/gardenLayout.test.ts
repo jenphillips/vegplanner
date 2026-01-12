@@ -7,6 +7,7 @@ import {
   checkCollisions,
   checkCollisionsWithTiming,
   findOverlappingPlacements,
+  findNearestValidPosition,
   fitsInBed,
   getCropColor,
   getSeasonDateRange,
@@ -894,5 +895,197 @@ describe('checkCollisionsWithTiming', () => {
       'a'
     );
     expect(result.hasCollision).toBe(false);
+  });
+});
+
+describe('findNearestValidPosition', () => {
+  const bed = { widthCm: 120, lengthCm: 240 };
+  const placement = { widthCm: 30, heightCm: 30 };
+  const emptyDateRanges = new Map<string, { start: string; end: string }>();
+
+  it('returns target position when already valid (no obstacles)', () => {
+    const result = findNearestValidPosition(
+      50, 50,
+      placement,
+      bed,
+      [],
+      emptyDateRanges,
+      null
+    );
+    expect(result).toEqual({ xCm: 50, yCm: 50 });
+  });
+
+  it('snaps result to grid (5cm increments)', () => {
+    const result = findNearestValidPosition(
+      53, 47,
+      placement,
+      bed,
+      [],
+      emptyDateRanges,
+      null
+    );
+    expect(result).toEqual({ xCm: 55, yCm: 45 });
+  });
+
+  it('clamps to bed bounds when target is outside', () => {
+    const result = findNearestValidPosition(
+      200, 300, // way outside the 120x240 bed
+      placement,
+      bed,
+      [],
+      emptyDateRanges,
+      null
+    );
+    // Should clamp to max valid position: bed - placement size
+    expect(result).toEqual({ xCm: 90, yCm: 210 });
+  });
+
+  it('finds nearest position when target overlaps single obstacle', () => {
+    const existing = [
+      { id: 'a', xCm: 50, yCm: 50, widthCm: 30, heightCm: 30 },
+    ];
+    const dateRanges = new Map([
+      ['a', { start: '2025-05-01', end: '2025-07-01' }],
+    ]);
+
+    // Try to place at (50, 50) which is exactly where 'a' is
+    const result = findNearestValidPosition(
+      50, 50,
+      placement,
+      bed,
+      existing,
+      dateRanges,
+      { start: '2025-05-15', end: '2025-08-01' }
+    );
+
+    expect(result).not.toBeNull();
+    // Should be offset from target but still close
+    // Valid positions would be at edges of the obstacle
+    expect(
+      result!.xCm === 50 && result!.yCm === 50
+    ).toBe(false); // Not the original position
+  });
+
+  it('finds position navigating between multiple obstacles', () => {
+    const existing = [
+      { id: 'a', xCm: 0, yCm: 0, widthCm: 50, heightCm: 50 },
+      { id: 'b', xCm: 60, yCm: 0, widthCm: 50, heightCm: 50 },
+    ];
+    const dateRanges = new Map([
+      ['a', { start: '2025-05-01', end: '2025-07-01' }],
+      ['b', { start: '2025-05-01', end: '2025-07-01' }],
+    ]);
+
+    // Try to place between the two obstacles
+    const result = findNearestValidPosition(
+      25, 25, // overlaps with 'a'
+      placement,
+      bed,
+      existing,
+      dateRanges,
+      { start: '2025-05-15', end: '2025-08-01' }
+    );
+
+    expect(result).not.toBeNull();
+    // Verify no collision with either obstacle
+    const collidesWithA = result!.xCm < 50 && result!.xCm + 30 > 0 &&
+                          result!.yCm < 50 && result!.yCm + 30 > 0;
+    const collidesWithB = result!.xCm < 110 && result!.xCm + 30 > 60 &&
+                          result!.yCm < 50 && result!.yCm + 30 > 0;
+    expect(collidesWithA && collidesWithB).toBe(false);
+  });
+
+  it('returns null when no valid position exists (bed too full)', () => {
+    // Fill the bed with obstacles - use a small bed for simplicity
+    const smallBed = { widthCm: 60, lengthCm: 60 };
+    const existing = [
+      { id: 'a', xCm: 0, yCm: 0, widthCm: 60, heightCm: 60 },
+    ];
+    const dateRanges = new Map([
+      ['a', { start: '2025-05-01', end: '2025-07-01' }],
+    ]);
+
+    const result = findNearestValidPosition(
+      0, 0,
+      placement,
+      smallBed,
+      existing,
+      dateRanges,
+      { start: '2025-05-15', end: '2025-08-01' }
+    );
+
+    expect(result).toBeNull();
+  });
+
+  it('allows placement when temporal ranges do not overlap', () => {
+    const existing = [
+      { id: 'a', xCm: 50, yCm: 50, widthCm: 30, heightCm: 30 },
+    ];
+    const dateRanges = new Map([
+      ['a', { start: '2025-05-01', end: '2025-06-01' }], // ends June 1
+    ]);
+
+    // New planting starts after existing one ends
+    const result = findNearestValidPosition(
+      50, 50,
+      placement,
+      bed,
+      existing,
+      dateRanges,
+      { start: '2025-06-15', end: '2025-08-01' } // starts June 15
+    );
+
+    // Should return the target position since there's no temporal overlap
+    expect(result).toEqual({ xCm: 50, yCm: 50 });
+  });
+
+  it('excludes self from collision check when moving', () => {
+    const existing = [
+      { id: 'self', xCm: 50, yCm: 50, widthCm: 30, heightCm: 30 },
+    ];
+    const dateRanges = new Map([
+      ['self', { start: '2025-05-01', end: '2025-07-01' }],
+    ]);
+
+    // Moving 'self' to a position that overlaps with its current location
+    const result = findNearestValidPosition(
+      55, 55,
+      placement,
+      bed,
+      existing,
+      dateRanges,
+      { start: '2025-05-01', end: '2025-07-01' },
+      'self' // exclude self from collision check
+    );
+
+    expect(result).toEqual({ xCm: 55, yCm: 55 });
+  });
+
+  it('finds nearest position preferring smaller distances', () => {
+    // Obstacle in the center, test that we get the closest valid spot
+    const existing = [
+      { id: 'a', xCm: 45, yCm: 45, widthCm: 30, heightCm: 30 },
+    ];
+    const dateRanges = new Map([
+      ['a', { start: '2025-05-01', end: '2025-07-01' }],
+    ]);
+
+    // Try to place at the center of the obstacle
+    const result = findNearestValidPosition(
+      50, 50,
+      placement,
+      bed,
+      existing,
+      dateRanges,
+      { start: '2025-05-15', end: '2025-08-01' }
+    );
+
+    expect(result).not.toBeNull();
+    // The result should be close to the target (within reasonable distance)
+    const distance = Math.sqrt(
+      Math.pow(result!.xCm - 50, 2) + Math.pow(result!.yCm - 50, 2)
+    );
+    // Should find something within ~35cm (one step past the obstacle edge)
+    expect(distance).toBeLessThanOrEqual(40);
   });
 });
