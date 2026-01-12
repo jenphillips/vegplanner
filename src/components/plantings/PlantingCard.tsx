@@ -16,6 +16,7 @@ type PlantingCardProps = {
   onDelete: (id: string) => void;
   isSelected?: boolean;
   onSelect?: (id: string) => void;
+  disableDrag?: boolean;
 };
 
 // TODO: Move status tracking to Tasks scheduler page
@@ -49,6 +50,7 @@ export function PlantingCard({
   onDelete,
   isSelected,
   onSelect,
+  disableDrag,
 }: PlantingCardProps) {
   const handleDelete = () => {
     onDelete(planting.id);
@@ -178,8 +180,8 @@ export function PlantingCard({
           climate={climate}
           cultivar={cultivar}
           previousHarvestEnd={previousHarvestEnd}
-          onUpdateSowDate={handleSowDateUpdate}
-          onShiftPlanting={handleShiftPlanting}
+          onUpdateSowDate={disableDrag ? undefined : handleSowDateUpdate}
+          onShiftPlanting={disableDrag ? undefined : handleShiftPlanting}
         />
         <div className={styles.methodToggleSlot}>
           {cultivar.sowMethod === 'either' && (

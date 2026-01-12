@@ -105,6 +105,7 @@ export function LayoutCalendarView({
                 previousHarvestEnd={undefined}
                 onUpdate={onUpdatePlanting ?? (() => {})}
                 onDelete={onDeletePlanting ?? (() => {})}
+                disableDrag
               />
             );
           })}
