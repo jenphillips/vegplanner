@@ -8,8 +8,9 @@ import {
   fitsInBed,
   getCropColor,
   getSeasonDateRange,
+  autoLayout,
 } from './gardenLayout';
-import type { Planting } from './types';
+import type { Planting, GardenBed, PlantingPlacement, Cultivar } from './types';
 
 describe('calculateFootprint', () => {
   it('returns zero dimensions for zero quantity', () => {
@@ -352,5 +353,154 @@ describe('getSeasonDateRange', () => {
     ];
     const result = getSeasonDateRange(plantings);
     expect(result).toEqual({ start: '2025-04-01', end: '2025-09-30' });
+  });
+});
+
+describe('autoLayout', () => {
+  // Test fixtures
+  const createPlanting = (id: string, cultivarId: string, quantity: number): Planting => ({
+    id,
+    cultivarId,
+    label: `${cultivarId} #1`,
+    quantity,
+    sowDate: '2025-05-01',
+    harvestStart: '2025-06-20',
+    harvestEnd: '2025-07-04',
+    method: 'direct',
+    status: 'planned',
+    successionNumber: 1,
+    createdAt: '2025-01-01',
+  });
+
+  const createBed = (id: string, widthCm: number, lengthCm: number): GardenBed => ({
+    id,
+    name: `Bed ${id}`,
+    widthCm,
+    lengthCm,
+    xPosition: 0,
+    yPosition: 0,
+    sunExposure: 'full',
+  });
+
+  const createCultivar = (id: string, spacingCm: number): Cultivar => ({
+    id,
+    crop: 'Test Crop',
+    variety: 'Test Variety',
+    spacingCm,
+    daysToMaturity: 60,
+    method: 'direct',
+    sowIndoorsWeeks: 0,
+    transplantAfterFrost: 0,
+    sowAfterFrost: 0,
+    frostSensitivity: 'tolerant',
+    plantingWindowEarlyStart: 0,
+    plantingWindowEarlyEnd: 0,
+    plantingWindowLateStart: 0,
+    plantingWindowLateEnd: 0,
+  });
+
+  it('places a planting in an empty bed', () => {
+    const plantings = [createPlanting('p1', 'c1', 4)];
+    const beds = [createBed('b1', 120, 240)];
+    const cultivars = [createCultivar('c1', 30)];
+    const quantities = new Map([['p1', 4]]);
+
+    const suggestions = autoLayout(plantings, beds, [], cultivars, quantities);
+
+    expect(suggestions).toHaveLength(1);
+    expect(suggestions[0].plantingId).toBe('p1');
+    expect(suggestions[0].bedId).toBe('b1');
+    expect(suggestions[0].xCm).toBe(0);
+    expect(suggestions[0].yCm).toBe(0);
+  });
+
+  it('avoids collision with existing placement', () => {
+    const plantings = [createPlanting('p2', 'c1', 4)];
+    const beds = [createBed('b1', 120, 240)];
+    const cultivars = [createCultivar('c1', 30)];
+    // Existing placement at origin: 4 plants at 30cm = 60x60cm
+    const existingPlacements: PlantingPlacement[] = [
+      { id: 'pl1', plantingId: 'p1', bedId: 'b1', xCm: 0, yCm: 0, spacingCm: 30 },
+    ];
+    const quantities = new Map([['p1', 4], ['p2', 4]]);
+
+    const suggestions = autoLayout(plantings, beds, existingPlacements, cultivars, quantities);
+
+    expect(suggestions).toHaveLength(1);
+    // Should not overlap with existing placement at (0,0) with size 60x60
+    const suggestion = suggestions[0];
+    const isOverlapping =
+      suggestion.xCm < 60 && suggestion.xCm + 60 > 0 &&
+      suggestion.yCm < 60 && suggestion.yCm + 60 > 0;
+    expect(isOverlapping).toBe(false);
+  });
+
+  it('respects custom cols on existing placements', () => {
+    // This test verifies the fix: existing placements with custom cols
+    // should use their actual dimensions, not the default square-ish layout
+    const plantings = [createPlanting('p2', 'c1', 4)];
+    const beds = [createBed('b1', 120, 240)];
+    const cultivars = [createCultivar('c1', 30)];
+    // Existing placement: 12 plants in 1 column = 30cm wide x 360cm tall
+    // But bed is only 240cm long, so let's use 6 plants: 1 col x 6 rows = 30x180cm
+    const existingPlacements: PlantingPlacement[] = [
+      { id: 'pl1', plantingId: 'p1', bedId: 'b1', xCm: 0, yCm: 0, spacingCm: 30, cols: 1 },
+    ];
+    const quantities = new Map([['p1', 6], ['p2', 4]]);
+
+    const suggestions = autoLayout(plantings, beds, existingPlacements, cultivars, quantities);
+
+    expect(suggestions).toHaveLength(1);
+    const suggestion = suggestions[0];
+    // Existing placement with cols=1 is 30cm wide x 180cm tall
+    // New placement should be placed to the right (x >= 30) since that's where space is
+    expect(suggestion.xCm).toBeGreaterThanOrEqual(30);
+  });
+
+  it('does not place suggestions that overlap each other', () => {
+    // Place multiple plantings and ensure they don't overlap
+    const plantings = [
+      createPlanting('p1', 'c1', 4),
+      createPlanting('p2', 'c1', 4),
+      createPlanting('p3', 'c1', 4),
+    ];
+    const beds = [createBed('b1', 120, 240)];
+    const cultivars = [createCultivar('c1', 30)];
+    const quantities = new Map([['p1', 4], ['p2', 4], ['p3', 4]]);
+
+    const suggestions = autoLayout(plantings, beds, [], cultivars, quantities);
+
+    expect(suggestions).toHaveLength(3);
+
+    // Check that no two suggestions overlap
+    for (let i = 0; i < suggestions.length; i++) {
+      for (let j = i + 1; j < suggestions.length; j++) {
+        const s1 = suggestions[i];
+        const s2 = suggestions[j];
+        // 4 plants at 30cm spacing = 2x2 grid = 60x60cm
+        const footprint = calculateFootprint(4, 30);
+
+        // Check if they're in the same bed
+        if (s1.bedId === s2.bedId) {
+          const overlaps =
+            s1.xCm < s2.xCm + footprint.widthCm &&
+            s1.xCm + footprint.widthCm > s2.xCm &&
+            s1.yCm < s2.yCm + footprint.heightCm &&
+            s1.yCm + footprint.heightCm > s2.yCm;
+          expect(overlaps).toBe(false);
+        }
+      }
+    }
+  });
+
+  it('returns empty array when no space available', () => {
+    const plantings = [createPlanting('p1', 'c1', 100)]; // Large planting
+    const beds = [createBed('b1', 60, 60)]; // Small bed
+    const cultivars = [createCultivar('c1', 30)];
+    const quantities = new Map([['p1', 100]]);
+
+    const suggestions = autoLayout(plantings, beds, [], cultivars, quantities);
+
+    expect(suggestions).toHaveLength(0);
   });
 });

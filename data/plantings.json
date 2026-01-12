@@ -16,7 +16,7 @@
   {
     "cultivarId": "spinach-seaside",
     "label": "Spinach - Seaside #1",
-    "quantity": 10,
+    "quantity": 8,
     "sowDate": "2025-04-01",
     "harvestStart": "2025-05-11",
     "harvestEnd": "2025-06-01",
@@ -55,7 +55,7 @@
   {
     "cultivarId": "lettuce-little-gem",
     "label": "Lettuce - Little Gem #1",
-    "quantity": 10,
+    "quantity": 6,
     "sowDate": "2025-04-01",
     "harvestStart": "2025-05-21",
     "harvestEnd": "2025-06-04",

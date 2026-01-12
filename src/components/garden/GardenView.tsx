@@ -342,15 +342,16 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
 
   // Auto-layout handlers
   const handleAutoLayout = () => {
-    // Build quantity map for the algorithm (default to 1 for unspecified quantities)
+    // Build quantity map for ALL in-ground plantings (both placed and unplaced)
+    // The algorithm needs quantities for existing placements to calculate their footprints
     const plantingQuantities = new Map(
-      unplacedPlantings.map((p) => [p.id, p.quantity ?? 1])
+      inGroundPlantings.map((p) => [p.id, p.quantity ?? 1])
     );
 
     const suggestions = autoLayout(
       unplacedPlantings,
       beds,
-      placements,
+      visiblePlacements, // Only consider placements for plantings in-ground on selected date
       cultivars,
       plantingQuantities
     );

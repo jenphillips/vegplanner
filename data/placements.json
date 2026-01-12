@@ -5,7 +5,8 @@
     "xCm": 0,
     "yCm": 60,
     "spacingCm": 15,
-    "id": "55ba693b-3afd-419a-9a7b-e694616cda9a"
+    "id": "55ba693b-3afd-419a-9a7b-e694616cda9a",
+    "cols": 2
   },
   {
     "plantingId": "f53ac084-cca5-41a8-b08a-14664f595697",
@@ -13,7 +14,8 @@
     "xCm": 0,
     "yCm": 0,
     "spacingCm": 20,
-    "id": "ebd6dd8e-03a4-4c0a-b453-08e3ece80db9"
+    "id": "ebd6dd8e-03a4-4c0a-b453-08e3ece80db9",
+    "cols": 2
   },
   {
     "plantingId": "0ccfce68-5b8d-4770-b7d3-e4897b4f7e82",
@@ -39,5 +41,37 @@
     "spacingCm": 15,
     "cols": 2,
     "id": "fa69b521-7377-4c56-899b-015aeddc2eda"
+  },
+  {
+    "plantingId": "07784879-e1d1-4c62-9f3f-594db96cb0ac",
+    "bedId": "c5b84767-e442-480b-bb9e-9d9235478055",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 20,
+    "id": "69af6feb-c9b8-43ab-a5a1-27a664cea808"
+  },
+  {
+    "plantingId": "8b913003-b7f0-469f-916b-d7ef19cebfac",
+    "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
+    "xCm": 40,
+    "yCm": 0,
+    "spacingCm": 10,
+    "id": "12187eee-d04c-4888-a4e5-db03b1bcb7ed"
+  },
+  {
+    "plantingId": "c343cbc6-90c0-4b12-818a-11006abbc9fc",
+    "bedId": "3733de2c-174c-4f9c-8f2e-0c8a649e75f2",
+    "xCm": 0,
+    "yCm": 60,
+    "spacingCm": 10,
+    "id": "95d5040b-aa92-42af-842b-425f7b7a8713"
+  },
+  {
+    "plantingId": "15cd744d-4124-4f49-aeb7-359f6888b41a",
+    "bedId": "3733de2c-174c-4f9c-8f2e-0c8a649e75f2",
+    "xCm": 0,
+    "yCm": 90,
+    "spacingCm": 20,
+    "id": "c1783d74-c42f-440a-99c1-b7c3982ffc6f"
   }
 ]

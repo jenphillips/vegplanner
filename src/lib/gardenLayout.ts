@@ -394,7 +394,10 @@ export function autoLayout(
     const bedPlacements = existingPlacements.filter((p) => p.bedId === bed.id);
     const footprints = bedPlacements.map((p) => {
       const qty = plantingQuantities.get(p.plantingId) ?? 1;
-      const fp = calculateFootprint(qty, p.spacingCm);
+      // Use custom cols if specified, otherwise calculate default layout
+      const fp = p.cols
+        ? calculateFootprintWithLayout(qty, p.spacingCm, p.cols)
+        : calculateFootprint(qty, p.spacingCm);
       return {
         xCm: p.xCm,
         yCm: p.yCm,
