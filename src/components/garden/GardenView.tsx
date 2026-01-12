@@ -546,6 +546,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
               units={units}
               bedsLocked={bedsLocked}
               suggestions={autoLayoutSuggestions ?? []}
+              selectedDate={selectedDate}
               onEditBed={handleEditBed}
               onDeleteBed={handleDeleteBed}
               onUpdateBed={updateBed}

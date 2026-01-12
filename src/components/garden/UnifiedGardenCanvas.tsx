@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
+import { Scissors } from 'lucide-react';
 import {
   calculateFootprint,
   calculateFootprintWithLayout,
@@ -9,6 +10,7 @@ import {
   getCropColor,
   checkCollisions,
   fitsInBed,
+  isPlantingInHarvest,
 } from '@/lib/gardenLayout';
 import type {
   GardenBed,
@@ -37,6 +39,7 @@ type UnifiedGardenCanvasProps = {
   units?: Units;
   bedsLocked?: boolean; // Prevent bed dragging when true
   suggestions?: PlacementSuggestion[]; // Auto-layout preview
+  selectedDate?: string; // ISO date for harvest indicator
   onEditBed: (bed: GardenBed) => void;
   onDeleteBed: (bed: GardenBed) => void;
   onUpdateBed: (id: string, updates: Partial<GardenBed>) => void;
@@ -80,6 +83,7 @@ export function UnifiedGardenCanvas({
   units = 'metric',
   bedsLocked = false,
   suggestions = [],
+  selectedDate,
   onEditBed,
   onDeleteBed,
   onUpdateBed,
@@ -352,6 +356,11 @@ export function UnifiedGardenCanvas({
       const bedX = bed?.positionX ?? 0;
       const bedY = bed?.positionY ?? 0;
 
+      // Check if planting is currently in harvest window
+      const isHarvesting = planting && selectedDate
+        ? isPlantingInHarvest(planting, selectedDate)
+        : false;
+
       return {
         placement,
         planting,
@@ -362,12 +371,13 @@ export function UnifiedGardenCanvas({
         rows,
         cols,
         color: cultivar ? getCropColor(cultivar.crop) : '#95a5a6',
+        isHarvesting,
         // Absolute position on canvas
         absoluteX: bedX + placement.xCm,
         absoluteY: bedY + placement.yCm,
       };
     });
-  }, [placements, plantingMap, cultivarMap, beds]);
+  }, [placements, plantingMap, cultivarMap, beds, selectedDate]);
 
   // Calculate footprints for suggestion previews
   const suggestionFootprints = useMemo(() => {
@@ -1118,7 +1128,7 @@ export function UnifiedGardenCanvas({
 
           {/* Planting footprints */}
           {footprints.map((footprint) => {
-            const { placement, planting, widthCm, heightCm, rows, cols, color, bed } = footprint;
+            const { placement, planting, widthCm, heightCm, rows, cols, color, bed, isHarvesting } = footprint;
             if (!bed) return null;
 
             const isBeingMoved = movingPlacement?.id === placement.id;
@@ -1249,6 +1259,31 @@ export function UnifiedGardenCanvas({
                   >
                     {planting.label.split(' ')[0]}
                   </text>
+                )}
+
+                {/* Harvest indicator - scissors icon */}
+                {isHarvesting && !isInteracting && (
+                  <foreignObject
+                    x={svgX + width - 14}
+                    y={svgY - 2}
+                    width={16}
+                    height={16}
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    <div
+                      style={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: '50%',
+                        backgroundColor: '#d07a00',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Scissors size={10} color="white" strokeWidth={2.5} />
+                    </div>
+                  </foreignObject>
                 )}
 
                 {/* Quantity indicator during resize */}

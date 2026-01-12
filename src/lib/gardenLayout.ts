@@ -213,6 +213,17 @@ export function getInGroundDateRange(planting: Planting): {
 }
 
 /**
+ * Determine if a planting is currently in its harvest window on a given date.
+ */
+export function isPlantingInHarvest(planting: Planting, date: string): boolean {
+  const checkDate = new Date(`${date}T00:00:00Z`).getTime();
+  const harvestStart = new Date(`${planting.harvestStart}T00:00:00Z`).getTime();
+  const harvestEnd = new Date(`${planting.harvestEnd}T00:00:00Z`).getTime();
+
+  return checkDate >= harvestStart && checkDate <= harvestEnd;
+}
+
+/**
  * Check if two rectangles overlap (AABB collision).
  */
 function rectanglesOverlap(
