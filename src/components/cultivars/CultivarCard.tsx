@@ -56,7 +56,7 @@ export function CultivarCard({
     setLocalExpanded(!expanded);
     setHasManualOverride(true);
   };
-  const [quantity, setQuantity] = useState<number | null>(10);
+  const [quantity, setQuantity] = useState<number | null>(4);
   const [selectedPlantingId, setSelectedPlantingId] = useState<string | null>(null);
 
   const cultivarPlantings = plantings
