@@ -106,6 +106,7 @@ export function UnifiedGardenCanvas({
   // Selection state
   const [selectedPlacement, setSelectedPlacement] = useState<string | null>(null);
   const [selectedBed, setSelectedBed] = useState<string | null>(null);
+  const [hoveredPlacement, setHoveredPlacement] = useState<string | null>(null);
 
   // Drag preview for new placements
   const [dragOver, setDragOver] = useState(false);
@@ -1341,11 +1342,16 @@ export function UnifiedGardenCanvas({
             const isInvalid = (isBeingMoved && movePreview && hasDragged && !movePreview.valid) ||
                               (isBeingResized && resizePreview && !resizePreview.valid);
 
+            const isHovered = hoveredPlacement === placement.id;
+            const showMaturePreview = isHovered && growthFactor < 1 && !isInteracting;
+
             return (
               <g
                 key={placement.id}
                 className={`${styles.footprint} ${isSelected ? styles.selected : ''}`}
                 onClick={(e) => handleFootprintClick(e, placement.id)}
+                onMouseEnter={() => setHoveredPlacement(placement.id)}
+                onMouseLeave={() => setHoveredPlacement(null)}
               >
                 {planting && <title>{planting.label}</title>}
 
@@ -1389,6 +1395,22 @@ export function UnifiedGardenCanvas({
                     r={calculatePlantDotRadius(placement.spacingCm, scale, growthFactor)}
                     fill={isInvalid ? '#ef4444' : color}
                     fillOpacity={0.6}
+                    style={{ pointerEvents: 'none' }}
+                  />
+                ))}
+
+                {/* Mature size preview on hover - dotted circles showing full size */}
+                {showMaturePreview && dots.map((dot, i) => (
+                  <circle
+                    key={`mature-${i}`}
+                    cx={dot.cx}
+                    cy={dot.cy}
+                    r={calculatePlantDotRadius(placement.spacingCm, scale, 1)}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth={1.5}
+                    strokeDasharray="3 2"
+                    strokeOpacity={0.7}
                     style={{ pointerEvents: 'none' }}
                   />
                 ))}
