@@ -40,6 +40,8 @@
   padding: 1px 6px;
   border-radius: 999px;
   white-space: nowrap;
+  min-width: 24px;
+  text-align: center;
 }
 
 /* Timeline track */
