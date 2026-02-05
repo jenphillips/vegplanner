@@ -16,7 +16,7 @@
   {
     "cultivarId": "lettuce-little-gem",
     "label": "Lettuce - Little Gem #1",
-    "quantity": 6,
+    "quantity": 5,
     "sowDate": "2025-04-01",
     "harvestStart": "2025-05-21",
     "harvestEnd": "2025-06-04",
@@ -137,7 +137,7 @@
   {
     "cultivarId": "gailan-green",
     "label": "Gai Lan - Green Gai Lan #2",
-    "quantity": 8,
+    "quantity": 6,
     "sowDate": "2025-04-14",
     "transplantDate": "2025-05-12",
     "harvestStart": "2025-07-06",
@@ -178,7 +178,7 @@
   {
     "cultivarId": "beet-avalanche",
     "label": "Beet - Avalanche #2",
-    "quantity": 10,
+    "quantity": 7,
     "sowDate": "2025-04-27",
     "harvestStart": "2025-06-21",
     "harvestEnd": "2025-06-28",
@@ -215,42 +215,72 @@
     "createdAt": "2026-01-12T00:45:08.286Z"
   },
   {
+    "cultivarId": "tomato-san-marzano",
+    "label": "Tomato - San Marzano #1",
+    "quantity": 4,
+    "sowDate": "2025-04-20",
+    "transplantDate": "2025-06-01",
+    "harvestStart": "2025-08-20",
+    "harvestEnd": "2025-09-22",
+    "method": "transplant",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "5e6ca600-9ae2-4308-bd9a-d0e800141857",
+    "createdAt": "2026-01-13T00:08:30.882Z",
+    "sowDateOverride": "2025-04-20"
+  },
+  {
+    "cultivarId": "tomato-sweet-million",
+    "label": "Tomato - Sweet Million #1",
+    "quantity": 4,
+    "sowDate": "2025-04-20",
+    "transplantDate": "2025-06-01",
+    "harvestStart": "2025-08-05",
+    "harvestEnd": "2025-09-22",
+    "method": "transplant",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "88752b3d-a6ca-433d-81ae-2b3dcf6fcc15",
+    "createdAt": "2026-01-25T23:33:57.237Z"
+  },
+  {
     "cultivarId": "spinach-seaside",
     "label": "Spinach - Seaside #1",
-    "quantity": 10,
+    "quantity": 4,
+    "sowDate": "2025-04-01",
+    "harvestStart": "2025-05-11",
+    "harvestEnd": "2025-06-01",
+    "method": "direct",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "2f9c7505-64f9-4eef-8253-6c95da49462b",
+    "createdAt": "2026-01-25T23:34:11.338Z"
+  },
+  {
+    "cultivarId": "spinach-seaside",
+    "label": "Spinach - Seaside #2",
+    "quantity": 4,
     "sowDate": "2025-04-22",
     "harvestStart": "2025-06-01",
     "harvestEnd": "2025-06-22",
     "method": "direct",
     "status": "planned",
-    "successionNumber": 1,
-    "id": "a942ca6e-34ac-4643-8984-b00c0e62ff32",
-    "createdAt": "2026-01-05T23:45:59.525Z"
-  },
-  {
-    "cultivarId": "spinach-seaside",
-    "label": "Spinach - Seaside #2",
-    "quantity": 8,
-    "sowDate": "2025-05-01",
-    "harvestStart": "2025-06-10",
-    "harvestEnd": "2025-07-01",
-    "method": "direct",
-    "status": "planned",
     "successionNumber": 2,
-    "id": "6006da37-a018-41c4-8dd2-790c289062a7",
-    "createdAt": "2026-01-05T23:45:58.225Z"
+    "id": "370965c2-0597-4c19-bae0-ac410985cdf0",
+    "createdAt": "2026-01-25T23:34:12.955Z"
   },
   {
     "cultivarId": "spinach-seaside",
     "label": "Spinach - Seaside #3",
-    "quantity": 10,
-    "sowDate": "2025-09-02",
-    "harvestStart": "2025-10-12",
-    "harvestEnd": "2025-11-01",
-    "method": "direct",
+    "quantity": 4,
+    "sowDate": "2025-08-11",
+    "transplantDate": "2025-09-01",
+    "harvestStart": "2025-09-20",
+    "harvestEnd": "2025-10-11",
+    "method": "transplant",
     "status": "planned",
     "successionNumber": 3,
-    "id": "4803e49a-c9f1-4adb-94a3-1a2e8d66cfb8",
-    "createdAt": "2026-01-05T23:46:00.857Z"
+    "id": "462401a1-d34d-4ba0-af40-4e2589823e24",
+    "createdAt": "2026-01-25T23:34:26.522Z"
   }
 ]

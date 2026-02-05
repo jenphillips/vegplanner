@@ -45,20 +45,19 @@
   },
   "cultivars": [
     {
-      "id": "tomato-sungold",
+      "id": "tomato-san-marzano",
       "crop": "Tomato",
-      "variety": "Sungold",
+      "variety": "San Marzano",
       "family": "Solanaceae",
       "plantType": "vegetable",
-      "vendor": "Johnny's",
       "germDaysMin": 6,
-      "germDaysMax": 10,
-      "maturityDays": 57,
+      "germDaysMax": 14,
+      "maturityDays": 80,
       "maturityBasis": "from_transplant",
       "sowMethod": "transplant",
       "indoorLeadWeeksMin": 6,
       "indoorLeadWeeksMax": 8,
-      "transplantAfterLsfDays": 7,
+      "transplantAfterLsfDays": 14,
       "harvestStyle": "continuous",
       "harvestDurationDays": null,
       "frostSensitive": true,
@@ -67,7 +66,31 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Indeterminate, F1, prune to single leader if desired."
+      "notes": "Indeterminate paste tomato. Classic Italian variety for sauce and canning. Meaty with few seeds."
+    },
+    {
+      "id": "tomato-sweet-million",
+      "crop": "Tomato",
+      "variety": "Sweet Million",
+      "family": "Solanaceae",
+      "plantType": "vegetable",
+      "germDaysMin": 6,
+      "germDaysMax": 10,
+      "maturityDays": 65,
+      "maturityBasis": "from_transplant",
+      "sowMethod": "transplant",
+      "indoorLeadWeeksMin": 6,
+      "indoorLeadWeeksMax": 8,
+      "transplantAfterLsfDays": 14,
+      "harvestStyle": "continuous",
+      "harvestDurationDays": null,
+      "frostSensitive": true,
+      "minGrowingTempC": 10,
+      "maxGrowingTempC": 35,
+      "optimalTempMinC": 21,
+      "optimalTempMaxC": 27,
+      "spacingCm": 45,
+      "notes": "Indeterminate cherry tomato. Prolific producer of sweet, crack-resistant fruit. Disease resistant."
     },
     {
       "id": "beet-avalanche",
@@ -227,28 +250,6 @@
       "notes": "Cut-and-come-again flowers. Pinch for bushier growth. Heat lover."
     },
     {
-      "id": "sunflower-procut-orange",
-      "crop": "Sunflower",
-      "variety": "ProCut Orange",
-      "family": "Asteraceae",
-      "plantType": "flower",
-      "germDaysMin": 7,
-      "germDaysMax": 14,
-      "maturityDays": 60,
-      "maturityBasis": "from_sow",
-      "sowMethod": "direct",
-      "directAfterLsfDays": 0,
-      "harvestStyle": "single",
-      "harvestDurationDays": 14,
-      "frostSensitive": true,
-      "minGrowingTempC": 10,
-      "maxGrowingTempC": 35,
-      "optimalTempMinC": 18,
-      "optimalTempMaxC": 25,
-      "spacingCm": 30,
-      "notes": "Pollenless cut flower. Single stem, no pinching needed. Succession sow for continuous blooms."
-    },
-    {
       "id": "cosmos-double-click",
       "crop": "Cosmos",
       "variety": "Double Click Mix",
@@ -277,8 +278,15 @@
   ],
   "plans": [
     {
-      "id": "plan-1",
-      "cultivarId": "tomato-sungold",
+      "id": "plan-tomato-san-marzano",
+      "cultivarId": "tomato-san-marzano",
+      "frostWindowId": "default-frost",
+      "season": "spring",
+      "successionOffsetsDays": [0]
+    },
+    {
+      "id": "plan-tomato-sweet-million",
+      "cultivarId": "tomato-sweet-million",
       "frostWindowId": "default-frost",
       "season": "spring",
       "successionOffsetsDays": [0]
@@ -321,13 +329,6 @@
     {
       "id": "plan-zinnia",
       "cultivarId": "zinnia-benary-giant",
-      "frostWindowId": "default-frost",
-      "season": "spring",
-      "successionOffsetsDays": [0]
-    },
-    {
-      "id": "plan-sunflower",
-      "cultivarId": "sunflower-procut-orange",
       "frostWindowId": "default-frost",
       "season": "spring",
       "successionOffsetsDays": [0]

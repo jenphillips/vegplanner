@@ -997,7 +997,11 @@ export function UnifiedGardenCanvas({
       justFinishedInteraction.current = false;
       return;
     }
-    if (e.target === e.currentTarget || (e.target as Element).tagName === 'svg') {
+    // Deselect when clicking on canvas background, SVG, or elements marked as deselect triggers
+    const target = e.target as Element;
+    if (e.target === e.currentTarget ||
+        target.tagName === 'svg' ||
+        target.getAttribute('data-deselect') === 'true') {
       setSelectedPlacement(null);
       setSelectedBed(null);
     }
@@ -1096,6 +1100,7 @@ export function UnifiedGardenCanvas({
             width={svgWidth}
             height={svgHeight}
             fill="#e8e4dc"
+            data-deselect="true"
           />
 
           {/* Render each bed */}

@@ -447,7 +447,10 @@ export function BedCanvas({
     }
     // Only deselect if clicking on the canvas background, not on a footprint
     // The footprint click handler will handle its own selection
-    if (e.target === e.currentTarget || (e.target as Element).tagName === 'svg') {
+    const target = e.target as Element;
+    if (e.target === e.currentTarget ||
+        target.tagName === 'svg' ||
+        target.getAttribute('data-deselect') === 'true') {
       setSelectedPlacement(null);
     }
   };
@@ -796,6 +799,7 @@ export function BedCanvas({
             width={bed.widthCm * scale}
             height={bed.lengthCm * scale}
             fill="#f5f0e6"
+            data-deselect="true"
           />
 
           {/* Grid lines */}

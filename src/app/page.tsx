@@ -215,7 +215,7 @@ export default function Home() {
                     onAddPlanting={handleAddPlanting}
                     onUpdatePlanting={handleUpdatePlanting}
                     onDeletePlanting={handleDeletePlanting}
-                    forceExpanded={expandAll ? true : undefined}
+                    forceExpanded={expandAll}
                   />
                 ))}
               </div>
@@ -256,7 +256,7 @@ export default function Home() {
                     onAddPlanting={handleAddPlanting}
                     onUpdatePlanting={handleUpdatePlanting}
                     onDeletePlanting={handleDeletePlanting}
-                    forceExpanded={expandAll ? true : undefined}
+                    forceExpanded={expandAll}
                   />
                 ))}
               </div>

@@ -25,5 +25,41 @@
     "id": "c5b84767-e442-480b-bb9e-9d9235478055",
     "positionX": 240,
     "positionY": 0
+  },
+  {
+    "name": "Side bed 1",
+    "widthCm": 61,
+    "lengthCm": 274,
+    "sunExposure": "full",
+    "id": "ec67c0cb-b35c-4c50-8aed-67554e01cba6",
+    "positionX": -105,
+    "positionY": 0
+  },
+  {
+    "name": "Side bed 2",
+    "widthCm": 61,
+    "lengthCm": 274,
+    "sunExposure": "full",
+    "id": "2cfe7a12-6d62-4b74-86b1-b485739e7d6a",
+    "positionX": 370,
+    "positionY": 0
+  },
+  {
+    "name": "Outside fence 1",
+    "widthCm": 61,
+    "lengthCm": 274,
+    "sunExposure": "full",
+    "id": "64126f97-9b73-43d9-863f-537bf800ea0a",
+    "positionX": -190,
+    "positionY": 0
+  },
+  {
+    "name": "Outside fence 2",
+    "widthCm": 61,
+    "lengthCm": 274,
+    "sunExposure": "full",
+    "id": "9589613f-3361-42b1-b55c-b1899ec73a32",
+    "positionX": 455,
+    "positionY": 0
   }
 ]
