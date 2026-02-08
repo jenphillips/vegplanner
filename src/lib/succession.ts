@@ -145,6 +145,41 @@ function isGrowingPeriodViable(
 }
 
 // ============================================
+// Perennial Handling
+// ============================================
+
+/**
+ * Calculate a planting window for a perennial crop.
+ * Perennials don't use maturityDays for harvest calculation - instead, their
+ * harvest window is relative to frost dates (they come back every year).
+ */
+export function calculatePerennialWindow(
+  cultivar: Cultivar,
+  frostWindow: FrostWindow
+): PlantingWindow | null {
+  if (!cultivar.isPerennial) return null;
+
+  const springFrost = frostWindow.lastSpringFrost;
+
+  // Calculate harvest start relative to last spring frost
+  const harvestStartOffset = cultivar.perennialHarvestStartDaysAfterLSF ?? 14;
+  const harvestStart = addDays(springFrost, harvestStartOffset);
+
+  // Calculate harvest end using harvestDurationDays (default 42 days / 6 weeks)
+  const harvestDuration = cultivar.harvestDurationDays ?? 42;
+  const harvestEnd = addDays(harvestStart, harvestDuration);
+
+  return {
+    sowDate: harvestStart, // Nominal - perennials are already established
+    transplantDate: undefined,
+    harvestStart,
+    harvestEnd,
+    method: 'direct', // Perennials don't have a traditional planting method
+    successionNumber: 1,
+  };
+}
+
+// ============================================
 // Planting Window Calculation
 // ============================================
 
@@ -194,6 +229,22 @@ export function calculateSuccessionWindows(
     targetQuantity?: number;
   }
 ): SuccessionResult {
+  // Early exit for perennials - they don't have succession windows
+  if (cultivar.isPerennial) {
+    const perennialWindow = calculatePerennialWindow(cultivar, frostWindow);
+    return {
+      windows: perennialWindow ? [perennialWindow] : [],
+      skippedPeriods: [],
+      diagnostic: perennialWindow
+        ? undefined
+        : {
+            earliestSowDate: '',
+            latestSowDate: '',
+            noWindowsReason: 'Could not calculate perennial harvest window',
+          },
+    };
+  }
+
   const maxSuccessions = options?.maxSuccessions ?? 10;
   const windows: PlantingWindow[] = [];
   const skippedPeriods: SuccessionResult['skippedPeriods'] = [];
@@ -621,6 +672,11 @@ export function calculateNextSuccession(
   climate: Climate,
   existingPlantings: Planting[]
 ): PlantingWindow | null {
+  // Perennials don't have succession plantings
+  if (cultivar.isPerennial) {
+    return null;
+  }
+
   const cultivarPlantings = existingPlantings
     .filter((p) => p.cultivarId === cultivar.id)
     .sort((a, b) => a.harvestEnd.localeCompare(b.harvestEnd));

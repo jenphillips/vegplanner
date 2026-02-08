@@ -39,6 +39,10 @@ export type Cultivar = {
   tempMarginC?: number | null; // Per-crop temperature buffer override (default: 2)
   // Spacing for garden bed layout
   spacingCm?: number; // Space between plants in cm (e.g., 60 for tomatoes, 10 for lettuce)
+  trailingHabit?: boolean; // true for plants that spill over container edges (petunias, sweet potato vine, etc.)
+  // Perennial-specific fields
+  isPerennial?: boolean; // true for asparagus, strawberries, rhubarb, etc.
+  perennialHarvestStartDaysAfterLSF?: number; // Harvest start relative to last spring frost (e.g., 14)
   notes?: string;
 };
 
@@ -175,11 +179,14 @@ export type TaskCompletion = {
 // Garden Bed Types (Phase 3)
 // ============================================
 
+export type GardenBedShape = 'bed' | 'container';
+
 export type GardenBed = {
   id: string;
   name: string;
-  widthCm: number;
-  lengthCm: number;
+  shape: GardenBedShape; // 'bed' = rectangle, 'container' = circle (uses widthCm as diameter)
+  widthCm: number; // For containers, this is the diameter
+  lengthCm: number; // Ignored for containers
   sunExposure: 'full' | 'partial' | 'shade';
   notes?: string;
   // Position on unified garden canvas (in cm from top-left)
@@ -195,6 +202,7 @@ export type PlantingPlacement = {
   yCm: number;
   spacingCm: number;
   cols?: number; // Optional: override default square-ish layout
+  quantity?: number; // Optional: for containers, how many plants to pack (default 1)
 };
 
 // Calculated footprint for rendering (not persisted)

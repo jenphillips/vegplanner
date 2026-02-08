@@ -169,6 +169,11 @@ export function CultivarCard({
       ? `${cultivar.minGrowingTempC}–${cultivar.maxGrowingTempC}°C`
       : null;
 
+  // For perennials, show harvest window info instead of maturity days
+  const maturityInfo = cultivar.isPerennial
+    ? `Harvest: ${cultivar.harvestDurationDays ?? 42} days, ${cultivar.perennialHarvestStartDaysAfterLSF ?? 14}d after last frost`
+    : `${cultivar.maturityDays} days from ${cultivar.sowMethod === 'transplant' ? 'transplant' : 'direct sow'}`;
+
   return (
     <div className={styles.card}>
       <div
@@ -183,10 +188,13 @@ export function CultivarCard({
             {cultivar.crop} — {cultivar.variety}
           </h3>
           <span className={styles.meta}>
-            {cultivar.maturityDays} days from {cultivar.sowMethod === 'transplant' ? 'transplant' : 'direct sow'}
+            {maturityInfo}
             {tempRange && <> · {tempRange}</>}
           </span>
           <div className={styles.badges}>
+            {cultivar.isPerennial && (
+              <span className={styles.badgePerennial}>Perennial</span>
+            )}
             <span className={cultivar.sowMethod === 'transplant' ? styles.badgeTransplant : styles.badge}>{methodLabel}</span>
             {cultivarPlantings.length > 0 && (
               <span className={styles.countBadge}>
@@ -229,27 +237,33 @@ export function CultivarCard({
                   title={
                     allWindows.windows.length === 0
                       ? allWindows.diagnostic?.noWindowsReason ?? 'No viable planting windows'
-                      : 'Generate first planting'
+                      : cultivar.isPerennial
+                        ? 'Add perennial to your garden'
+                        : 'Generate first planting'
                   }
                 >
-                  Generate Initial Planting
+                  {cultivar.isPerennial ? 'Add Perennial' : 'Generate Initial Planting'}
                 </button>
               ) : (
                 <>
-                  <button
-                    onClick={handleAddSuccession}
-                    className={styles.secondaryButton}
-                    disabled={remainingWindows.length === 0}
-                    title={
-                      remainingWindows.length === 0
-                        ? 'No more viable planting windows this season'
-                        : `Add succession #${cultivarPlantings.length + 1}`
-                    }
-                  >
-                    + Add Succession
-                  </button>
+                  {/* Hide succession button for perennials - they don't have successions */}
+                  {!cultivar.isPerennial && (
+                    <button
+                      onClick={handleAddSuccession}
+                      className={styles.secondaryButton}
+                      disabled={remainingWindows.length === 0}
+                      title={
+                        remainingWindows.length === 0
+                          ? 'No more viable planting windows this season'
+                          : `Add succession #${cultivarPlantings.length + 1}`
+                      }
+                    >
+                      + Add Succession
+                    </button>
+                  )}
                   {/* Only show hint for continuous harvest crops that don't need successions */}
-                  {remainingWindows.length === 0 &&
+                  {!cultivar.isPerennial &&
+                    remainingWindows.length === 0 &&
                     cultivar.harvestStyle === 'continuous' &&
                     cultivar.harvestDurationDays == null && (
                       <span className={styles.inlineHint}>

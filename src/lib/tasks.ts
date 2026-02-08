@@ -18,6 +18,21 @@ export function generateTasksFromPlanting(
   cultivar: Cultivar
 ): GeneratedTask[] {
   const tasks: GeneratedTask[] = [];
+
+  // For perennials, only generate harvest task (no sowing/transplanting needed)
+  if (cultivar.isPerennial) {
+    tasks.push({
+      id: `${planting.id}-harvest_start`,
+      plantingId: planting.id,
+      cultivarId: planting.cultivarId,
+      type: 'harvest_start',
+      date: planting.harvestStart,
+      title: `Begin harvesting ${planting.label}`,
+      description: `Harvest ready through ${formatDate(planting.harvestEnd)}`,
+    });
+    return tasks;
+  }
+
   const displaySowDate = planting.sowDateOverride ?? planting.sowDate;
   // Format quantity for display, handling undefined
   const quantityStr = planting.quantity != null ? String(planting.quantity) : 'some';
