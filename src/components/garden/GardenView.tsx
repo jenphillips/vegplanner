@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useGardenBeds } from '@/hooks/useGardenBeds';
 import { usePlacements } from '@/hooks/usePlacements';
 import {
@@ -11,6 +11,8 @@ import {
   getCropColor,
   autoLayout,
   checkCollisions,
+  getPlacedQuantity,
+  getRemainingQuantity,
 } from '@/lib/gardenLayout';
 import type { PlacementSuggestion, FrostWindow, Climate } from '@/lib/types';
 import { BedEditor } from './BedEditor';
@@ -121,6 +123,10 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
   // Plant type filter
   const [plantTypeFilter, setPlantTypeFilter] = useState<PlantTypeFilterValue>('all');
 
+  // Highlighted planting from canvas selection
+  const [highlightedPlantingId, setHighlightedPlantingId] = useState<string | null>(null);
+  const sidebarCardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
   // Get season date range for the scrubber
   const seasonRange = useMemo(
     () => getSeasonDateRange(plantings),
@@ -162,15 +168,21 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
     return inGround;
   }, [filteredPlantings, selectedDate]);
 
-  // Get unplaced plantings (in ground but not in any bed)
+  // Get plantings with remaining plants to place (either no placements or partial placement)
+  const plantingsWithRemaining = useMemo(
+    () => inGroundPlantings.filter((p) => {
+      // If no quantity set, nothing to place
+      if (p.quantity == null || p.quantity === 0) return false;
+      const remaining = getRemainingQuantity(p, placements);
+      return remaining > 0;
+    }),
+    [inGroundPlantings, placements]
+  );
+
+  // For backward compatibility - set of planted IDs (used by tooLarge check)
   const placedPlantingIds = useMemo(
     () => new Set(placements.map((p) => p.plantingId)),
     [placements]
-  );
-
-  const unplacedPlantings = useMemo(
-    () => inGroundPlantings.filter((p) => !placedPlantingIds.has(p.id)),
-    [inGroundPlantings, placedPlantingIds]
   );
 
   // Filter placements to only those for in-ground plantings
@@ -183,7 +195,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
   const tooLargePlantingIds = useMemo(() => {
     const tooLarge = new Set<string>();
 
-    for (const planting of unplacedPlantings) {
+    for (const planting of plantingsWithRemaining) {
       const cultivar = cultivarMap.get(planting.cultivarId);
       const spacing = cultivar?.spacingCm ?? 30;
       const quantity = planting.quantity ?? 1;
@@ -253,7 +265,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
     }
 
     return tooLarge;
-  }, [unplacedPlantings, beds, placements, inGroundPlantings, cultivarMap]);
+  }, [plantingsWithRemaining, beds, placements, inGroundPlantings, cultivarMap]);
 
   const isLoading = loading || bedsLoading || placementsLoading;
 
@@ -364,7 +376,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
     );
 
     const suggestions = autoLayout(
-      unplacedPlantings,
+      plantingsWithRemaining,
       beds,
       visiblePlacements, // Only consider placements for plantings in-ground on selected date
       cultivars,
@@ -390,6 +402,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
         xCm: suggestion.xCm,
         yCm: suggestion.yCm,
         spacingCm: suggestion.spacingCm,
+        quantity: suggestion.quantity,
       });
     }
 
@@ -418,12 +431,27 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
     onUpdatePlanting?.(plantingId, { quantity });
   };
 
+  // Handle selection changes from canvas
+  const handleSelectionChange = useCallback((_placementId: string | null, plantingId: string | null) => {
+    setHighlightedPlantingId(plantingId);
+
+    // Scroll to the highlighted card if it exists in the sidebar
+    if (plantingId) {
+      const cardEl = sidebarCardRefs.current.get(plantingId);
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, []);
+
   // Drag handlers for sidebar cards
   const handleDragStart = (e: React.DragEvent, planting: Planting) => {
     const cultivar = cultivarMap.get(planting.cultivarId);
+    // Pass remaining quantity (what's left to place), not total quantity
+    const remaining = getRemainingQuantity(planting, placements);
     const dragData = {
       plantingId: planting.id,
-      quantity: planting.quantity ?? 1,
+      quantity: remaining,
       spacingCm: cultivar?.spacingCm ?? 30,
       cropName: cultivar?.crop ?? 'Unknown',
       family: cultivar?.family,
@@ -435,6 +463,14 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
     const dragEl = e.currentTarget as HTMLElement;
     if (dragEl) {
       e.dataTransfer.setDragImage(dragEl, dragEl.offsetWidth / 2, dragEl.offsetHeight / 2);
+    }
+  };
+
+  // Handler for discarding remaining unplaced plants
+  const handleDiscardRemaining = (plantingId: string) => {
+    const placed = getPlacedQuantity(plantingId, placements);
+    if (placed > 0) {
+      onUpdatePlanting?.(plantingId, { quantity: placed });
     }
   };
 
@@ -496,7 +532,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
           </button>
           <button
             className={styles.toolbarButton}
-            disabled={unplacedPlantings.length === 0 || beds.length === 0}
+            disabled={plantingsWithRemaining.length === 0 || beds.length === 0}
             onClick={handleAutoLayout}
           >
             Auto-Layout
@@ -583,14 +619,15 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
               onPlacementDelete={handlePlacementDelete}
               onPlantingQuantityUpdate={handlePlantingQuantityUpdate}
               onZoomChange={handleZoomChange}
+              onSelectionChange={handleSelectionChange}
             />
           )}
         </div>
 
-        {/* Sidebar - Unplaced Plantings */}
+        {/* Sidebar - Plantings to Place */}
         <div className={styles.sidebar}>
-          <h3 className={styles.sidebarTitle}>Unplaced Plantings</h3>
-          {unplacedPlantings.length === 0 ? (
+          <h3 className={styles.sidebarTitle}>Plants to Place</h3>
+          {plantingsWithRemaining.length === 0 ? (
             <p className={styles.sidebarEmpty}>
               {inGroundPlantings.length === 0
                 ? 'No plantings in ground on this date.'
@@ -598,18 +635,28 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
             </p>
           ) : (
             <div className={styles.unplacedList}>
-              {unplacedPlantings.map((planting) => {
+              {plantingsWithRemaining.map((planting) => {
                 const cultivar = cultivarMap.get(planting.cultivarId);
                 const spacing = cultivar?.spacingCm ?? 30;
-                const quantity = planting.quantity ?? 1;
-                const footprint = calculateFootprint(quantity, spacing);
+                const totalQuantity = planting.quantity ?? 1;
+                const placedQuantity = getPlacedQuantity(planting.id, placements);
+                const remainingQuantity = totalQuantity - placedQuantity;
+                const footprint = calculateFootprint(remainingQuantity, spacing);
                 const color = getCropColor(cultivar?.family, cultivar?.crop ?? '');
                 const isTooLarge = tooLargePlantingIds.has(planting.id);
+                const isPartiallyPlaced = placedQuantity > 0;
+                const progressPercent = (placedQuantity / totalQuantity) * 100;
+
+                const isHighlighted = highlightedPlantingId === planting.id;
 
                 return (
                   <div
                     key={planting.id}
-                    className={`${styles.unplacedCard} ${isTooLarge ? styles.tooLarge : ''}`}
+                    ref={(el) => {
+                      if (el) sidebarCardRefs.current.set(planting.id, el);
+                      else sidebarCardRefs.current.delete(planting.id);
+                    }}
+                    className={`${styles.unplacedCard} ${isTooLarge ? styles.tooLarge : ''} ${isHighlighted ? styles.highlighted : ''}`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, planting)}
                   >
@@ -622,11 +669,21 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
                         <span className={styles.unplacedLabel}>
                           {planting.label}
                         </span>
-                        {planting.quantity != null && (
-                          <span className={styles.unplacedQuantity}>
-                            ×{planting.quantity}
-                          </span>
-                        )}
+                        <span className={styles.unplacedQuantity}>
+                          {remainingQuantity} remaining
+                        </span>
+                      </div>
+                      {/* Progress bar */}
+                      <div className={styles.placementProgress}>
+                        <div className={styles.progressBar}>
+                          <div
+                            className={styles.progressFill}
+                            style={{ width: `${progressPercent}%`, backgroundColor: color }}
+                          />
+                        </div>
+                        <span className={styles.progressText}>
+                          {placedQuantity}/{totalQuantity} placed
+                        </span>
                       </div>
                       <div className={styles.unplacedMeta}>
                         <span className={styles.unplacedFootprint}>
@@ -652,6 +709,19 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
                             Reset size
                           </button>
                         </div>
+                      )}
+                      {/* Discard remaining button - only show when partially placed */}
+                      {isPartiallyPlaced && !isTooLarge && (
+                        <button
+                          className={styles.discardRemainingButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDiscardRemaining(planting.id);
+                          }}
+                          title="Update quantity to match what's placed"
+                        >
+                          Discard remaining
+                        </button>
                       )}
                     </div>
                   </div>

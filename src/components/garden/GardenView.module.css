@@ -518,6 +518,12 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
+.unplacedCard.highlighted {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  background: #eff6ff;
+}
+
 .unplacedCard:active {
   cursor: grabbing;
 }
@@ -608,4 +614,52 @@
 
 .resetQuantityButton:hover {
   background: #d97706;
+}
+
+/* Placement Progress */
+.placementProgress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.125rem;
+}
+
+.progressBar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.2s ease;
+}
+
+.progressText {
+  font-size: 0.625rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Discard Remaining Button */
+.discardRemainingButton {
+  padding: 0.25rem 0.5rem;
+  margin-top: 0.25rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  font-size: 0.625rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  align-self: flex-start;
+}
+
+.discardRemainingButton:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
 }

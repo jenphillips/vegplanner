@@ -485,6 +485,7 @@ export function autoLayout(
             xCm: position.xCm,
             yCm: position.yCm,
             spacingCm,
+            quantity,
             score,
           };
         }
@@ -842,6 +843,50 @@ export function checkCollisionsWithTiming(
     hasCollision: overlapping.length > 0,
     overlappingPlacements: overlapping,
   };
+}
+
+// ============================================
+// Placed / Remaining Quantity Utilities
+// ============================================
+
+/**
+ * Calculate the total number of plants placed across all placements for a planting.
+ */
+export function getPlacedQuantity(
+  plantingId: string,
+  placements: PlantingPlacement[]
+): number {
+  return placements
+    .filter((p) => p.plantingId === plantingId)
+    .reduce((sum, placement) => sum + placement.quantity, 0);
+}
+
+/**
+ * Calculate how many plants from a planting remain to be placed.
+ * Returns 0 if no quantity is set on the planting (nothing to track).
+ */
+export function getRemainingQuantity(
+  planting: Planting,
+  placements: PlantingPlacement[]
+): number {
+  const totalDesired = planting.quantity ?? 0;
+  if (totalDesired === 0) return 0;
+
+  const placed = getPlacedQuantity(planting.id, placements);
+  return Math.max(0, totalDesired - placed);
+}
+
+/**
+ * Check if a planting has any remaining plants to place.
+ */
+export function hasRemainingPlants(
+  planting: Planting,
+  placements: PlantingPlacement[]
+): boolean {
+  // If no quantity set, nothing to place
+  if (planting.quantity == null || planting.quantity === 0) return false;
+
+  return getRemainingQuantity(planting, placements) > 0;
 }
 
 // ============================================

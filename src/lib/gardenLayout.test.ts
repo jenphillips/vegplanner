@@ -16,6 +16,9 @@ import {
   calculatePlantDotRadius,
   dateRangesOverlap,
   getInGroundDateRange,
+  getPlacedQuantity,
+  getRemainingQuantity,
+  hasRemainingPlants,
 } from './gardenLayout';
 import type { Planting, GardenBed, PlantingPlacement, Cultivar } from './types';
 
@@ -405,6 +408,7 @@ describe('autoLayout', () => {
   const createBed = (id: string, widthCm: number, lengthCm: number): GardenBed => ({
     id,
     name: `Bed ${id}`,
+    shape: 'bed',
     widthCm,
     lengthCm,
     positionX: 0,
@@ -445,7 +449,7 @@ describe('autoLayout', () => {
     const cultivars = [createCultivar('c1', 30)];
     // Existing placement at origin: 4 plants at 30cm = 60x60cm
     const existingPlacements: PlantingPlacement[] = [
-      { id: 'pl1', plantingId: 'p1', bedId: 'b1', xCm: 0, yCm: 0, spacingCm: 30 },
+      { id: 'pl1', plantingId: 'p1', bedId: 'b1', xCm: 0, yCm: 0, spacingCm: 30, quantity: 4 },
     ];
     const quantities = new Map([['p1', 4], ['p2', 4]]);
 
@@ -469,7 +473,7 @@ describe('autoLayout', () => {
     // Existing placement: 12 plants in 1 column = 30cm wide x 360cm tall
     // But bed is only 240cm long, so let's use 6 plants: 1 col x 6 rows = 30x180cm
     const existingPlacements: PlantingPlacement[] = [
-      { id: 'pl1', plantingId: 'p1', bedId: 'b1', xCm: 0, yCm: 0, spacingCm: 30, cols: 1 },
+      { id: 'pl1', plantingId: 'p1', bedId: 'b1', xCm: 0, yCm: 0, spacingCm: 30, cols: 1, quantity: 6 },
     ];
     const quantities = new Map([['p1', 6], ['p2', 4]]);
 
@@ -1087,5 +1091,151 @@ describe('findNearestValidPosition', () => {
     );
     // Should find something within ~35cm (one step past the obstacle edge)
     expect(distance).toBeLessThanOrEqual(40);
+  });
+});
+
+// ============================================
+// Placed / Remaining Quantity Tests
+// ============================================
+
+describe('getPlacedQuantity', () => {
+  it('returns 0 when no placements exist for planting', () => {
+    const placements: PlantingPlacement[] = [];
+    expect(getPlacedQuantity('planting-1', placements)).toBe(0);
+  });
+
+  it('returns quantity from single placement', () => {
+    const placements: PlantingPlacement[] = [
+      { id: 'p1', plantingId: 'planting-1', bedId: 'bed-1', xCm: 0, yCm: 0, spacingCm: 30, quantity: 5 },
+    ];
+    expect(getPlacedQuantity('planting-1', placements)).toBe(5);
+  });
+
+  it('sums quantities across multiple placements', () => {
+    const placements: PlantingPlacement[] = [
+      { id: 'p1', plantingId: 'planting-1', bedId: 'bed-1', xCm: 0, yCm: 0, spacingCm: 30, quantity: 3 },
+      { id: 'p2', plantingId: 'planting-1', bedId: 'bed-2', xCm: 0, yCm: 0, spacingCm: 30, quantity: 4 },
+    ];
+    expect(getPlacedQuantity('planting-1', placements)).toBe(7);
+  });
+
+  it('only counts placements for the specified planting', () => {
+    const placements: PlantingPlacement[] = [
+      { id: 'p1', plantingId: 'planting-1', bedId: 'bed-1', xCm: 0, yCm: 0, spacingCm: 30, quantity: 5 },
+      { id: 'p2', plantingId: 'planting-2', bedId: 'bed-1', xCm: 0, yCm: 60, spacingCm: 30, quantity: 10 },
+    ];
+    expect(getPlacedQuantity('planting-1', placements)).toBe(5);
+  });
+});
+
+describe('getRemainingQuantity', () => {
+  const makePlanting = (id: string, quantity: number): Planting => ({
+    id,
+    cultivarId: 'tomato',
+    label: 'Tomato #1',
+    quantity,
+    sowDate: '2025-04-01',
+    harvestStart: '2025-07-01',
+    harvestEnd: '2025-09-01',
+    method: 'direct',
+    status: 'planned',
+    successionNumber: 1,
+    createdAt: '2025-01-01',
+  });
+
+  it('returns full quantity when no placements exist', () => {
+    const planting = makePlanting('p1', 10);
+    expect(getRemainingQuantity(planting, [])).toBe(10);
+  });
+
+  it('returns 0 when all plants are placed', () => {
+    const planting = makePlanting('p1', 10);
+    const placements: PlantingPlacement[] = [
+      { id: 'pl1', plantingId: 'p1', bedId: 'bed-1', xCm: 0, yCm: 0, spacingCm: 30, quantity: 10 },
+    ];
+    expect(getRemainingQuantity(planting, placements)).toBe(0);
+  });
+
+  it('returns difference when partially placed', () => {
+    const planting = makePlanting('p1', 10);
+    const placements: PlantingPlacement[] = [
+      { id: 'pl1', plantingId: 'p1', bedId: 'bed-1', xCm: 0, yCm: 0, spacingCm: 30, quantity: 4 },
+    ];
+    expect(getRemainingQuantity(planting, placements)).toBe(6);
+  });
+
+  it('handles split placements across multiple beds', () => {
+    const planting = makePlanting('p1', 10);
+    const placements: PlantingPlacement[] = [
+      { id: 'pl1', plantingId: 'p1', bedId: 'bed-1', xCm: 0, yCm: 0, spacingCm: 30, quantity: 3 },
+      { id: 'pl2', plantingId: 'p1', bedId: 'bed-2', xCm: 0, yCm: 0, spacingCm: 30, quantity: 4 },
+    ];
+    expect(getRemainingQuantity(planting, placements)).toBe(3);
+  });
+
+  it('returns 0 when planting has no quantity set', () => {
+    const planting: Planting = {
+      ...makePlanting('p1', 0),
+      quantity: undefined,
+    };
+    expect(getRemainingQuantity(planting, [])).toBe(0);
+  });
+
+  it('returns 0 (not negative) when placed exceeds quantity', () => {
+    const planting = makePlanting('p1', 5);
+    const placements: PlantingPlacement[] = [
+      { id: 'pl1', plantingId: 'p1', bedId: 'bed-1', xCm: 0, yCm: 0, spacingCm: 30, quantity: 8 },
+    ];
+    expect(getRemainingQuantity(planting, placements)).toBe(0);
+  });
+});
+
+describe('hasRemainingPlants', () => {
+  const makePlanting = (id: string, quantity: number): Planting => ({
+    id,
+    cultivarId: 'tomato',
+    label: 'Tomato #1',
+    quantity,
+    sowDate: '2025-04-01',
+    harvestStart: '2025-07-01',
+    harvestEnd: '2025-09-01',
+    method: 'direct',
+    status: 'planned',
+    successionNumber: 1,
+    createdAt: '2025-01-01',
+  });
+
+  it('returns true when no placements exist', () => {
+    const planting = makePlanting('p1', 10);
+    expect(hasRemainingPlants(planting, [])).toBe(true);
+  });
+
+  it('returns false when all plants are placed', () => {
+    const planting = makePlanting('p1', 10);
+    const placements: PlantingPlacement[] = [
+      { id: 'pl1', plantingId: 'p1', bedId: 'bed-1', xCm: 0, yCm: 0, spacingCm: 30, quantity: 10 },
+    ];
+    expect(hasRemainingPlants(planting, placements)).toBe(false);
+  });
+
+  it('returns true when partially placed', () => {
+    const planting = makePlanting('p1', 10);
+    const placements: PlantingPlacement[] = [
+      { id: 'pl1', plantingId: 'p1', bedId: 'bed-1', xCm: 0, yCm: 0, spacingCm: 30, quantity: 6 },
+    ];
+    expect(hasRemainingPlants(planting, placements)).toBe(true);
+  });
+
+  it('returns false when planting has no quantity', () => {
+    const planting: Planting = {
+      ...makePlanting('p1', 0),
+      quantity: undefined,
+    };
+    expect(hasRemainingPlants(planting, [])).toBe(false);
+  });
+
+  it('returns false when planting quantity is 0', () => {
+    const planting = makePlanting('p1', 0);
+    expect(hasRemainingPlants(planting, [])).toBe(false);
   });
 });

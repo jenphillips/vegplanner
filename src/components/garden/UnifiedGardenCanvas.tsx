@@ -18,6 +18,7 @@ import {
   getInGroundDateRange,
   calculateMaxPlantsInContainer,
   getContainerPlantPositions,
+  getPlacedQuantity,
 } from '@/lib/gardenLayout';
 import type {
   GardenBed,
@@ -57,6 +58,7 @@ type UnifiedGardenCanvasProps = {
   onPlacementDelete: (id: string) => void;
   onPlantingQuantityUpdate?: (plantingId: string, quantity: number) => void;
   onZoomChange?: (scale: number) => void;
+  onSelectionChange?: (placementId: string | null, plantingId: string | null) => void;
 };
 
 // Grid line spacing in cm
@@ -102,6 +104,7 @@ export function UnifiedGardenCanvas({
   onPlacementDelete,
   onPlantingQuantityUpdate,
   onZoomChange,
+  onSelectionChange,
 }: UnifiedGardenCanvasProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -161,6 +164,18 @@ export function UnifiedGardenCanvas({
       }
     }
   }, [placements, committedMove]);
+
+  // Memoize selected plantingId to avoid effect re-running on unrelated placement changes
+  const selectedPlantingId = useMemo(() => {
+    if (!selectedPlacement) return null;
+    const placement = placements.find((p) => p.id === selectedPlacement);
+    return placement?.plantingId ?? null;
+  }, [selectedPlacement, placements]);
+
+  // Notify parent when selection changes
+  useEffect(() => {
+    onSelectionChange?.(selectedPlacement, selectedPlantingId);
+  }, [selectedPlacement, selectedPlantingId, onSelectionChange]);
 
   // State for moving beds
   const [movingBed, setMovingBed] = useState<{
@@ -379,7 +394,7 @@ export function UnifiedGardenCanvas({
     return placements.map((placement) => {
       const planting = plantingMap.get(placement.plantingId);
       const cultivar = planting ? cultivarMap.get(planting.cultivarId) : undefined;
-      const quantity = planting?.quantity ?? 1;
+      const quantity = placement.quantity;
       const { widthCm, heightCm, rows, cols } = placement.cols
         ? calculateFootprintWithLayout(quantity, placement.spacingCm, placement.cols)
         : calculateFootprint(quantity, placement.spacingCm);
@@ -426,8 +441,8 @@ export function UnifiedGardenCanvas({
     return suggestions.map((suggestion) => {
       const planting = plantingMap.get(suggestion.plantingId);
       const cultivar = planting ? cultivarMap.get(planting.cultivarId) : undefined;
-      const quantity = planting?.quantity ?? 1;
-      const { widthCm, heightCm, rows, cols } = calculateFootprint(quantity, suggestion.spacingCm);
+      // Use the suggestion's quantity (remaining to place), not the planting's total
+      const { widthCm, heightCm, rows, cols } = calculateFootprint(suggestion.quantity, suggestion.spacingCm);
 
       const bed = beds.find((b) => b.id === suggestion.bedId);
       const bedX = bed?.positionX ?? 0;
@@ -547,11 +562,11 @@ export function UnifiedGardenCanvas({
                           existing.dateRange.start <= plantingDateRange.end;
           if (overlaps) {
             // Count how many plants are in this overlapping placement
-            occupiedSlots += existing.placement.quantity ?? 1;
+            occupiedSlots += existing.placement.quantity;
           }
         } else {
           // No date info, assume always present
-          occupiedSlots += existing.placement.quantity ?? 1;
+          occupiedSlots += existing.placement.quantity;
         }
       }
 
@@ -698,6 +713,21 @@ export function UnifiedGardenCanvas({
 
       const bestFit = findBestFittingConfig(bed.id, data.quantity, data.spacingCm, xCm, yCm, undefined, plantingDateRange, trailingHabit);
       if (bestFit && bestFit.valid) {
+        // Calculate quantity based on placement type
+        let placementQuantity: number;
+        if (bestFit.isContainer && bestFit.containerQuantity != null) {
+          // Container: use the calculated packed quantity
+          placementQuantity = bestFit.containerQuantity;
+        } else {
+          // Rectangular bed: calculate from dimensions
+          const { quantity: calcQuantity } = calculateQuantityFromDimensions(
+            bestFit.widthCm,
+            bestFit.heightCm,
+            data.spacingCm
+          );
+          placementQuantity = calcQuantity;
+        }
+
         onPlacementCreate({
           plantingId: data.plantingId,
           bedId: bed.id,
@@ -705,10 +735,7 @@ export function UnifiedGardenCanvas({
           yCm: bestFit.yCm,
           spacingCm: data.spacingCm,
           cols: bestFit.cols,
-          // For containers, store quantity of packed plants
-          ...(bestFit.isContainer && bestFit.containerQuantity
-            ? { quantity: bestFit.containerQuantity }
-            : {}),
+          quantity: placementQuantity, // Always store explicit quantity
         });
       }
     } catch (err) {
@@ -1035,20 +1062,31 @@ export function UnifiedGardenCanvas({
       });
     }
 
-    // Apply resize
+    // Apply resize - update placement with new position, cols, and quantity
     if (resizing && resizePreview && resizePreview.valid) {
+      // Find the planting and calculate if we need to increase its total quantity
+      const placement = placements.find((p) => p.id === resizing.placementId);
+      const planting = placement ? plantingMap.get(placement.plantingId) : undefined;
+
+      if (planting && onPlantingQuantityUpdate) {
+        // Calculate total placed quantity (excluding this placement, then adding the new quantity)
+        const currentPlacedTotal = getPlacedQuantity(planting.id, placements);
+        const thisPlacementCurrentQty = placement?.quantity ?? 0;
+        const otherPlacementsQty = currentPlacedTotal - thisPlacementCurrentQty;
+        const newTotalPlaced = otherPlacementsQty + resizePreview.quantity;
+
+        // If the new total exceeds planting.quantity, update it
+        if (newTotalPlaced > (planting.quantity ?? 0)) {
+          onPlantingQuantityUpdate(planting.id, newTotalPlaced);
+        }
+      }
+
       onPlacementUpdate(resizing.placementId, {
         xCm: resizePreview.xCm,
         yCm: resizePreview.yCm,
         cols: resizePreview.cols,
+        quantity: resizePreview.quantity,
       });
-
-      if (onPlantingQuantityUpdate) {
-        const placement = placements.find((p) => p.id === resizing.placementId);
-        if (placement) {
-          onPlantingQuantityUpdate(placement.plantingId, resizePreview.quantity);
-        }
-      }
     }
 
     setMovingPlacement(null);
@@ -1493,7 +1531,7 @@ export function UnifiedGardenCanvas({
 
             const displayQuantity = isBeingResized && resizePreview
               ? resizePreview.quantity
-              : (planting?.quantity ?? 1);
+              : placement.quantity;
 
             // Generate plant dots
             const dots: { cx: number; cy: number }[] = [];
@@ -1534,7 +1572,7 @@ export function UnifiedGardenCanvas({
                 {isInContainer ? (
                   // Container placement: render plants using circle packing
                   (() => {
-                    const containerQuantity = placement.quantity ?? 1;
+                    const containerQuantity = placement.quantity;
                     const plantPositions = getContainerPlantPositions(
                       containerQuantity,
                       bed.widthCm,
@@ -1678,7 +1716,7 @@ export function UnifiedGardenCanvas({
                         fontWeight={600}
                         style={{ pointerEvents: 'none' }}
                       >
-                        {planting.label.split(' ')[0]}
+                        {footprint.cultivar ? `${footprint.cultivar.crop} ${footprint.cultivar.variety}` : planting.label.split(' ')[0]} {placement.quantity} of {planting.quantity ?? 1}
                       </text>
                     )}
                   </>
@@ -1830,17 +1868,16 @@ export function UnifiedGardenCanvas({
           })}
 
           {/* Auto-layout suggestion previews */}
-          {suggestionFootprints.map(({ suggestion, planting, widthCm, heightCm, rows, cols, color, absoluteX, absoluteY }) => {
+          {suggestionFootprints.map(({ suggestion, planting, cultivar, widthCm, heightCm, rows, cols, color, absoluteX, absoluteY }) => {
             const svgX = toSvgX(absoluteX);
             const svgY = toSvgY(absoluteY);
             const width = widthCm * scale;
             const height = heightCm * scale;
 
             const dots: { cx: number; cy: number }[] = [];
-            const quantity = planting?.quantity ?? 1;
             let plantIndex = 0;
-            for (let row = 0; row < rows && plantIndex < quantity; row++) {
-              for (let col = 0; col < cols && plantIndex < quantity; col++) {
+            for (let row = 0; row < rows && plantIndex < suggestion.quantity; row++) {
+              for (let col = 0; col < cols && plantIndex < suggestion.quantity; col++) {
                 const dotX = svgX + (col + 0.5) * suggestion.spacingCm * scale;
                 const dotY = svgY + (row + 0.5) * suggestion.spacingCm * scale;
                 dots.push({ cx: dotX, cy: dotY });
@@ -1893,7 +1930,7 @@ export function UnifiedGardenCanvas({
                     opacity={0.7}
                     style={{ pointerEvents: 'none' }}
                   >
-                    {planting.label.split(' ')[0]}
+                    {cultivar ? `${cultivar.crop} ${cultivar.variety}` : planting.label.split(' ')[0]} ({suggestion.quantity})
                   </text>
                 )}
               </g>

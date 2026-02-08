@@ -202,7 +202,7 @@ export type PlantingPlacement = {
   yCm: number;
   spacingCm: number;
   cols?: number; // Optional: override default square-ish layout
-  quantity?: number; // Optional: for containers, how many plants to pack (default 1)
+  quantity: number; // Number of plants in this placement (allows splitting across multiple placements)
 };
 
 // Calculated footprint for rendering (not persisted)
@@ -230,5 +230,6 @@ export type PlacementSuggestion = {
   xCm: number;
   yCm: number;
   spacingCm: number;
+  quantity: number;
   score: number;
 };
