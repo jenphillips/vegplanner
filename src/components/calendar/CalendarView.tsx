@@ -48,7 +48,7 @@ export function CalendarView({
     if (filter === 'all') return sortedPlantings;
     return sortedPlantings.filter((p) => {
       const cultivar = cultivarMap.get(p.cultivarId);
-      return (cultivar?.plantType ?? 'vegetable') === filter;
+      return cultivar?.plantType === filter;
     });
   }, [sortedPlantings, filter, cultivarMap]);
 

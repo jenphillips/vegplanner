@@ -46,7 +46,7 @@ export function LibraryView({
 
     // Filter by plant type
     if (typeFilter !== 'all') {
-      result = result.filter((c) => (c.plantType ?? 'vegetable') === typeFilter);
+      result = result.filter((c) => c.plantType === typeFilter);
     }
 
     // Filter by plan status

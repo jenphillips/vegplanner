@@ -125,9 +125,6 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     return {
       ranges,
       currentViable,
-      // For backwards compatibility, also provide the overall min/max
-      minShift: ranges.length > 0 ? ranges[0].minShift : 0,
-      maxShift: ranges.length > 0 ? ranges[ranges.length - 1].maxShift : 0,
     };
   }, [canDragDirectSow, canDragTransplantShift, climate, cultivar, shiftBounds, planting.transplantDate, planting.sowDate, planting.harvestStart]);
 

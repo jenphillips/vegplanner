@@ -829,8 +829,7 @@ export function checkCollisionsWithTiming(
     // Check temporal overlap
     const existingRange = existingDateRanges.get(existing.id);
     if (!existingRange) {
-      // No date range info - assume always present (backward compatible)
-      overlapping.push(existing.id);
+      // Skip placements without date range info - they won't be checked for temporal overlap
       continue;
     }
 

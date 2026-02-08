@@ -58,8 +58,35 @@ When a planting is placed in a garden bed, the placement's `quantity` becomes au
 
 Detailed documentation is in `docs/`:
 - `docs/overview.md` - Architecture and data flow
+- `docs/data-schemas.md` - All data types and JSON file formats
 - `docs/succession-planting.md` - Succession algorithm with examples
 - `docs/features/` - Feature-specific documentation
+
+## Data Schemas Quick Reference
+
+### Key Types (defined in `src/lib/types.ts`)
+
+| Type | Purpose | Storage |
+|------|---------|---------|
+| `Cultivar` | Crop variety with timing, temp tolerances, spacing | `vegplanner.json`, `baseline-cultivars.json` |
+| `Planting` | Individual planting instance with dates | `plantings.json` |
+| `TaskCompletion` | Task completion state only (tasks generated at runtime) | `tasks.json` |
+| `GardenBed` | Bed/container definition with dimensions | `garden-beds.json` |
+| `PlantingPlacement` | Position of planting in a bed | `placements.json` |
+| `Climate` | Monthly temps, frost ranges for succession planning | `vegplanner.json` |
+
+### Required Cultivar Fields
+All cultivars must have: `id`, `crop`, `variety`, `plantType`, `germDaysMin`, `germDaysMax`, `maturityDays`, `maturityBasis`, `sowMethod`
+
+### Enums
+- `PlantType`: `"vegetable"` | `"flower"`
+- `SowMethod`: `"direct"` | `"transplant"` | `"either"`
+- `MaturityBasis`: `"from_sow"` | `"from_transplant"`
+- `HarvestStyle`: `"single"` | `"continuous"`
+- `GardenBedShape`: `"bed"` | `"container"`
+- `TaskType`: `"sow_indoor"` | `"sow_direct"` | `"harden_off"` | `"transplant"` | `"harvest_start"`
+
+See `docs/data-schemas.md` for complete field documentation.
 
 ## Common Tasks
 

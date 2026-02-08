@@ -92,7 +92,7 @@ export default function Home() {
 
   // Filter cultivars by plant type
   const vegetableCultivars = useMemo(() => {
-    return plannedCultivars.filter((c) => (c.plantType ?? 'vegetable') === 'vegetable');
+    return plannedCultivars.filter((c) => c.plantType === 'vegetable');
   }, [plannedCultivars]);
 
   const flowerCultivars = useMemo(() => {

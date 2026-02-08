@@ -156,6 +156,11 @@ Tasks are generated on-the-fly from planting dates, ensuring they stay in sync w
 
 See [Task Scheduling](./features/task-scheduling.md) for details.
 
+### Data Schemas
+All TypeScript types and JSON file formats are documented with field requirements and constraints.
+
+See [Data Schemas](./data-schemas.md) for complete type definitions.
+
 ## Design Decisions
 
 1. **Local JSON Storage**: Files in `data/` directory for version control compatibility and portability. No database required.

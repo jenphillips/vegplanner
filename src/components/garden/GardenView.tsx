@@ -158,7 +158,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
     if (plantTypeFilter === 'all') return plantings;
     return plantings.filter((p) => {
       const cultivar = cultivarMap.get(p.cultivarId);
-      return (cultivar?.plantType ?? 'vegetable') === plantTypeFilter;
+      return cultivar?.plantType === plantTypeFilter;
     });
   }, [plantings, plantTypeFilter, cultivarMap]);
 

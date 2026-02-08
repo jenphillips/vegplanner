@@ -390,30 +390,6 @@ describe('LibraryView', () => {
       expect(screen.queryByText(/Spinach/)).not.toBeInTheDocument();
       expect(screen.getByText(/Zinnia/)).toBeInTheDocument();
     });
-
-    it('defaults undefined plantType to vegetable', async () => {
-      const user = userEvent.setup();
-      const cultivars = [
-        createCultivar({ id: 'c1', crop: 'Spinach', plantType: undefined }),
-        createCultivar({ id: 'c2', crop: 'Zinnia', plantType: 'flower' }),
-      ];
-
-      render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={[]}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
-      );
-
-      // Click on vegetable filter
-      await user.click(screen.getByText('Vegetables'));
-
-      expect(screen.getByText(/Spinach/)).toBeInTheDocument();
-      expect(screen.queryByText(/Zinnia/)).not.toBeInTheDocument();
-    });
   });
 
   describe('combined filters', () => {
