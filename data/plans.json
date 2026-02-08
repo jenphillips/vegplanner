@@ -1,0 +1,146 @@
+[
+  {
+    "id": "plan-tomato-san-marzano",
+    "cultivarId": "tomato-san-marzano",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-2",
+    "cultivarId": "beet-avalanche",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-3",
+    "cultivarId": "bean-provider",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-4",
+    "cultivarId": "lettuce-little-gem",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-5",
+    "cultivarId": "spinach-seaside",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-6",
+    "cultivarId": "gailan-green",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-zinnia",
+    "cultivarId": "zinnia-benary-giant",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-cosmos",
+    "cultivarId": "cosmos-double-click",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-carrot-tendersweet",
+    "cultivarId": "carrot-tendersweet",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-cucumber-tendergreen-burpless",
+    "cultivarId": "cucumber-tendergreen-burpless",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-tomato-cherry-falls",
+    "cultivarId": "tomato-cherry-falls",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-onion-frontier",
+    "cultivarId": "onion-frontier",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-shallot-ambition",
+    "cultivarId": "shallot-ambition",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-pea-spring",
+    "cultivarId": "pea-spring",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-asparagus-guelph-millennium",
+    "cultivarId": "asparagus-guelph-millennium",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-strawberry-cavendish",
+    "cultivarId": "strawberry-cavendish",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  }
+]

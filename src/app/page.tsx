@@ -8,9 +8,11 @@ import { TabNav, type Tab } from '@/components/tabs/TabNav';
 import { ScheduleView } from '@/components/schedule/ScheduleView';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { GardenView } from '@/components/garden/GardenView';
+import { LibraryView } from '@/components/library/LibraryView';
 import { usePlantings } from '@/hooks/usePlantings';
+import { usePlans } from '@/hooks/usePlans';
 import { useTasks } from '@/hooks/useTasks';
-import type { Cultivar, FrostWindow, PlantingPlan, Climate } from '@/lib/types';
+import type { Cultivar, FrostWindow, Climate } from '@/lib/types';
 import styles from './page.module.css';
 
 // ============================================
@@ -20,26 +22,20 @@ import styles from './page.module.css';
 type LoadedData = {
   frost: FrostWindow;
   cultivars: Cultivar[];
-  plans: PlantingPlan[];
   climate: Climate;
 };
 
 const dataset = plannerData as {
   frostWindow: FrostWindow;
   cultivars: Cultivar[];
-  plans: PlantingPlan[];
   climate: Climate;
 };
 
 const data: LoadedData = {
   frost: dataset.frostWindow,
   cultivars: dataset.cultivars,
-  plans: dataset.plans,
   climate: dataset.climate,
 };
-
-const ready =
-  !!data.frost && data.cultivars.length > 0 && data.plans.length > 0;
 
 const daysBetweenExclusive = (startIso: string, endIso: string) => {
   const start = new Date(`${startIso}T00:00:00Z`).getTime();
@@ -59,9 +55,17 @@ export default function Home() {
     loading: plantingsLoading,
     updatePlanting,
     deletePlanting,
+    deleteAllForCultivar,
     updateAndRenumber,
     addAndRenumber,
   } = usePlantings();
+
+  const {
+    plans,
+    loading: plansLoading,
+    addPlan,
+    removePlan,
+  } = usePlans();
 
   const {
     tasksByWeek,
@@ -69,10 +73,13 @@ export default function Home() {
     toggleTaskComplete,
   } = useTasks(plantings, data.cultivars);
 
+  // Check if app is ready (has static data and plans have loaded)
+  const ready = !!data.frost && data.cultivars.length > 0 && !plansLoading;
+
   // Get unique cultivars from plans, sorted alphabetically by crop then variety
   const plannedCultivars = useMemo(() => {
     const cultivarMap = new Map(data.cultivars.map((c) => [c.id, c]));
-    const uniqueIds = [...new Set(data.plans.map((p) => p.cultivarId))];
+    const uniqueIds = [...new Set(plans.map((p) => p.cultivarId))];
     return (uniqueIds
       .map((id) => cultivarMap.get(id))
       .filter(Boolean) as Cultivar[])
@@ -81,7 +88,7 @@ export default function Home() {
         if (cropCompare !== 0) return cropCompare;
         return a.variety.localeCompare(b.variety);
       });
-  }, []);
+  }, [plans]);
 
   // Filter cultivars by plant type
   const vegetableCultivars = useMemo(() => {
@@ -121,6 +128,12 @@ export default function Home() {
 
   const handleDeletePlanting = async (id: string) => {
     await deletePlanting(id);
+  };
+
+  const handleRemoveFromPlan = async (cultivarId: string) => {
+    // Delete all plantings for this cultivar first, then remove the plan
+    await deleteAllForCultivar(cultivarId);
+    await removePlan(cultivarId);
   };
 
   return (
@@ -329,6 +342,28 @@ export default function Home() {
               loading={plantingsLoading}
               onUpdatePlanting={handleUpdatePlanting}
               onDeletePlanting={handleDeletePlanting}
+            />
+          </section>
+        )}
+
+        {/* Library Tab: Cultivar Library with Add/Remove from Plan */}
+        {ready && activeTab === 'library' && (
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <h2 className={styles.sectionTitle}>Cultivar Library</h2>
+                <p className={styles.sectionDesc}>
+                  Browse all cultivars in your library. Add varieties to this
+                  year&apos;s plan or remove ones you won&apos;t be growing.
+                </p>
+              </div>
+            </div>
+            <LibraryView
+              cultivars={data.cultivars}
+              plans={plans}
+              loading={plansLoading}
+              onAddToPlan={addPlan}
+              onRemoveFromPlan={handleRemoveFromPlan}
             />
           </section>
         )}

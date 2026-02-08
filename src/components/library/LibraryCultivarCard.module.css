@@ -1,0 +1,139 @@
+.card {
+  background: var(--panel, #ffffff);
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card.inPlan {
+  border-color: var(--accent, #2f6f4e);
+  background: linear-gradient(to bottom, #f8fcf9, #ffffff);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px 12px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text, #1f2614);
+}
+
+.inPlanBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent, #2f6f4e);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.meta {
+  font-size: 13px;
+  color: var(--muted, #5f6653);
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badgeTransplant {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f3e5f5;
+  color: #7b1fa2;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.harvestBadge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.footer {
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--border, #e5e5de);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notes {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted, #5f6653);
+  font-style: italic;
+}
+
+.addButton,
+.removeButton {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.addButton {
+  background: linear-gradient(120deg, var(--accent, #2f6f4e), var(--accent-strong, #1f4a33));
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(31, 74, 51, 0.2);
+}
+
+.addButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(31, 74, 51, 0.25);
+}
+
+.removeButton {
+  background: #fff;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.removeButton:hover {
+  background: #ffebee;
+  border-color: #ef9a9a;
+}

@@ -87,6 +87,14 @@ export function usePlantings() {
     [data, save]
   );
 
+  const deleteAllForCultivar = useCallback(
+    async (cultivarId: string) => {
+      const remaining = data.filter((p) => p.cultivarId !== cultivarId);
+      await save(remaining);
+    },
+    [data, save]
+  );
+
   return {
     plantings: data,
     loading,
@@ -94,6 +102,7 @@ export function usePlantings() {
     addPlanting,
     updatePlanting,
     deletePlanting,
+    deleteAllForCultivar,
     getPlantingsForCultivar,
     renumberPlantings,
     updateAndRenumber,
