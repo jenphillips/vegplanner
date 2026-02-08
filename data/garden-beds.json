@@ -1,6 +1,7 @@
 [
   {
     "name": "Raised Bed 1",
+    "shape": "bed",
     "widthCm": 91,
     "lengthCm": 213,
     "sunExposure": "full",
@@ -10,6 +11,7 @@
   },
   {
     "name": "Raised Bed 2",
+    "shape": "bed",
     "widthCm": 91,
     "lengthCm": 213,
     "sunExposure": "full",
@@ -19,6 +21,7 @@
   },
   {
     "name": "Raised Bed 3",
+    "shape": "bed",
     "widthCm": 91,
     "lengthCm": 213,
     "sunExposure": "full",
@@ -28,8 +31,9 @@
   },
   {
     "name": "Side bed 1",
+    "shape": "bed",
     "widthCm": 61,
-    "lengthCm": 274,
+    "lengthCm": 366,
     "sunExposure": "full",
     "id": "ec67c0cb-b35c-4c50-8aed-67554e01cba6",
     "positionX": -105,
@@ -37,8 +41,9 @@
   },
   {
     "name": "Side bed 2",
+    "shape": "bed",
     "widthCm": 61,
-    "lengthCm": 274,
+    "lengthCm": 366,
     "sunExposure": "full",
     "id": "2cfe7a12-6d62-4b74-86b1-b485739e7d6a",
     "positionX": 370,
@@ -46,8 +51,9 @@
   },
   {
     "name": "Outside fence 1",
+    "shape": "bed",
     "widthCm": 61,
-    "lengthCm": 274,
+    "lengthCm": 366,
     "sunExposure": "full",
     "id": "64126f97-9b73-43d9-863f-537bf800ea0a",
     "positionX": -190,
@@ -55,11 +61,52 @@
   },
   {
     "name": "Outside fence 2",
+    "shape": "bed",
     "widthCm": 61,
-    "lengthCm": 274,
+    "lengthCm": 366,
     "sunExposure": "full",
     "id": "9589613f-3361-42b1-b55c-b1899ec73a32",
     "positionX": 455,
     "positionY": 0
+  },
+  {
+    "name": "Garage Bed 1",
+    "shape": "bed",
+    "widthCm": 122,
+    "lengthCm": 61,
+    "sunExposure": "full",
+    "id": "3c5f7691-bd3f-4693-ab7c-2b4be080304a",
+    "positionX": -105,
+    "positionY": -120
+  },
+  {
+    "name": "Garage Bed 2",
+    "shape": "bed",
+    "widthCm": 122,
+    "lengthCm": 61,
+    "sunExposure": "full",
+    "id": "e02b3526-88b0-4fd1-b41b-937ef4cde6bf",
+    "positionX": 30,
+    "positionY": -120
+  },
+  {
+    "name": "Deck pot 1",
+    "shape": "container",
+    "widthCm": 30,
+    "lengthCm": 30,
+    "sunExposure": "full",
+    "id": "e19fe887-fd76-4974-9ae0-1ba8c41c092a",
+    "positionX": 185,
+    "positionY": -125
+  },
+  {
+    "name": "Deck pot 2",
+    "shape": "container",
+    "widthCm": 30,
+    "lengthCm": 30,
+    "sunExposure": "full",
+    "id": "2628ba69-7f1c-42fa-a97c-ebda08fff750",
+    "positionX": 235,
+    "positionY": -125
   }
 ]
