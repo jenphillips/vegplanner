@@ -3,7 +3,7 @@ import { readFile, writeFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 
-const ALLOWED_COLLECTIONS = ['plantings', 'tasks', 'garden-beds', 'placements'] as const;
+const ALLOWED_COLLECTIONS = ['plantings', 'tasks', 'garden-beds', 'placements', 'plans'] as const;
 type Collection = (typeof ALLOWED_COLLECTIONS)[number];
 
 function getDataFilePath(collection: Collection): string {

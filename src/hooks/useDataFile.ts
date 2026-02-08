@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-type Collection = 'plantings' | 'tasks' | 'garden-beds' | 'placements';
+type Collection = 'plantings' | 'tasks' | 'garden-beds' | 'placements' | 'plans';
 
 type UseDataFileResult<T> = {
   data: T[];
