@@ -320,11 +320,14 @@ export function findOverlappingPlacements(
 
 /**
  * Check if a placement fits within bed boundaries.
+ * For containers (circles), uses bounding box check - strict circular
+ * bounds checking is deferred for simplicity.
  */
 export function fitsInBed(
   placement: { xCm: number; yCm: number; widthCm: number; heightCm: number },
-  bed: { widthCm: number; lengthCm: number }
+  bed: { widthCm: number; lengthCm: number; shape?: 'bed' | 'container' }
 ): boolean {
+  // For containers, lengthCm equals widthCm (diameter), so this works as a square bounding box
   return (
     placement.xCm >= 0 &&
     placement.yCm >= 0 &&
@@ -839,4 +842,206 @@ export function checkCollisionsWithTiming(
     hasCollision: overlapping.length > 0,
     overlappingPlacements: overlapping,
   };
+}
+
+// ============================================
+// Circle Packing for Container Plants
+// ============================================
+
+/**
+ * Circle packing positions for N equal circles inside a larger circle.
+ * Returns positions as offsets from center (0,0) in units of plant radius.
+ *
+ * Based on optimal packing solutions:
+ * - 1: center
+ * - 2: horizontal pair
+ * - 3: equilateral triangle
+ * - 4: square corners
+ * - 5: 1 center + 4 around (square pattern)
+ * - 6: hexagon
+ * - 7: 1 center + 6 around (hexagon pattern)
+ */
+export function getCirclePackingPositions(
+  count: number
+): Array<{ x: number; y: number }> {
+  if (count <= 0) return [];
+  if (count === 1) return [{ x: 0, y: 0 }];
+
+  if (count === 2) {
+    // Side by side horizontally
+    return [
+      { x: -1, y: 0 },
+      { x: 1, y: 0 },
+    ];
+  }
+
+  if (count === 3) {
+    // Equilateral triangle
+    const r = 1.15; // Distance from center
+    return [
+      { x: 0, y: -r },
+      { x: -r * Math.sin(Math.PI / 3), y: r * 0.5 },
+      { x: r * Math.sin(Math.PI / 3), y: r * 0.5 },
+    ];
+  }
+
+  if (count === 4) {
+    // Square corners
+    const r = 1;
+    return [
+      { x: -r, y: -r },
+      { x: r, y: -r },
+      { x: -r, y: r },
+      { x: r, y: r },
+    ];
+  }
+
+  if (count === 5) {
+    // 1 center + 4 corners
+    const r = 1.5;
+    return [
+      { x: 0, y: 0 },
+      { x: -r, y: -r },
+      { x: r, y: -r },
+      { x: -r, y: r },
+      { x: r, y: r },
+    ];
+  }
+
+  if (count === 6) {
+    // Hexagon pattern (no center)
+    const r = 1.5;
+    const positions: Array<{ x: number; y: number }> = [];
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * Math.PI) / 3 - Math.PI / 2;
+      positions.push({
+        x: r * Math.cos(angle),
+        y: r * Math.sin(angle),
+      });
+    }
+    return positions;
+  }
+
+  if (count === 7) {
+    // 1 center + 6 hexagon
+    const r = 2;
+    const positions: Array<{ x: number; y: number }> = [{ x: 0, y: 0 }];
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * Math.PI) / 3 - Math.PI / 2;
+      positions.push({
+        x: r * Math.cos(angle),
+        y: r * Math.sin(angle),
+      });
+    }
+    return positions;
+  }
+
+  // For larger counts, arrange in concentric rings
+  // This is a simplified approach - just arrange in a ring
+  const positions: Array<{ x: number; y: number }> = [];
+  const ringSize = count <= 12 ? count : Math.ceil(count / 2);
+  const r = 1 + (count > 8 ? 0.5 : 0);
+
+  for (let i = 0; i < ringSize; i++) {
+    const angle = (i * 2 * Math.PI) / ringSize - Math.PI / 2;
+    positions.push({
+      x: r * Math.cos(angle),
+      y: r * Math.sin(angle),
+    });
+  }
+
+  // If more than one ring, add center plants
+  if (count > ringSize) {
+    positions.unshift({ x: 0, y: 0 });
+  }
+
+  return positions.slice(0, count);
+}
+
+/**
+ * Calculate how many plants of a given size can fit in a container.
+ * Uses the ratio of container diameter to plant spacing.
+ *
+ * @param containerDiameter - Container diameter in cm
+ * @param plantSpacing - Plant spacing in cm
+ * @param toleranceFactor - How much plants can overlap edges (default 1.2 = 20%)
+ * @returns Maximum number of plants that fit
+ */
+export function calculateMaxPlantsInContainer(
+  containerDiameter: number,
+  plantSpacing: number,
+  toleranceFactor: number = 1.2
+): number {
+  if (plantSpacing <= 0 || containerDiameter <= 0) return 0;
+
+  // Available radius for plant centers (accounting for plant size)
+  const usableRadius = (containerDiameter / 2) * toleranceFactor - plantSpacing / 2;
+
+  if (usableRadius <= 0) {
+    // Only room for 1 plant at center (which can spill over)
+    return plantSpacing <= containerDiameter * toleranceFactor ? 1 : 0;
+  }
+
+  // How many plant radii fit in the usable space?
+  const ratio = containerDiameter / plantSpacing;
+
+  if (ratio < 1.5) return 1;
+  if (ratio < 2.2) return 2;
+  if (ratio < 2.8) return 3;
+  if (ratio < 3.2) return 4;
+  if (ratio < 3.8) return 5;
+  if (ratio < 4.2) return 6;
+  if (ratio < 5.0) return 7;
+
+  // For large containers, estimate based on area
+  const containerArea = Math.PI * Math.pow(containerDiameter / 2, 2);
+  const plantArea = Math.PI * Math.pow(plantSpacing / 2, 2);
+  // Packing efficiency is about 90% for circle packing
+  return Math.floor((containerArea / plantArea) * 0.9);
+}
+
+/**
+ * Get actual pixel positions for plants in a container.
+ *
+ * @param count - Number of plants
+ * @param containerDiameter - Container diameter in cm
+ * @param plantSpacing - Plant spacing in cm
+ * @param containerCenterX - Container center X in pixels
+ * @param containerCenterY - Container center Y in pixels
+ * @param scale - Pixels per cm
+ * @returns Array of { x, y } positions in pixels
+ */
+export function getContainerPlantPositions(
+  count: number,
+  containerDiameter: number,
+  plantSpacing: number,
+  containerCenterX: number,
+  containerCenterY: number,
+  scale: number
+): Array<{ x: number; y: number }> {
+  const packingPositions = getCirclePackingPositions(count);
+
+  // Calculate scaling factor: how far apart to space the plants
+  // For count=1, it's centered. For multiple, spread based on container size
+  let spreadFactor: number;
+
+  if (count === 1) {
+    spreadFactor = 0;
+  } else if (count === 2) {
+    // Plants side by side - fit within container
+    spreadFactor = (containerDiameter - plantSpacing) / 4;
+  } else {
+    // General case: use a fraction of container radius minus plant radius
+    const availableRadius = (containerDiameter / 2) - (plantSpacing / 3);
+    // Get the max extent from packing positions to normalize
+    const maxExtent = Math.max(...packingPositions.map(p =>
+      Math.sqrt(p.x * p.x + p.y * p.y)
+    ));
+    spreadFactor = maxExtent > 0 ? availableRadius / maxExtent : 0;
+  }
+
+  return packingPositions.map(pos => ({
+    x: containerCenterX + pos.x * spreadFactor * scale,
+    y: containerCenterY + pos.y * spreadFactor * scale,
+  }));
 }

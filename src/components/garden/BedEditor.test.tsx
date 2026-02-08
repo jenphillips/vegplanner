@@ -118,14 +118,11 @@ describe('BedEditor', () => {
     });
 
     it('converts existing bed dimensions to feet and inches', () => {
-      // 91cm ≈ 35.8 inches ≈ 2ft 12in rounded to 3ft 0in
-      // 152cm ≈ 59.8 inches ≈ 4ft 12in rounded to 5ft 0in
+      // 91cm ≈ 35.83 inches ≈ 3ft 0in (rounds 11.83in up to 12in, then carries to feet)
+      // 152cm ≈ 59.84 inches ≈ 5ft 0in (rounds 11.84in up to 12in, then carries to feet)
       const bed = createGardenBed({ widthCm: 91, lengthCm: 152 });
       const { container } = render(<BedEditor bed={bed} units="imperial" onSave={vi.fn()} onCancel={vi.fn()} />);
 
-      // The conversion rounds: 91cm = 35.83 inches = 2ft 11.83in → 2ft 12in = 3ft 0in
-      // But the actual code does: Math.floor(35.83/12) = 2ft, Math.round(35.83 % 12) = 12in
-      // So it shows 2ft 12in (which is a display quirk)
       const widthFtInput = container.querySelector('#bed-width-ft') as HTMLInputElement;
       const lengthFtInput = container.querySelector('#bed-length-ft') as HTMLInputElement;
 

@@ -16,6 +16,8 @@ import {
   calculateGrowthFactor,
   calculatePlantDotRadius,
   getInGroundDateRange,
+  calculateMaxPlantsInContainer,
+  getContainerPlantPositions,
 } from '@/lib/gardenLayout';
 import type {
   GardenBed,
@@ -118,6 +120,8 @@ export function UnifiedGardenCanvas({
     heightCm: number;
     color: string;
     valid: boolean;
+    isContainer?: boolean; // True if dropping onto a container
+    containerQuantity?: number; // Number of plants that will be placed in container
   } | null>(null);
 
   // State for moving existing placements
@@ -276,10 +280,13 @@ export function UnifiedGardenCanvas({
     beds.forEach((bed) => {
       const x = bed.positionX ?? 0;
       const y = bed.positionY ?? 0;
+      // For containers, use diameter for both dimensions
+      const bedWidth = bed.widthCm;
+      const bedHeight = bed.shape === 'container' ? bed.widthCm : bed.lengthCm;
       minX = Math.min(minX, x);
       minY = Math.min(minY, y);
-      maxX = Math.max(maxX, x + bed.widthCm);
-      maxY = Math.max(maxY, y + bed.lengthCm);
+      maxX = Math.max(maxX, x + bedWidth);
+      maxY = Math.max(maxY, y + bedHeight);
     });
 
     // Add padding
@@ -346,9 +353,22 @@ export function UnifiedGardenCanvas({
     for (const bed of beds) {
       const bedX = bed.positionX ?? 0;
       const bedY = bed.positionY ?? 0;
-      if (xCm >= bedX && xCm <= bedX + bed.widthCm &&
-          yCm >= bedY && yCm <= bedY + bed.lengthCm) {
-        return bed;
+
+      if (bed.shape === 'container') {
+        // Circle hit detection: check if distance from center is within radius
+        const radius = bed.widthCm / 2;
+        const centerX = bedX + radius;
+        const centerY = bedY + radius;
+        const distSq = (xCm - centerX) ** 2 + (yCm - centerY) ** 2;
+        if (distSq <= radius ** 2) {
+          return bed;
+        }
+      } else {
+        // Rectangle hit detection
+        if (xCm >= bedX && xCm <= bedX + bed.widthCm &&
+            yCm >= bedY && yCm <= bedY + bed.lengthCm) {
+          return bed;
+        }
       }
     }
     return null;
@@ -494,7 +514,8 @@ export function UnifiedGardenCanvas({
     cursorXCm: number,
     cursorYCm: number,
     excludeId?: string,
-    plantingDateRange?: { start: string; end: string } | null
+    plantingDateRange?: { start: string; end: string } | null,
+    trailingHabit?: boolean
   ) => {
     const bed = beds.find((b) => b.id === bedId);
     if (!bed) return null;
@@ -502,6 +523,56 @@ export function UnifiedGardenCanvas({
     const bedX = bed.positionX ?? 0;
     const bedY = bed.positionY ?? 0;
 
+    // Special handling for containers - plants are packed using circle packing
+    if (bed.shape === 'container') {
+      const containerDiameter = bed.widthCm;
+      const plantDiameter = spacingCm; // Plant's mature diameter
+      // Trailing plants (petunias, etc.) can spill more over edges
+      const tolerance = trailingHabit ? 2.0 : 1.2;
+
+      // Calculate how many plants of this size can fit
+      const maxPlants = calculateMaxPlantsInContainer(containerDiameter, plantDiameter, tolerance);
+      const requestedQuantity = Math.min(quantity, maxPlants);
+
+      // Count existing plants in this container (excluding self when moving)
+      const existingPlacements = footprints.filter(
+        f => f.placement.bedId === bedId && f.placement.id !== excludeId
+      );
+
+      // Check temporal overlap with existing placements
+      let occupiedSlots = 0;
+      for (const existing of existingPlacements) {
+        if (plantingDateRange && existing.dateRange) {
+          const overlaps = plantingDateRange.start <= existing.dateRange.end &&
+                          existing.dateRange.start <= plantingDateRange.end;
+          if (overlaps) {
+            // Count how many plants are in this overlapping placement
+            occupiedSlots += existing.placement.quantity ?? 1;
+          }
+        } else {
+          // No date info, assume always present
+          occupiedSlots += existing.placement.quantity ?? 1;
+        }
+      }
+
+      const availableSlots = maxPlants - occupiedSlots;
+      const fitsQuantity = Math.min(requestedQuantity, availableSlots);
+      const fits = fitsQuantity > 0;
+
+      return {
+        widthCm: spacingCm,
+        heightCm: spacingCm,
+        cols: 1,
+        xCm: 0, // Will be centered in container
+        yCm: 0,
+        valid: fits,
+        isContainer: true,
+        containerQuantity: fitsQuantity, // How many plants to place
+        maxContainerPlants: maxPlants, // Total capacity
+      };
+    }
+
+    // Standard rectangular bed logic
     // Convert to bed-relative coordinates
     const relX = cursorXCm - bedX;
     const relY = cursorYCm - bedY;
@@ -535,7 +606,7 @@ export function UnifiedGardenCanvas({
       yCm: centeredY,
       valid: false,
     };
-  }, [beds, isPlacementValid]);
+  }, [beds, footprints, isPlacementValid]);
 
   // --- DRAG HANDLERS FOR NEW PLACEMENTS ---
 
@@ -559,8 +630,10 @@ export function UnifiedGardenCanvas({
       // Get planting's date range for time-aware collision detection
       const planting = plantingMap.get(data.plantingId);
       const plantingDateRange = planting ? getInGroundDateRange(planting) : null;
+      const cultivar = planting ? cultivarMap.get(planting.cultivarId) : undefined;
+      const trailingHabit = cultivar?.trailingHabit ?? false;
 
-      const bestFit = findBestFittingConfig(bed.id, data.quantity, data.spacingCm, xCm, yCm, undefined, plantingDateRange);
+      const bestFit = findBestFittingConfig(bed.id, data.quantity, data.spacingCm, xCm, yCm, undefined, plantingDateRange, trailingHabit);
       if (!bestFit) {
         setDragPreview(null);
         return;
@@ -569,6 +642,7 @@ export function UnifiedGardenCanvas({
       const bedX = bed.positionX ?? 0;
       const bedY = bed.positionY ?? 0;
 
+      const isContainer = bed.shape === 'container';
       setDragPreview({
         bedId: bed.id,
         xCm: bedX + bestFit.xCm,
@@ -577,6 +651,8 @@ export function UnifiedGardenCanvas({
         heightCm: bestFit.heightCm,
         color: getCropColor(data.family, data.cropName),
         valid: bestFit.valid,
+        isContainer,
+        containerQuantity: bestFit.containerQuantity,
       });
     } catch {
       // Data not available during dragover in some browsers
@@ -617,8 +693,10 @@ export function UnifiedGardenCanvas({
       // Get planting's date range for time-aware collision detection
       const planting = plantingMap.get(data.plantingId);
       const plantingDateRange = planting ? getInGroundDateRange(planting) : null;
+      const cultivar = planting ? cultivarMap.get(planting.cultivarId) : undefined;
+      const trailingHabit = cultivar?.trailingHabit ?? false;
 
-      const bestFit = findBestFittingConfig(bed.id, data.quantity, data.spacingCm, xCm, yCm, undefined, plantingDateRange);
+      const bestFit = findBestFittingConfig(bed.id, data.quantity, data.spacingCm, xCm, yCm, undefined, plantingDateRange, trailingHabit);
       if (bestFit && bestFit.valid) {
         onPlacementCreate({
           plantingId: data.plantingId,
@@ -627,6 +705,10 @@ export function UnifiedGardenCanvas({
           yCm: bestFit.yCm,
           spacingCm: data.spacingCm,
           cols: bestFit.cols,
+          // For containers, store quantity of packed plants
+          ...(bestFit.isContainer && bestFit.containerQuantity
+            ? { quantity: bestFit.containerQuantity }
+            : {}),
         });
       }
     } catch (err) {
@@ -1109,28 +1191,37 @@ export function UnifiedGardenCanvas({
             const bedY = movingBed?.id === bed.id && bedMovePreview ? bedMovePreview.y : (bed.positionY ?? 0);
             const isSelected = selectedBed === bed.id;
             const isBeingMoved = movingBed?.id === bed.id && hasDragged;
+            const isContainer = bed.shape === 'container';
 
             const svgX = toSvgX(bedX);
             const svgY = toSvgY(bedY);
             const width = bed.widthCm * scale;
-            const height = bed.lengthCm * scale;
+            // For containers, height = width (it's a circle)
+            const height = isContainer ? width : bed.lengthCm * scale;
 
-            // Grid lines for this bed
+            // Container-specific values
+            const radius = width / 2;
+            const centerX = svgX + radius;
+            const centerY = svgY + radius;
+
+            // Grid lines for this bed (skip for containers)
             const gridSpacing = units === 'metric' ? GRID_SPACING_CM_METRIC : GRID_SPACING_CM_IMPERIAL;
             const majorSpacing = units === 'metric' ? GRID_MAJOR_CM_METRIC : GRID_MAJOR_CM_IMPERIAL;
 
             const gridLines: { x1: number; y1: number; x2: number; y2: number; major: boolean }[] = [];
-            for (let x = 0; x <= bed.widthCm; x += gridSpacing) {
-              const isMajor = units === 'metric'
-                ? x % majorSpacing === 0
-                : Math.abs(x % majorSpacing) < 0.1 || Math.abs((x % majorSpacing) - majorSpacing) < 0.1;
-              gridLines.push({ x1: x * scale, y1: 0, x2: x * scale, y2: height, major: isMajor });
-            }
-            for (let y = 0; y <= bed.lengthCm; y += gridSpacing) {
-              const isMajor = units === 'metric'
-                ? y % majorSpacing === 0
-                : Math.abs(y % majorSpacing) < 0.1 || Math.abs((y % majorSpacing) - majorSpacing) < 0.1;
-              gridLines.push({ x1: 0, y1: y * scale, x2: width, y2: y * scale, major: isMajor });
+            if (!isContainer) {
+              for (let x = 0; x <= bed.widthCm; x += gridSpacing) {
+                const isMajor = units === 'metric'
+                  ? x % majorSpacing === 0
+                  : Math.abs(x % majorSpacing) < 0.1 || Math.abs((x % majorSpacing) - majorSpacing) < 0.1;
+                gridLines.push({ x1: x * scale, y1: 0, x2: x * scale, y2: height, major: isMajor });
+              }
+              for (let y = 0; y <= bed.lengthCm; y += gridSpacing) {
+                const isMajor = units === 'metric'
+                  ? y % majorSpacing === 0
+                  : Math.abs(y % majorSpacing) < 0.1 || Math.abs((y % majorSpacing) - majorSpacing) < 0.1;
+                gridLines.push({ x1: 0, y1: y * scale, x2: width, y2: y * scale, major: isMajor });
+              }
             }
 
             const sunIcon = bed.sunExposure === 'full' ? '☀️' : bed.sunExposure === 'partial' ? '⛅' : '☁️';
@@ -1143,40 +1234,71 @@ export function UnifiedGardenCanvas({
             // Hide labels entirely if they'd be too small to read
             const showLabel = labelFontSize >= 8;
 
+            // Colors: containers are dark gray, beds are tan
+            const fillColor = isContainer ? '#4a4a4a' : '#f5f0e6';
+            const strokeColor = isBeingMoved ? '#3b82f6' : (isContainer ? '#333333' : '#8b7355');
+
             return (
               <g key={bed.id}>
                 {/* Selection highlight */}
                 {isSelected && !isBeingMoved && (
-                  <rect
-                    x={svgX - 4}
-                    y={svgY - 4}
-                    width={width + 8}
-                    height={height + 8}
-                    fill="none"
-                    stroke="#3b82f6"
+                  isContainer ? (
+                    <circle
+                      cx={centerX}
+                      cy={centerY}
+                      r={radius + 4}
+                      fill="none"
+                      stroke="#3b82f6"
+                      strokeWidth={2}
+                      strokeDasharray="6 3"
+                    />
+                  ) : (
+                    <rect
+                      x={svgX - 4}
+                      y={svgY - 4}
+                      width={width + 8}
+                      height={height + 8}
+                      fill="none"
+                      stroke="#3b82f6"
+                      strokeWidth={2}
+                      strokeDasharray="6 3"
+                      rx={6}
+                    />
+                  )
+                )}
+
+                {/* Bed/Container background */}
+                {isContainer ? (
+                  <circle
+                    cx={centerX}
+                    cy={centerY}
+                    r={radius}
+                    fill={fillColor}
+                    stroke={strokeColor}
                     strokeWidth={2}
-                    strokeDasharray="6 3"
-                    rx={6}
+                    strokeDasharray={isBeingMoved ? '6 3' : 'none'}
+                    style={{ cursor: bedsLocked ? 'default' : 'move' }}
+                    onClick={(e) => handleBedClick(e, bed.id)}
+                    onMouseDown={(e) => handleBedMoveStart(e, bed)}
+                  />
+                ) : (
+                  <rect
+                    x={svgX}
+                    y={svgY}
+                    width={width}
+                    height={height}
+                    fill={fillColor}
+                    stroke={strokeColor}
+                    strokeWidth={2}
+                    strokeDasharray={isBeingMoved ? '6 3' : 'none'}
+                    rx={4}
+                    style={{ cursor: bedsLocked ? 'default' : 'move' }}
+                    onClick={(e) => handleBedClick(e, bed.id)}
+                    onMouseDown={(e) => handleBedMoveStart(e, bed)}
                   />
                 )}
 
-                {/* Bed background */}
-                <rect
-                  x={svgX}
-                  y={svgY}
-                  width={width}
-                  height={height}
-                  fill="#f5f0e6"
-                  stroke={isBeingMoved ? '#3b82f6' : '#8b7355'}
-                  strokeWidth={2}
-                  strokeDasharray={isBeingMoved ? '6 3' : 'none'}
-                  rx={4}
-                  style={{ cursor: bedsLocked ? 'default' : 'move' }}
-                  onClick={(e) => handleBedClick(e, bed.id)}
-                  onMouseDown={(e) => handleBedMoveStart(e, bed)}
-                />
-
-                {/* Grid lines */}
+                {/* Grid lines (beds only) */}
                 {gridLines.map((line, i) => (
                   <line
                     key={i}
@@ -1261,18 +1383,59 @@ export function UnifiedGardenCanvas({
 
           {/* Drag preview for new placements */}
           {dragPreview && (
-            <rect
-              x={toSvgX(dragPreview.xCm)}
-              y={toSvgY(dragPreview.yCm)}
-              width={dragPreview.widthCm * scale}
-              height={dragPreview.heightCm * scale}
-              fill={dragPreview.valid ? dragPreview.color : '#ef4444'}
-              fillOpacity={0.3}
-              stroke={dragPreview.valid ? dragPreview.color : '#ef4444'}
-              strokeWidth={2}
-              strokeDasharray={dragPreview.valid ? 'none' : '4 2'}
-              rx={4}
-            />
+            dragPreview.isContainer ? (
+              // Container preview: circle(s) representing the plant(s)
+              (() => {
+                const bed = beds.find(b => b.id === dragPreview.bedId);
+                if (!bed) return null;
+                const bedX = bed.positionX ?? 0;
+                const bedY = bed.positionY ?? 0;
+                const containerRadius = (bed.widthCm * scale) / 2;
+                const centerX = toSvgX(bedX) + containerRadius;
+                const centerY = toSvgY(bedY) + containerRadius;
+                const plantRadius = (dragPreview.widthCm * scale) / 2;
+                const quantity = dragPreview.containerQuantity ?? 1;
+                const positions = getContainerPlantPositions(
+                  quantity,
+                  bed.widthCm,
+                  dragPreview.widthCm,
+                  centerX,
+                  centerY,
+                  scale
+                );
+                return (
+                  <>
+                    {positions.map((pos, i) => (
+                      <circle
+                        key={i}
+                        cx={pos.x}
+                        cy={pos.y}
+                        r={plantRadius}
+                        fill={dragPreview.valid ? dragPreview.color : '#ef4444'}
+                        fillOpacity={0.4}
+                        stroke={dragPreview.valid ? dragPreview.color : '#ef4444'}
+                        strokeWidth={2}
+                        strokeDasharray={dragPreview.valid ? 'none' : '4 2'}
+                      />
+                    ))}
+                  </>
+                );
+              })()
+            ) : (
+              // Regular bed preview: rectangle
+              <rect
+                x={toSvgX(dragPreview.xCm)}
+                y={toSvgY(dragPreview.yCm)}
+                width={dragPreview.widthCm * scale}
+                height={dragPreview.heightCm * scale}
+                fill={dragPreview.valid ? dragPreview.color : '#ef4444'}
+                fillOpacity={0.3}
+                stroke={dragPreview.valid ? dragPreview.color : '#ef4444'}
+                strokeWidth={2}
+                strokeDasharray={dragPreview.valid ? 'none' : '4 2'}
+                rx={4}
+              />
+            )
           )}
 
           {/* Planting footprints - sort so selected placement renders last (on top) */}
@@ -1349,6 +1512,14 @@ export function UnifiedGardenCanvas({
 
             const isHovered = hoveredPlacement === placement.id;
             const showMaturePreview = isHovered && growthFactor < 1 && !isInteracting;
+            const isInContainer = bed.shape === 'container';
+
+            // For containers: calculate centered position for the plant circle
+            const containerRadius = isInContainer ? (bed.widthCm * scale) / 2 : 0;
+            const containerCenterX = isInContainer ? toSvgX(bedX) + containerRadius : 0;
+            const containerCenterY = isInContainer ? toSvgY(bedY) + containerRadius : 0;
+            const plantRadius = isInContainer ? calculatePlantDotRadius(placement.spacingCm, scale, growthFactor) : 0;
+            const maturePlantRadius = isInContainer ? calculatePlantDotRadius(placement.spacingCm, scale, 1) : 0;
 
             return (
               <g
@@ -1360,87 +1531,164 @@ export function UnifiedGardenCanvas({
               >
                 {planting && <title>{planting.label}</title>}
 
-                {/* Selection highlight */}
-                {isSelected && !isInteracting && (
-                  <rect
-                    x={svgX - 3}
-                    y={svgY - 3}
-                    width={width + 6}
-                    height={height + 6}
-                    fill="none"
-                    stroke="#3b82f6"
-                    strokeWidth={2}
-                    strokeDasharray="4 2"
-                    rx={6}
-                  />
-                )}
+                {isInContainer ? (
+                  // Container placement: render plants using circle packing
+                  (() => {
+                    const containerQuantity = placement.quantity ?? 1;
+                    const plantPositions = getContainerPlantPositions(
+                      containerQuantity,
+                      bed.widthCm,
+                      placement.spacingCm,
+                      containerCenterX,
+                      containerCenterY,
+                      scale
+                    );
 
-                {/* Footprint rectangle */}
-                <rect
-                  x={svgX}
-                  y={svgY}
-                  width={width}
-                  height={height}
-                  fill={isInvalid ? '#ef4444' : color}
-                  fillOpacity={isInteracting ? 0.4 : 0.3}
-                  stroke={isInvalid ? '#ef4444' : color}
-                  strokeWidth={2}
-                  strokeDasharray={isInteracting ? '4 2' : 'none'}
-                  rx={4}
-                  style={{ cursor: isInteracting ? 'grabbing' : 'grab' }}
-                  onMouseDown={(e) => handlePlacementMoveStart(e, footprint)}
-                />
+                    return (
+                      <>
+                        {/* Selection highlight - circle around all plants */}
+                        {isSelected && !isInteracting && (
+                          <circle
+                            cx={containerCenterX}
+                            cy={containerCenterY}
+                            r={containerRadius - 2}
+                            fill="none"
+                            stroke="#3b82f6"
+                            strokeWidth={2}
+                            strokeDasharray="4 2"
+                          />
+                        )}
 
-                {/* Plant dots - size based on growth stage */}
-                {dots.map((dot, i) => (
-                  <circle
-                    key={i}
-                    cx={dot.cx}
-                    cy={dot.cy}
-                    r={calculatePlantDotRadius(placement.spacingCm, scale, growthFactor)}
-                    fill={isInvalid ? '#ef4444' : color}
-                    fillOpacity={0.6}
-                    style={{ pointerEvents: 'none' }}
-                  />
-                ))}
+                        {/* Invisible drag target covering the container */}
+                        <circle
+                          cx={containerCenterX}
+                          cy={containerCenterY}
+                          r={containerRadius}
+                          fill="transparent"
+                          style={{ cursor: isInteracting ? 'grabbing' : 'grab' }}
+                          onMouseDown={(e) => handlePlacementMoveStart(e, footprint)}
+                        />
 
-                {/* Mature size preview on hover - dotted circles showing full size */}
-                {showMaturePreview && dots.map((dot, i) => (
-                  <circle
-                    key={`mature-${i}`}
-                    cx={dot.cx}
-                    cy={dot.cy}
-                    r={calculatePlantDotRadius(placement.spacingCm, scale, 1)}
-                    fill="none"
-                    stroke={color}
-                    strokeWidth={1.5}
-                    strokeDasharray="3 2"
-                    strokeOpacity={0.7}
-                    style={{ pointerEvents: 'none' }}
-                  />
-                ))}
+                        {/* Plant circles at packed positions */}
+                        {plantPositions.map((pos, i) => (
+                          <circle
+                            key={i}
+                            cx={pos.x}
+                            cy={pos.y}
+                            r={plantRadius}
+                            fill={isInvalid ? '#ef4444' : color}
+                            fillOpacity={isInteracting ? 0.5 : 0.6}
+                            stroke={isInvalid ? '#ef4444' : color}
+                            strokeWidth={2}
+                            strokeDasharray={isInteracting ? '4 2' : 'none'}
+                            style={{ pointerEvents: 'none' }}
+                          />
+                        ))}
 
-                {/* Label */}
-                {planting && width > 40 && height > 20 && (
-                  <text
-                    x={svgX + width / 2}
-                    y={svgY + height / 2}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill={isInvalid ? '#ef4444' : color}
-                    fontSize={Math.min(12, height * 0.3)}
-                    fontWeight={600}
-                    style={{ pointerEvents: 'none' }}
-                  >
-                    {planting.label.split(' ')[0]}
-                  </text>
+                        {/* Mature size preview on hover */}
+                        {showMaturePreview && plantPositions.map((pos, i) => (
+                          <circle
+                            key={`mature-${i}`}
+                            cx={pos.x}
+                            cy={pos.y}
+                            r={maturePlantRadius}
+                            fill="none"
+                            stroke={color}
+                            strokeWidth={1.5}
+                            strokeDasharray="3 2"
+                            strokeOpacity={0.7}
+                            style={{ pointerEvents: 'none' }}
+                          />
+                        ))}
+                      </>
+                    );
+                  })()
+                ) : (
+                  // Regular bed placement: render as rectangle with dots
+                  <>
+                    {/* Selection highlight */}
+                    {isSelected && !isInteracting && (
+                      <rect
+                        x={svgX - 3}
+                        y={svgY - 3}
+                        width={width + 6}
+                        height={height + 6}
+                        fill="none"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                        strokeDasharray="4 2"
+                        rx={6}
+                      />
+                    )}
+
+                    {/* Footprint rectangle */}
+                    <rect
+                      x={svgX}
+                      y={svgY}
+                      width={width}
+                      height={height}
+                      fill={isInvalid ? '#ef4444' : color}
+                      fillOpacity={isInteracting ? 0.4 : 0.3}
+                      stroke={isInvalid ? '#ef4444' : color}
+                      strokeWidth={2}
+                      strokeDasharray={isInteracting ? '4 2' : 'none'}
+                      rx={4}
+                      style={{ cursor: isInteracting ? 'grabbing' : 'grab' }}
+                      onMouseDown={(e) => handlePlacementMoveStart(e, footprint)}
+                    />
+
+                    {/* Plant dots - size based on growth stage */}
+                    {dots.map((dot, i) => (
+                      <circle
+                        key={i}
+                        cx={dot.cx}
+                        cy={dot.cy}
+                        r={calculatePlantDotRadius(placement.spacingCm, scale, growthFactor)}
+                        fill={isInvalid ? '#ef4444' : color}
+                        fillOpacity={0.6}
+                        style={{ pointerEvents: 'none' }}
+                      />
+                    ))}
+
+                    {/* Mature size preview on hover - dotted circles showing full size */}
+                    {showMaturePreview && dots.map((dot, i) => (
+                      <circle
+                        key={`mature-${i}`}
+                        cx={dot.cx}
+                        cy={dot.cy}
+                        r={calculatePlantDotRadius(placement.spacingCm, scale, 1)}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={1.5}
+                        strokeDasharray="3 2"
+                        strokeOpacity={0.7}
+                        style={{ pointerEvents: 'none' }}
+                      />
+                    ))}
+
+                    {/* Label */}
+                    {planting && width > 40 && height > 20 && (
+                      <text
+                        x={svgX + width / 2}
+                        y={svgY + height / 2}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill={isInvalid ? '#ef4444' : color}
+                        fontSize={Math.min(12, height * 0.3)}
+                        fontWeight={600}
+                        style={{ pointerEvents: 'none' }}
+                      >
+                        {planting.label.split(' ')[0]}
+                      </text>
+                    )}
+                  </>
                 )}
 
                 {/* Harvest indicator - scissors icon */}
                 {isHarvesting && !isInteracting && (
                   <foreignObject
-                    x={svgX + width - 14}
-                    y={svgY - 2}
+                    x={isInContainer ? containerCenterX + maturePlantRadius - 8 : svgX + width - 14}
+                    y={isInContainer ? containerCenterY - maturePlantRadius - 8 : svgY - 2}
                     width={16}
                     height={16}
                     style={{ pointerEvents: 'none' }}
@@ -1461,8 +1709,8 @@ export function UnifiedGardenCanvas({
                   </foreignObject>
                 )}
 
-                {/* Quantity indicator during resize */}
-                {isBeingResized && resizePreview && (
+                {/* Quantity indicator during resize (beds only) */}
+                {!isInContainer && isBeingResized && resizePreview && (
                   <text
                     x={svgX + width / 2}
                     y={svgY + height + 14}
@@ -1476,58 +1724,10 @@ export function UnifiedGardenCanvas({
                   </text>
                 )}
 
-                {/* Resize handles */}
+                {/* Resize handles and delete button */}
                 {isSelected && !isInteracting && (
-                  <>
-                    <rect
-                      x={svgX - handleSize / 2}
-                      y={svgY - handleSize / 2}
-                      width={handleSize}
-                      height={handleSize}
-                      fill="white"
-                      stroke="#3b82f6"
-                      strokeWidth={1.5}
-                      rx={2}
-                      style={{ cursor: 'nwse-resize' }}
-                      onMouseDown={(e) => handleResizeStart(e, footprint, 'nw')}
-                    />
-                    <rect
-                      x={svgX + width - handleSize / 2}
-                      y={svgY - handleSize / 2}
-                      width={handleSize}
-                      height={handleSize}
-                      fill="white"
-                      stroke="#3b82f6"
-                      strokeWidth={1.5}
-                      rx={2}
-                      style={{ cursor: 'nesw-resize' }}
-                      onMouseDown={(e) => handleResizeStart(e, footprint, 'ne')}
-                    />
-                    <rect
-                      x={svgX - handleSize / 2}
-                      y={svgY + height - handleSize / 2}
-                      width={handleSize}
-                      height={handleSize}
-                      fill="white"
-                      stroke="#3b82f6"
-                      strokeWidth={1.5}
-                      rx={2}
-                      style={{ cursor: 'nesw-resize' }}
-                      onMouseDown={(e) => handleResizeStart(e, footprint, 'sw')}
-                    />
-                    <rect
-                      x={svgX + width - handleSize / 2}
-                      y={svgY + height - handleSize / 2}
-                      width={handleSize}
-                      height={handleSize}
-                      fill="white"
-                      stroke="#3b82f6"
-                      strokeWidth={1.5}
-                      rx={2}
-                      style={{ cursor: 'nwse-resize' }}
-                      onMouseDown={(e) => handleResizeStart(e, footprint, 'se')}
-                    />
-                    {/* Delete button */}
+                  isInContainer ? (
+                    // Container: just delete button, no resize handles
                     <g
                       style={{ cursor: 'pointer' }}
                       onClick={(e) => {
@@ -1537,19 +1737,93 @@ export function UnifiedGardenCanvas({
                       }}
                     >
                       <circle
-                        cx={svgX + width + 4}
-                        cy={svgY - 4}
+                        cx={containerCenterX + maturePlantRadius + 4}
+                        cy={containerCenterY - maturePlantRadius - 4}
                         r={8}
                         fill="#ef4444"
                       />
                       <path
-                        d={`M${svgX + width + 1},${svgY - 7} L${svgX + width + 7},${svgY - 1} M${svgX + width + 7},${svgY - 7} L${svgX + width + 1},${svgY - 1}`}
+                        d={`M${containerCenterX + maturePlantRadius + 1},${containerCenterY - maturePlantRadius - 7} L${containerCenterX + maturePlantRadius + 7},${containerCenterY - maturePlantRadius - 1} M${containerCenterX + maturePlantRadius + 7},${containerCenterY - maturePlantRadius - 7} L${containerCenterX + maturePlantRadius + 1},${containerCenterY - maturePlantRadius - 1}`}
                         stroke="white"
                         strokeWidth={2}
                         strokeLinecap="round"
                       />
                     </g>
-                  </>
+                  ) : (
+                    // Bed: resize handles + delete button
+                    <>
+                      <rect
+                        x={svgX - handleSize / 2}
+                        y={svgY - handleSize / 2}
+                        width={handleSize}
+                        height={handleSize}
+                        fill="white"
+                        stroke="#3b82f6"
+                        strokeWidth={1.5}
+                        rx={2}
+                        style={{ cursor: 'nwse-resize' }}
+                        onMouseDown={(e) => handleResizeStart(e, footprint, 'nw')}
+                      />
+                      <rect
+                        x={svgX + width - handleSize / 2}
+                        y={svgY - handleSize / 2}
+                        width={handleSize}
+                        height={handleSize}
+                        fill="white"
+                        stroke="#3b82f6"
+                        strokeWidth={1.5}
+                        rx={2}
+                        style={{ cursor: 'nesw-resize' }}
+                        onMouseDown={(e) => handleResizeStart(e, footprint, 'ne')}
+                      />
+                      <rect
+                        x={svgX - handleSize / 2}
+                        y={svgY + height - handleSize / 2}
+                        width={handleSize}
+                        height={handleSize}
+                        fill="white"
+                        stroke="#3b82f6"
+                        strokeWidth={1.5}
+                        rx={2}
+                        style={{ cursor: 'nesw-resize' }}
+                        onMouseDown={(e) => handleResizeStart(e, footprint, 'sw')}
+                      />
+                      <rect
+                        x={svgX + width - handleSize / 2}
+                        y={svgY + height - handleSize / 2}
+                        width={handleSize}
+                        height={handleSize}
+                        fill="white"
+                        stroke="#3b82f6"
+                        strokeWidth={1.5}
+                        rx={2}
+                        style={{ cursor: 'nwse-resize' }}
+                        onMouseDown={(e) => handleResizeStart(e, footprint, 'se')}
+                      />
+                      {/* Delete button */}
+                      <g
+                        style={{ cursor: 'pointer' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPlacementDelete(footprint.placement.id);
+                          setSelectedPlacement(null);
+                        }}
+                      >
+                        <circle
+                          cx={svgX + width + 4}
+                          cy={svgY - 4}
+                          r={8}
+                          fill="#ef4444"
+                        />
+                        <path
+                          d={`M${svgX + width + 1},${svgY - 7} L${svgX + width + 7},${svgY - 1} M${svgX + width + 7},${svgY - 7} L${svgX + width + 1},${svgY - 1}`}
+                          stroke="white"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                        />
+                      </g>
+                    </>
+                  )
                 )}
               </g>
             );

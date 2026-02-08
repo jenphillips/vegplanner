@@ -18,6 +18,7 @@ import { UnifiedGardenCanvas, ZOOM_LEVELS } from './UnifiedGardenCanvas';
 import { LayoutCalendarView } from './LayoutCalendarView';
 import { PlantTypeFilter, type PlantTypeFilterValue } from '@/components/plantings/PlantTypeFilter';
 import type { Planting, Cultivar, GardenBed, PlantingPlacement } from '@/lib/types';
+import { Lock, LockOpen } from 'lucide-react';
 import styles from './GardenView.module.css';
 
 // Base scale: 2 pixels per cm at zoom level 1 (must match UnifiedGardenCanvas)
@@ -447,68 +448,10 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
 
   return (
     <div className={styles.container}>
-      {/* Toolbar */}
+      {/* Plant List Toolbar */}
       <div className={styles.toolbar}>
-        <button className={styles.toolbarButton} onClick={handleAddBed}>
-          + Add Bed
-        </button>
-        <button
-          className={styles.toolbarButton}
-          disabled={unplacedPlantings.length === 0 || beds.length === 0}
-          onClick={handleAutoLayout}
-        >
-          Auto-Layout
-        </button>
+        <span className={styles.toolbarLabel}>Filter Plant List:</span>
         <PlantTypeFilter value={plantTypeFilter} onChange={setPlantTypeFilter} />
-        <div className={styles.toolbarSpacer} />
-        <button
-          className={`${styles.lockToggle} ${bedsLocked ? styles.locked : ''}`}
-          onClick={() => setBedsLocked(!bedsLocked)}
-          title={bedsLocked ? 'Unlock beds to allow dragging' : 'Lock beds to prevent accidental moves'}
-        >
-          {bedsLocked ? '🔒' : '🔓'}
-        </button>
-        <button
-          className={`${styles.toolbarButton} ${allowOverlap ? styles.active : ''}`}
-          onClick={() => setAllowOverlap(!allowOverlap)}
-          title={allowOverlap ? 'Overlapping allowed (companion planting mode)' : 'Click to allow overlapping placements'}
-        >
-          {allowOverlap ? 'Overlap' : 'No Overlap'}
-        </button>
-        <button
-          className={styles.toolbarButton}
-          onClick={handleToggleUnits}
-          title="Toggle units"
-        >
-          {units === 'metric' ? 'cm/m' : 'in/ft'}
-        </button>
-        <div className={styles.zoomControls}>
-          <button
-            className={styles.zoomButton}
-            onClick={handleZoomOut}
-            disabled={scale <= minScale}
-            title="Zoom out"
-          >
-            −
-          </button>
-          <span className={styles.zoomLabel} title="Ctrl+scroll to zoom">{zoomPercent}%</span>
-          <button
-            className={styles.zoomButton}
-            onClick={handleZoomIn}
-            disabled={scale >= maxScale}
-            title="Zoom in"
-          >
-            +
-          </button>
-          <button
-            className={styles.zoomButton}
-            onClick={handleZoomToFit}
-            disabled={beds.length === 0}
-            title="Zoom to fit (Ctrl+0)"
-          >
-            ⊡
-          </button>
-        </div>
       </div>
 
       {/* Calendar Timeline */}
@@ -546,6 +489,70 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
       )}
 
       <div className={styles.mainArea}>
+        {/* Canvas Toolbar */}
+        <div className={styles.canvasToolbar}>
+          <button className={styles.toolbarButton} onClick={handleAddBed}>
+            + Add Bed
+          </button>
+          <button
+            className={styles.toolbarButton}
+            disabled={unplacedPlantings.length === 0 || beds.length === 0}
+            onClick={handleAutoLayout}
+          >
+            Auto-Layout
+          </button>
+          <div className={styles.toolbarSpacer} />
+          <button
+            className={`${styles.lockToggle} ${bedsLocked ? styles.locked : ''}`}
+            onClick={() => setBedsLocked(!bedsLocked)}
+            title={bedsLocked ? 'Unlock beds to allow dragging' : 'Lock beds to prevent accidental moves'}
+          >
+            {bedsLocked ? <Lock size={16} /> : <LockOpen size={16} />}
+            <span>{bedsLocked ? 'Unlock Beds' : 'Lock Beds'}</span>
+          </button>
+          <button
+            className={`${styles.toolbarButton} ${allowOverlap ? styles.active : ''}`}
+            onClick={() => setAllowOverlap(!allowOverlap)}
+            title={allowOverlap ? 'Overlapping allowed (companion planting mode)' : 'Click to allow overlapping placements'}
+          >
+            {allowOverlap ? 'Overlap' : 'No Overlap'}
+          </button>
+          <button
+            className={styles.toolbarButton}
+            onClick={handleToggleUnits}
+            title="Toggle units"
+          >
+            {units === 'metric' ? 'cm/m' : 'in/ft'}
+          </button>
+          <div className={styles.zoomControls}>
+            <button
+              className={styles.zoomButton}
+              onClick={handleZoomOut}
+              disabled={scale <= minScale}
+              title="Zoom out"
+            >
+              −
+            </button>
+            <span className={styles.zoomLabel} title="Ctrl+scroll to zoom">{zoomPercent}%</span>
+            <button
+              className={styles.zoomButton}
+              onClick={handleZoomIn}
+              disabled={scale >= maxScale}
+              title="Zoom in"
+            >
+              +
+            </button>
+            <button
+              className={styles.zoomButton}
+              onClick={handleZoomToFit}
+              disabled={beds.length === 0}
+              title="Zoom to fit (Ctrl+0)"
+            >
+              ⊡
+            </button>
+          </div>
+        </div>
+
         {/* Canvas Area */}
         <div className={styles.canvasArea}>
           {beds.length === 0 ? (

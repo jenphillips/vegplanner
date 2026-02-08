@@ -25,6 +25,11 @@
   border-radius: 8px;
 }
 
+.toolbarLabel {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
 .toolbarButton {
   padding: 0.5rem 1rem;
   background: var(--accent);
@@ -51,11 +56,14 @@
 }
 
 .lockToggle {
-  padding: 0.375rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 0.6875rem;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
@@ -268,9 +276,21 @@
 .mainArea {
   display: grid;
   grid-template-columns: 1fr 280px;
+  grid-template-rows: auto 1fr;
   gap: 1rem;
   flex: 1;
   min-height: 400px;
+}
+
+.canvasToolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
 
 @media (max-width: 900px) {
@@ -285,7 +305,8 @@
 }
 
 @media (max-width: 500px) {
-  .toolbar {
+  .toolbar,
+  .canvasToolbar {
     flex-wrap: wrap;
   }
 

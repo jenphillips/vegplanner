@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { GardenBed } from '@/lib/types';
+import type { GardenBed, GardenBedShape } from '@/lib/types';
 import styles from './BedEditor.module.css';
 
 type Units = 'metric' | 'imperial';
@@ -27,8 +27,12 @@ function inchesToCm(inches: number): number {
 
 function cmToFeetAndInches(cm: number): { feet: number; inches: number } {
   const totalInches = cmToInches(cm);
-  const feet = Math.floor(totalInches / INCHES_PER_FOOT);
-  const inches = Math.round(totalInches % INCHES_PER_FOOT);
+  let feet = Math.floor(totalInches / INCHES_PER_FOOT);
+  let inches = Math.round(totalInches % INCHES_PER_FOOT);
+  if (inches === 12) {
+    feet += 1;
+    inches = 0;
+  }
   return { feet, inches };
 }
 
@@ -37,7 +41,17 @@ function feetAndInchesToCm(feet: number, inches: number): number {
   return Math.round(inchesToCm(totalInches));
 }
 
-function formatArea(widthCm: number, lengthCm: number, units: Units): string {
+function formatArea(widthCm: number, lengthCm: number, units: Units, isCircle: boolean = false): string {
+  if (isCircle) {
+    const radiusCm = widthCm / 2;
+    if (units === 'metric') {
+      const sqMeters = (Math.PI * radiusCm * radiusCm) / 10000;
+      return `${sqMeters.toFixed(1)} m²`;
+    }
+    const radiusInches = cmToInches(radiusCm);
+    const sqFeet = (Math.PI * radiusInches * radiusInches) / 144;
+    return `${sqFeet.toFixed(1)} ft²`;
+  }
   if (units === 'metric') {
     const sqMeters = (widthCm * lengthCm) / 10000;
     return `${sqMeters.toFixed(1)} m²`;
@@ -46,23 +60,32 @@ function formatArea(widthCm: number, lengthCm: number, units: Units): string {
   return `${sqFeet.toFixed(1)} ft²`;
 }
 
-function formatDimensions(widthCm: number, lengthCm: number, units: Units): string {
+function formatDimensions(widthCm: number, lengthCm: number, units: Units, isCircle: boolean = false): string {
+  const formatFtIn = (ft: number, inches: number) => {
+    if (inches === 0) return `${ft}ft`;
+    return `${ft}ft ${inches}in`;
+  };
+
+  if (isCircle) {
+    if (units === 'metric') {
+      return `${(widthCm / 100).toFixed(1)}m diameter`;
+    }
+    const d = cmToFeetAndInches(widthCm);
+    return `${formatFtIn(d.feet, d.inches)} diameter`;
+  }
+
   if (units === 'metric') {
     return `${(widthCm / 100).toFixed(1)}m × ${(lengthCm / 100).toFixed(1)}m`;
   }
   const w = cmToFeetAndInches(widthCm);
   const l = cmToFeetAndInches(lengthCm);
-  const formatFtIn = (ft: number, inches: number) => {
-    if (inches === 0) return `${ft}ft`;
-    return `${ft}ft ${inches}in`;
-  };
   return `${formatFtIn(w.feet, w.inches)} × ${formatFtIn(l.feet, l.inches)}`;
 }
 
 export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditorProps) {
-  // Default values: 120cm x 240cm (metric) or 4ft x 8ft (imperial)
-  const defaultWidthCm = 120;
-  const defaultLengthCm = 240;
+  // Default values: 4ft x 8ft
+  const defaultWidthCm = 122;
+  const defaultLengthCm = 244;
 
   // Convert existing bed dimensions to display units
   const getInitialMetricValue = (cmValue: number | undefined, defaultVal: number): string => {
@@ -76,6 +99,7 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
   };
 
   const [name, setName] = useState(bed?.name ?? '');
+  const [shape, setShape] = useState<GardenBedShape>(bed?.shape ?? 'bed');
 
   // Metric state (cm)
   const [widthCmValue, setWidthCmValue] = useState(getInitialMetricValue(bed?.widthCm, defaultWidthCm));
@@ -99,6 +123,7 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
   // Reset form when bed prop changes
   useEffect(() => {
     setName(bed?.name ?? '');
+    setShape(bed?.shape ?? 'bed');
     setWidthCmValue(getInitialMetricValue(bed?.widthCm, defaultWidthCm));
     setLengthCmValue(getInitialMetricValue(bed?.lengthCm, defaultLengthCm));
     const wFtIn = getInitialFeetInches(bed?.widthCm, defaultWidthCm);
@@ -137,34 +162,42 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
 
     // Validation
     if (!name.trim()) {
-      setError('Please enter a bed name');
+      setError(shape === 'container' ? 'Please enter a container name' : 'Please enter a bed name');
       return;
     }
 
     const widthCm = getCurrentWidthCm();
     const lengthCm = getCurrentLengthCm();
 
-    if (widthCm <= 0) {
-      setError('Width must be greater than zero');
-      return;
-    }
+    if (shape === 'container') {
+      if (widthCm <= 0) {
+        setError('Diameter must be greater than zero');
+        return;
+      }
+    } else {
+      if (widthCm <= 0) {
+        setError('Width must be greater than zero');
+        return;
+      }
 
-    if (lengthCm <= 0) {
-      setError('Length must be greater than zero');
-      return;
+      if (lengthCm <= 0) {
+        setError('Length must be greater than zero');
+        return;
+      }
     }
 
     setSaving(true);
     try {
       await onSave({
         name: name.trim(),
+        shape,
         widthCm,
-        lengthCm,
+        lengthCm: shape === 'container' ? widthCm : lengthCm, // For containers, set length = diameter
         sunExposure,
         notes: notes.trim() || undefined,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save bed');
+      setError(err instanceof Error ? err.message : 'Failed to save');
       setSaving(false);
     }
   };
@@ -173,10 +206,41 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
     <div className={styles.overlay} onClick={onCancel}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <h2 className={styles.title}>
-          {isEditing ? 'Edit Garden Bed' : 'Add Garden Bed'}
+          {isEditing
+            ? (shape === 'container' ? 'Edit Container' : 'Edit Garden Bed')
+            : (shape === 'container' ? 'Add Container' : 'Add Garden Bed')}
         </h2>
 
         <form onSubmit={handleSubmit} className={styles.form}>
+          {/* Shape toggle - only show when creating new */}
+          {!isEditing && (
+            <div className={styles.field}>
+              <label className={styles.label}>Type</label>
+              <div className={styles.sunOptions}>
+                <label className={styles.sunOption}>
+                  <input
+                    type="radio"
+                    name="shape"
+                    value="bed"
+                    checked={shape === 'bed'}
+                    onChange={() => setShape('bed')}
+                  />
+                  <span className={styles.sunLabel}>Bed (rectangle)</span>
+                </label>
+                <label className={styles.sunOption}>
+                  <input
+                    type="radio"
+                    name="shape"
+                    value="container"
+                    checked={shape === 'container'}
+                    onChange={() => setShape('container')}
+                  />
+                  <span className={styles.sunLabel}>Container (round)</span>
+                </label>
+              </div>
+            </div>
+          )}
+
           <div className={styles.field}>
             <label htmlFor="bed-name" className={styles.label}>
               Name
@@ -186,20 +250,21 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Main Bed 1"
+              placeholder={shape === 'container' ? 'e.g., Tomato Pot' : 'e.g., Main Bed 1'}
               className={styles.input}
               autoFocus
             />
           </div>
 
-          {units === 'metric' ? (
-            <div className={styles.row}>
+          {shape === 'container' ? (
+            // Container: single diameter input
+            units === 'metric' ? (
               <div className={styles.field}>
-                <label htmlFor="bed-width" className={styles.label}>
-                  Width (cm)
+                <label htmlFor="bed-diameter" className={styles.label}>
+                  Diameter (cm)
                 </label>
                 <input
-                  id="bed-width"
+                  id="bed-diameter"
                   type="number"
                   value={widthCmValue}
                   onChange={(e) => setWidthCmValue(e.target.value)}
@@ -207,29 +272,13 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
                   className={styles.input}
                 />
               </div>
-
+            ) : (
               <div className={styles.field}>
-                <label htmlFor="bed-length" className={styles.label}>
-                  Length (cm)
-                </label>
-                <input
-                  id="bed-length"
-                  type="number"
-                  value={lengthCmValue}
-                  onChange={(e) => setLengthCmValue(e.target.value)}
-                  min="1"
-                  className={styles.input}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className={styles.imperialDimensions}>
-              <div className={styles.field}>
-                <label className={styles.label}>Width</label>
+                <label className={styles.label}>Diameter</label>
                 <div className={styles.feetInchesRow}>
                   <div className={styles.feetInchesInput}>
                     <input
-                      id="bed-width-ft"
+                      id="bed-diameter-ft"
                       type="number"
                       value={widthFeet}
                       onChange={(e) => setWidthFeet(e.target.value)}
@@ -240,7 +289,7 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
                   </div>
                   <div className={styles.feetInchesInput}>
                     <input
-                      id="bed-width-in"
+                      id="bed-diameter-in"
                       type="number"
                       value={widthInches}
                       onChange={(e) => setWidthInches(e.target.value)}
@@ -252,46 +301,112 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
                   </div>
                 </div>
               </div>
+            )
+          ) : (
+            // Bed: width and length inputs
+            units === 'metric' ? (
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label htmlFor="bed-width" className={styles.label}>
+                    Width (cm)
+                  </label>
+                  <input
+                    id="bed-width"
+                    type="number"
+                    value={widthCmValue}
+                    onChange={(e) => setWidthCmValue(e.target.value)}
+                    min="1"
+                    className={styles.input}
+                  />
+                </div>
 
-              <div className={styles.field}>
-                <label className={styles.label}>Length</label>
-                <div className={styles.feetInchesRow}>
-                  <div className={styles.feetInchesInput}>
-                    <input
-                      id="bed-length-ft"
-                      type="number"
-                      value={lengthFeet}
-                      onChange={(e) => setLengthFeet(e.target.value)}
-                      min="0"
-                      className={styles.input}
-                    />
-                    <span className={styles.unitLabel}>ft</span>
+                <div className={styles.field}>
+                  <label htmlFor="bed-length" className={styles.label}>
+                    Length (cm)
+                  </label>
+                  <input
+                    id="bed-length"
+                    type="number"
+                    value={lengthCmValue}
+                    onChange={(e) => setLengthCmValue(e.target.value)}
+                    min="1"
+                    className={styles.input}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className={styles.imperialDimensions}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Width</label>
+                  <div className={styles.feetInchesRow}>
+                    <div className={styles.feetInchesInput}>
+                      <input
+                        id="bed-width-ft"
+                        type="number"
+                        value={widthFeet}
+                        onChange={(e) => setWidthFeet(e.target.value)}
+                        min="0"
+                        className={styles.input}
+                      />
+                      <span className={styles.unitLabel}>ft</span>
+                    </div>
+                    <div className={styles.feetInchesInput}>
+                      <input
+                        id="bed-width-in"
+                        type="number"
+                        value={widthInches}
+                        onChange={(e) => setWidthInches(e.target.value)}
+                        min="0"
+                        max="11"
+                        className={styles.input}
+                      />
+                      <span className={styles.unitLabel}>in</span>
+                    </div>
                   </div>
-                  <div className={styles.feetInchesInput}>
-                    <input
-                      id="bed-length-in"
-                      type="number"
-                      value={lengthInches}
-                      onChange={(e) => setLengthInches(e.target.value)}
-                      min="0"
-                      max="11"
-                      className={styles.input}
-                    />
-                    <span className={styles.unitLabel}>in</span>
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>Length</label>
+                  <div className={styles.feetInchesRow}>
+                    <div className={styles.feetInchesInput}>
+                      <input
+                        id="bed-length-ft"
+                        type="number"
+                        value={lengthFeet}
+                        onChange={(e) => setLengthFeet(e.target.value)}
+                        min="0"
+                        className={styles.input}
+                      />
+                      <span className={styles.unitLabel}>ft</span>
+                    </div>
+                    <div className={styles.feetInchesInput}>
+                      <input
+                        id="bed-length-in"
+                        type="number"
+                        value={lengthInches}
+                        onChange={(e) => setLengthInches(e.target.value)}
+                        min="0"
+                        max="11"
+                        className={styles.input}
+                      />
+                      <span className={styles.unitLabel}>in</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )
           )}
 
           <div className={styles.dimensionPreview}>
             {(() => {
               const widthCm = getCurrentWidthCm();
               const lengthCm = getCurrentLengthCm();
-              if (widthCm <= 0 || lengthCm <= 0) return null;
+              const isCircle = shape === 'container';
+              if (widthCm <= 0) return null;
+              if (!isCircle && lengthCm <= 0) return null;
               return (
                 <span>
-                  {formatDimensions(widthCm, lengthCm, units)} = {formatArea(widthCm, lengthCm, units)}
+                  {formatDimensions(widthCm, lengthCm, units, isCircle)} = {formatArea(widthCm, lengthCm, units, isCircle)}
                 </span>
               );
             })()}
@@ -372,7 +487,7 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
               className={styles.saveButton}
               disabled={saving}
             >
-              {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Bed'}
+              {saving ? 'Saving...' : isEditing ? 'Save Changes' : (shape === 'container' ? 'Add Container' : 'Add Bed')}
             </button>
           </div>
         </form>
