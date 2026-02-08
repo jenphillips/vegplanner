@@ -1239,3 +1239,213 @@ describe('hasRemainingPlants', () => {
     expect(hasRemainingPlants(planting, [])).toBe(false);
   });
 });
+
+// ============================================
+// Circle Packing Tests
+// ============================================
+
+import {
+  getCirclePackingPositions,
+  calculateMaxPlantsInContainer,
+  getContainerPlantPositions,
+} from './gardenLayout';
+
+describe('getCirclePackingPositions', () => {
+  it('returns empty array for count <= 0', () => {
+    expect(getCirclePackingPositions(0)).toEqual([]);
+    expect(getCirclePackingPositions(-1)).toEqual([]);
+  });
+
+  it('returns center position for count = 1', () => {
+    const positions = getCirclePackingPositions(1);
+    expect(positions).toHaveLength(1);
+    expect(positions[0]).toEqual({ x: 0, y: 0 });
+  });
+
+  it('returns horizontal pair for count = 2', () => {
+    const positions = getCirclePackingPositions(2);
+    expect(positions).toHaveLength(2);
+    // Should be symmetrical left/right
+    expect(positions[0].x).toBeLessThan(0);
+    expect(positions[1].x).toBeGreaterThan(0);
+    expect(positions[0].y).toBe(0);
+    expect(positions[1].y).toBe(0);
+  });
+
+  it('returns equilateral triangle for count = 3', () => {
+    const positions = getCirclePackingPositions(3);
+    expect(positions).toHaveLength(3);
+    // All positions should be equidistant from center
+    const distances = positions.map((p) => Math.sqrt(p.x * p.x + p.y * p.y));
+    const avgDistance = distances.reduce((a, b) => a + b, 0) / 3;
+    for (const d of distances) {
+      expect(d).toBeCloseTo(avgDistance, 1);
+    }
+  });
+
+  it('returns square corners for count = 4', () => {
+    const positions = getCirclePackingPositions(4);
+    expect(positions).toHaveLength(4);
+    // Should have 2 in each quadrant
+    const topLeft = positions.filter((p) => p.x < 0 && p.y < 0);
+    const topRight = positions.filter((p) => p.x > 0 && p.y < 0);
+    const bottomLeft = positions.filter((p) => p.x < 0 && p.y > 0);
+    const bottomRight = positions.filter((p) => p.x > 0 && p.y > 0);
+    expect(topLeft).toHaveLength(1);
+    expect(topRight).toHaveLength(1);
+    expect(bottomLeft).toHaveLength(1);
+    expect(bottomRight).toHaveLength(1);
+  });
+
+  it('returns center + 4 corners for count = 5', () => {
+    const positions = getCirclePackingPositions(5);
+    expect(positions).toHaveLength(5);
+    // Should have one at center
+    const center = positions.filter((p) => p.x === 0 && p.y === 0);
+    expect(center).toHaveLength(1);
+  });
+
+  it('returns hexagon for count = 6', () => {
+    const positions = getCirclePackingPositions(6);
+    expect(positions).toHaveLength(6);
+    // All should be equidistant from center (no center point)
+    const distances = positions.map((p) => Math.sqrt(p.x * p.x + p.y * p.y));
+    const avgDistance = distances.reduce((a, b) => a + b, 0) / 6;
+    for (const d of distances) {
+      expect(d).toBeCloseTo(avgDistance, 1);
+    }
+  });
+
+  it('returns center + hexagon for count = 7', () => {
+    const positions = getCirclePackingPositions(7);
+    expect(positions).toHaveLength(7);
+    // Should have one at center
+    const center = positions.filter((p) => p.x === 0 && p.y === 0);
+    expect(center).toHaveLength(1);
+  });
+
+  it('handles larger counts (8+)', () => {
+    const positions = getCirclePackingPositions(10);
+    expect(positions).toHaveLength(10);
+    // All positions should be defined
+    for (const pos of positions) {
+      expect(typeof pos.x).toBe('number');
+      expect(typeof pos.y).toBe('number');
+      expect(Number.isNaN(pos.x)).toBe(false);
+      expect(Number.isNaN(pos.y)).toBe(false);
+    }
+  });
+});
+
+describe('calculateMaxPlantsInContainer', () => {
+  it('returns 0 for invalid inputs', () => {
+    expect(calculateMaxPlantsInContainer(0, 30)).toBe(0);
+    expect(calculateMaxPlantsInContainer(30, 0)).toBe(0);
+    expect(calculateMaxPlantsInContainer(-10, 30)).toBe(0);
+  });
+
+  it('returns 1 for container barely fitting one plant', () => {
+    // 30cm container, 30cm spacing = 1 plant
+    expect(calculateMaxPlantsInContainer(30, 30)).toBe(1);
+  });
+
+  it('returns 1 for small ratio', () => {
+    // Container diameter < 1.5x plant spacing
+    expect(calculateMaxPlantsInContainer(40, 30)).toBe(1);
+  });
+
+  it('returns 2 for ratio between 1.5 and 2.2', () => {
+    // 60cm container, 30cm spacing = ratio 2.0
+    expect(calculateMaxPlantsInContainer(60, 30)).toBe(2);
+  });
+
+  it('returns 3 for ratio between 2.2 and 2.8', () => {
+    // 75cm container, 30cm spacing = ratio 2.5
+    expect(calculateMaxPlantsInContainer(75, 30)).toBe(3);
+  });
+
+  it('returns 4 for ratio between 2.8 and 3.2', () => {
+    // 90cm container, 30cm spacing = ratio 3.0
+    expect(calculateMaxPlantsInContainer(90, 30)).toBe(4);
+  });
+
+  it('returns 5 for ratio between 3.2 and 3.8', () => {
+    // 105cm container, 30cm spacing = ratio 3.5
+    expect(calculateMaxPlantsInContainer(105, 30)).toBe(5);
+  });
+
+  it('returns 6 for ratio between 3.8 and 4.2', () => {
+    // 120cm container, 30cm spacing = ratio 4.0
+    expect(calculateMaxPlantsInContainer(120, 30)).toBe(6);
+  });
+
+  it('returns 7 for ratio between 4.2 and 5.0', () => {
+    // 140cm container, 30cm spacing = ratio ~4.67
+    expect(calculateMaxPlantsInContainer(140, 30)).toBe(7);
+  });
+
+  it('returns area-based estimate for large containers', () => {
+    // Very large container should use area calculation
+    const result = calculateMaxPlantsInContainer(300, 30);
+    expect(result).toBeGreaterThan(7);
+    // Should be roughly (pi * 150^2) / (pi * 15^2) * 0.9 ≈ 90
+    expect(result).toBeLessThan(100);
+  });
+});
+
+describe('getContainerPlantPositions', () => {
+  it('returns single center position for 1 plant', () => {
+    const positions = getContainerPlantPositions(1, 40, 30, 100, 100, 2);
+    expect(positions).toHaveLength(1);
+    expect(positions[0].x).toBe(100); // Center X
+    expect(positions[0].y).toBe(100); // Center Y
+  });
+
+  it('returns correct number of positions', () => {
+    for (let count = 1; count <= 7; count++) {
+      const positions = getContainerPlantPositions(count, 60, 15, 50, 50, 1);
+      expect(positions).toHaveLength(count);
+    }
+  });
+
+  it('spreads positions based on container size', () => {
+    const smallContainer = getContainerPlantPositions(4, 30, 10, 50, 50, 1);
+    const largeContainer = getContainerPlantPositions(4, 60, 10, 50, 50, 1);
+
+    // Large container should have more spread
+    const smallMaxDistance = Math.max(
+      ...smallContainer.map((p) => Math.sqrt((p.x - 50) ** 2 + (p.y - 50) ** 2))
+    );
+    const largeMaxDistance = Math.max(
+      ...largeContainer.map((p) => Math.sqrt((p.x - 50) ** 2 + (p.y - 50) ** 2))
+    );
+
+    expect(largeMaxDistance).toBeGreaterThan(smallMaxDistance);
+  });
+
+  it('scales positions with scale factor', () => {
+    const scale1 = getContainerPlantPositions(3, 40, 15, 50, 50, 1);
+    const scale2 = getContainerPlantPositions(3, 40, 15, 50, 50, 2);
+
+    // Positions relative to center should scale
+    for (let i = 0; i < scale1.length; i++) {
+      const dist1 = Math.sqrt((scale1[i].x - 50) ** 2 + (scale1[i].y - 50) ** 2);
+      const dist2 = Math.sqrt((scale2[i].x - 50) ** 2 + (scale2[i].y - 50) ** 2);
+      // Scale 2 should be roughly 2x the distance (accounting for center point)
+      if (dist1 > 0) {
+        expect(dist2 / dist1).toBeCloseTo(2, 0);
+      }
+    }
+  });
+
+  it('centers positions on given coordinates', () => {
+    const positions = getContainerPlantPositions(5, 50, 15, 200, 300, 1);
+
+    // Average position should be close to center
+    const avgX = positions.reduce((sum, p) => sum + p.x, 0) / positions.length;
+    const avgY = positions.reduce((sum, p) => sum + p.y, 0) / positions.length;
+
+    expect(avgX).toBeCloseTo(200, 0);
+    expect(avgY).toBeCloseTo(300, 0);
+  });
+});
