@@ -84,9 +84,9 @@ describe('BedEditor', () => {
     it('shows dimension preview in meters', () => {
       render(<BedEditor units="metric" onSave={vi.fn()} onCancel={vi.fn()} />);
 
-      // Default is 120cm x 240cm = 1.2m x 2.4m = 2.9 m²
+      // Default is 122cm x 244cm (4ft x 8ft) = 1.2m x 2.4m = 3.0 m²
       expect(screen.getByText(/1\.2m × 2\.4m/)).toBeInTheDocument();
-      expect(screen.getByText(/2\.9 m²/)).toBeInTheDocument();
+      expect(screen.getByText(/3\.0 m²/)).toBeInTheDocument();
     });
 
     it('populates metric fields with existing bed dimensions', () => {
@@ -246,6 +246,7 @@ describe('BedEditor', () => {
       await waitFor(() => {
         expect(onSave).toHaveBeenCalledWith({
           name: 'New Bed',
+          shape: 'bed',
           widthCm: 100,
           lengthCm: 200,
           sunExposure: 'partial',

@@ -198,6 +198,7 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save');
+    } finally {
       setSaving(false);
     }
   };

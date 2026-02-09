@@ -205,12 +205,17 @@ describe('useDataFile', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      await expect(
-        act(async () => {
+      let thrownError: unknown;
+      await act(async () => {
+        try {
           await result.current.save([createTestItem()]);
-        })
-      ).rejects.toThrow('Failed to save plantings');
+        } catch (err) {
+          thrownError = err;
+        }
+      });
 
+      expect(thrownError).toBeInstanceOf(Error);
+      expect((thrownError as Error).message).toBe('Failed to save plantings');
       expect(result.current.error).toBe('Failed to save plantings');
     });
   });

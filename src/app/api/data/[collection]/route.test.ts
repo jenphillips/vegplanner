@@ -1,26 +1,33 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET, POST } from './route';
 
 // ============================================
 // Mock Setup
 // ============================================
 
+const { mockReadFile, mockWriteFile, mockExistsSync } = vi.hoisted(() => ({
+  mockReadFile: vi.fn(),
+  mockWriteFile: vi.fn(),
+  mockExistsSync: vi.fn(),
+}));
+
 vi.mock('fs/promises', () => ({
-  readFile: vi.fn(),
-  writeFile: vi.fn(),
+  default: {
+    readFile: mockReadFile,
+    writeFile: mockWriteFile,
+  },
+  readFile: mockReadFile,
+  writeFile: mockWriteFile,
 }));
 
 vi.mock('fs', () => ({
-  existsSync: vi.fn(),
+  default: {
+    existsSync: mockExistsSync,
+  },
+  existsSync: mockExistsSync,
 }));
 
-import { readFile, writeFile } from 'fs/promises';
-import { existsSync } from 'fs';
-
-const mockReadFile = vi.mocked(readFile);
-const mockWriteFile = vi.mocked(writeFile);
-const mockExistsSync = vi.mocked(existsSync);
+import { GET, POST } from './route';
 
 beforeEach(() => {
   vi.resetAllMocks();
