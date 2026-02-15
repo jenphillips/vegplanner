@@ -457,7 +457,7 @@
       "maxGrowingTempC": 21,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 18,
-      "tempMarginC": 3,
+
       "notes": "Very cold-hardy, tolerates frost. Bolts quickly in heat (above 75°F/24°C) and long days. Best as spring/fall crop. Seeds won't germinate above 85°F (29°C). Typical maturity 37-50 days."
     },
     {
@@ -484,7 +484,7 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 20,
-      "tempMarginC": 3,
+
       "notes": "Fastest lettuce type. Cut-and-come-again harvest. Seeds need light, don't bury deep. Bolts in heat; shade cloth helps. Baby greens in 25-40 days. Typical full maturity 40-50 days."
     },
     {
@@ -510,8 +510,8 @@
       "minGrowingTempC": 4,
       "maxGrowingTempC": 24,
       "optimalTempMinC": 15,
-      "optimalTempMaxC": 20,
-      "tempMarginC": 3,
+      "optimalTempMaxC": 21,
+
       "notes": "Upright heads, more heat tolerant than other head types. Seeds need light. Can harvest outer leaves or whole head. Typical maturity 55-75 days."
     },
     {
@@ -538,7 +538,7 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 20,
-      "tempMarginC": 3,
+
       "notes": "Soft, tender heads (Bibb, Boston types). Seeds need light. Less bolt-resistant than romaine. Typical maturity 50-65 days."
     },
     {
@@ -613,7 +613,7 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": 28,
       "frostSensitive": false,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 7,
       "maxGrowingTempC": 25,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
@@ -659,7 +659,7 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": 42,
       "frostSensitive": false,
-      "minGrowingTempC": 7,
+      "minGrowingTempC": 4,
       "maxGrowingTempC": 24,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
@@ -683,7 +683,7 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": 35,
       "frostSensitive": false,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 5,
       "maxGrowingTempC": 24,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
@@ -709,7 +709,7 @@
       "maxGrowingTempC": 21,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 18,
-      "tempMarginC": 3,
+
       "notes": "Fast-growing peppery salad green. Baby greens ready in 21 days. Bolts quickly in heat; best as spring/fall crop. Sow every 3 weeks for continuous harvest. Very cold-hardy with protection. Typical maturity 30-40 days."
     },
     {
@@ -732,7 +732,7 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 24,
-      "tempMarginC": 3,
+
       "notes": "Perennial, does not bolt in hot weather like regular arugula. Narrower leaves, more intense flavor. Can harvest all summer. Slower to establish but longer productive life. Typical maturity 45-55 days."
     },
     {
