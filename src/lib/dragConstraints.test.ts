@@ -153,6 +153,7 @@ describe('calculateShiftBounds', () => {
       // minShift should be -14 (can only go back 14 days to June 1)
       // Cannot go to May 1st (31 days before June 1) - that was the bug
       expect(result.minShift).toBe(-14);
+      expect(result.minShiftReason).toBe('frost');
     });
 
     it('should allow Cosmos direct sow to go 7 days before frost (directAfterLsfDays=-7)', () => {
@@ -177,6 +178,7 @@ describe('calculateShiftBounds', () => {
       // minShift should allow going back 14 days (to May 25th, which is 7 days before June 1)
       // June 8 - 14 days = May 25 = June 1 - 7 days
       expect(result.minShift).toBe(-14);
+      expect(result.minShiftReason).toBe('frost');
     });
 
     it('should constrain Zinnia equally for direct and transplant (both offsets are +7)', () => {
@@ -201,6 +203,7 @@ describe('calculateShiftBounds', () => {
       // Zinnia transplant must be >= June 8 (frost + 7 days)
       // Current is June 15, so can go back 7 days
       expect(transplantResult.minShift).toBe(-7);
+      expect(transplantResult.minShiftReason).toBe('frost');
 
       // Zinnia direct sow on June 15th
       const directPlanting = createPlanting({
@@ -222,6 +225,7 @@ describe('calculateShiftBounds', () => {
       // Zinnia direct sow must be >= June 8 (frost + 7 days)
       // Current is June 15, so can go back 7 days
       expect(directResult.minShift).toBe(-7);
+      expect(directResult.minShiftReason).toBe('frost');
     });
   });
 
@@ -249,6 +253,7 @@ describe('calculateShiftBounds', () => {
       // The only constraint should be season start (March 1)
       // Sow date is March 15, so can go back 14 days to March 1
       expect(result.minShift).toBe(-14);
+      expect(result.minShiftReason).toBe('season');
     });
 
     it('should NOT constrain beets direct sow by frost', () => {
@@ -271,6 +276,7 @@ describe('calculateShiftBounds', () => {
       // Beets are frost-tolerant - can go back to March 1
       // May 1 to March 1 = 61 days
       expect(result.minShift).toBe(-61);
+      expect(result.minShiftReason).toBe('season');
     });
   });
 
@@ -295,6 +301,7 @@ describe('calculateShiftBounds', () => {
       // Harvest start is Aug 15, previous ends Aug 1
       // Can only shift 14 days earlier before overlapping
       expect(result.minShift).toBe(-14);
+      expect(result.minShiftReason).toBe('succession');
     });
 
     it('should use succession constraint when more restrictive than frost constraint', () => {
@@ -321,6 +328,31 @@ describe('calculateShiftBounds', () => {
       // Frost constraint: transplant June 15 - frost June 1 = 14 days
       // Succession is more restrictive (5 < 14)
       expect(result.minShift).toBe(-5);
+      expect(result.minShiftReason).toBe('succession');
+    });
+
+    it('should report frost reason when frost is more restrictive than succession', () => {
+      const planting = createPlanting({
+        cultivarId: cosmosCultivar.id,
+        method: 'transplant',
+        sowDate: '2025-04-20',
+        transplantDate: '2025-06-08', // 7 days after frost
+        harvestStart: '2025-08-08',
+        harvestEnd: '2025-09-15',
+      });
+
+      const result = calculateShiftBounds({
+        planting,
+        cultivar: cosmosCultivar,
+        frost: defaultFrostWindow,
+        climate: sussexClimate,
+        previousHarvestEnd: '2025-07-01', // Far before harvest start (38 days)
+        isTransplantMode: true,
+      });
+
+      // Succession allows 38 days earlier, frost allows only 7 days. Frost wins.
+      expect(result.minShift).toBe(-7);
+      expect(result.minShiftReason).toBe('frost');
     });
   });
 

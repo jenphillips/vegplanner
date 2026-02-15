@@ -4,6 +4,7 @@ import { addDays } from './dateUtils';
 export type ShiftBounds = {
   minShift: number; // Maximum days earlier (negative means can't go earlier)
   maxShift: number; // Maximum days later
+  minShiftReason: 'succession' | 'frost' | 'season'; // Which constraint is binding for the earlier limit
 };
 
 export type ShiftBoundsInput = {
@@ -36,18 +37,21 @@ export function calculateShiftBounds(input: ShiftBoundsInput): ShiftBounds {
   // === Calculate maxShiftEarlier ===
 
   let maxShiftEarlier: number;
+  let minShiftReason: 'succession' | 'frost' | 'season';
   if (previousHarvestEnd) {
     // Succession constraint: harvest start can go back to previous harvest end
     const prevEnd = new Date(`${previousHarvestEnd}T00:00:00Z`);
     maxShiftEarlier = Math.floor(
       (harvestStart.getTime() - prevEnd.getTime()) / (1000 * 60 * 60 * 24)
     );
+    minShiftReason = 'succession';
   } else {
     // First planting: constrain to season start
     const seasonStart = new Date(`${year}-03-01T00:00:00Z`);
     maxShiftEarlier = Math.floor(
       (sowDate.getTime() - seasonStart.getTime()) / (1000 * 60 * 60 * 24)
     );
+    minShiftReason = 'season';
   }
 
   // Apply frost-based constraints for frost-SENSITIVE crops only
@@ -65,7 +69,10 @@ export function calculateShiftBounds(input: ShiftBoundsInput): ShiftBounds {
       const maxShiftForFrost = Math.floor(
         (currentTransplant.getTime() - earliestTransplant.getTime()) / (1000 * 60 * 60 * 24)
       );
-      maxShiftEarlier = Math.min(maxShiftEarlier, maxShiftForFrost);
+      if (maxShiftForFrost < maxShiftEarlier) {
+        maxShiftEarlier = maxShiftForFrost;
+        minShiftReason = 'frost';
+      }
     } else {
       // Direct sow mode: constrain sow date based on directAfterLsfDays
       const directAfterDays = cultivar.directAfterLsfDays ?? 0;
@@ -75,7 +82,10 @@ export function calculateShiftBounds(input: ShiftBoundsInput): ShiftBounds {
       const maxShiftForFrost = Math.floor(
         (sowDate.getTime() - earliestSow.getTime()) / (1000 * 60 * 60 * 24)
       );
-      maxShiftEarlier = Math.min(maxShiftEarlier, maxShiftForFrost);
+      if (maxShiftForFrost < maxShiftEarlier) {
+        maxShiftEarlier = maxShiftForFrost;
+        minShiftReason = 'frost';
+      }
     }
   }
 
@@ -107,5 +117,6 @@ export function calculateShiftBounds(input: ShiftBoundsInput): ShiftBounds {
   return {
     minShift: -maxShiftEarlier,
     maxShift: Math.max(0, maxShiftLater),
+    minShiftReason,
   };
 }

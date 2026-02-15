@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { Cultivar, Planting, FrostWindow, Climate } from '@/lib/types';
 import { recalculatePlantingForMethodChange } from '@/lib/succession';
 import { PlantingTimeline } from './PlantingTimeline';
@@ -99,6 +99,12 @@ export function PlantingCard({
   };
 
   const [methodNotice, setMethodNotice] = useState<string | null>(null);
+  const [reorderNotice, setReorderNotice] = useState<string | null>(null);
+  const [dragNotice, setDragNotice] = useState<string | null>(null);
+
+  // Refs for detecting reorder after method change
+  const pendingMethodChangeRef = useRef(false);
+  const preMethodChangeNumberRef = useRef(planting.successionNumber);
 
   const handleMethodChange = (newMethod: 'direct' | 'transplant') => {
     if (newMethod === planting.method) return;
@@ -118,6 +124,9 @@ export function PlantingCard({
     }
 
     setMethodNotice(null);
+    setReorderNotice(null);
+    pendingMethodChangeRef.current = true;
+    preMethodChangeNumberRef.current = planting.successionNumber;
     onUpdate(planting.id, {
       method: newMethod,
       ...result.updates,
@@ -159,6 +168,27 @@ export function PlantingCard({
     });
   };
 
+  const handleDragConstraintHit = () => {
+    setDragNotice("Can\u2019t move earlier \u2014 harvest would overlap previous planting");
+  };
+
+  const handleDragEnd = () => {
+    setDragNotice(null);
+  };
+
+  // Detect if a method change caused plantings to reorder.
+  // The ref guard ensures this only fires after an explicit method toggle action,
+  // not on every successionNumber change.
+  useEffect(() => {
+    if (pendingMethodChangeRef.current) {
+      if (planting.successionNumber !== preMethodChangeNumberRef.current) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- guarded by ref, only fires once per method change
+        setReorderNotice('Plantings reordered to keep harvests in chronological order');
+      }
+      pendingMethodChangeRef.current = false;
+    }
+  }, [planting.successionNumber]);
+
   // Use the override sow date for display if available
   const displaySowDate = planting.sowDateOverride ?? planting.sowDate;
 
@@ -194,6 +224,8 @@ export function PlantingCard({
           previousHarvestEnd={previousHarvestEnd}
           onUpdateSowDate={disableDrag ? undefined : handleSowDateUpdate}
           onShiftPlanting={disableDrag ? undefined : handleShiftPlanting}
+          onDragConstraintHit={handleDragConstraintHit}
+          onDragEnd={handleDragEnd}
           selectedDate={selectedDate}
         />
         <div className={styles.methodToggleSlot}>
@@ -217,6 +249,28 @@ export function PlantingCard({
           Can&apos;t switch method: {methodNotice}
           <button
             onClick={() => setMethodNotice(null)}
+            style={{ marginLeft: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#7a5e00', fontWeight: 600 }}
+          >
+            Dismiss
+          </button>
+        </p>
+      )}
+      {reorderNotice && (
+        <p className={styles.notice}>
+          {reorderNotice}
+          <button
+            onClick={() => setReorderNotice(null)}
+            style={{ marginLeft: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#7a5e00', fontWeight: 600 }}
+          >
+            Dismiss
+          </button>
+        </p>
+      )}
+      {dragNotice && (
+        <p className={styles.notice}>
+          {dragNotice}
+          <button
+            onClick={() => setDragNotice(null)}
             style={{ marginLeft: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#7a5e00', fontWeight: 600 }}
           >
             Dismiss

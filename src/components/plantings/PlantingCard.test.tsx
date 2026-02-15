@@ -443,6 +443,110 @@ describe('PlantingCard', () => {
   });
 
   // ============================================
+  // Reorder notice
+  // ============================================
+
+  describe('method change reorder notice', () => {
+    it('shows reorder notice when succession number changes after method switch', () => {
+      const onUpdate = vi.fn();
+      const { rerender } = render(
+        <PlantingCard
+          planting={createPlanting({
+            method: 'direct',
+            successionNumber: 2,
+          })}
+          cultivar={createCultivar({
+            sowMethod: 'either',
+            indoorLeadWeeksMin: 3,
+            maxGrowingTempC: 30,
+          })}
+          frost={createFrostWindow()}
+          climate={createClimate()}
+          onUpdate={onUpdate}
+          onDelete={vi.fn()}
+        />
+      );
+
+      // Trigger method switch (direct → transplant)
+      fireEvent.click(screen.getByTitle('Start indoors, transplant later'));
+      expect(onUpdate).toHaveBeenCalled();
+
+      // Simulate parent re-rendering with new succession number (reordered)
+      rerender(
+        <PlantingCard
+          planting={createPlanting({
+            method: 'transplant',
+            successionNumber: 1, // Changed from 2 → 1
+            sowDate: '2025-04-24',
+            transplantDate: '2025-05-15',
+            harvestStart: '2025-06-24',
+            harvestEnd: '2025-07-15',
+          })}
+          cultivar={createCultivar({
+            sowMethod: 'either',
+            indoorLeadWeeksMin: 3,
+            maxGrowingTempC: 30,
+          })}
+          frost={createFrostWindow()}
+          climate={createClimate()}
+          onUpdate={onUpdate}
+          onDelete={vi.fn()}
+        />
+      );
+
+      expect(screen.getByText(/reordered/i)).toBeTruthy();
+    });
+
+    it('does not show reorder notice when succession number stays the same', () => {
+      const onUpdate = vi.fn();
+      const { rerender } = render(
+        <PlantingCard
+          planting={createPlanting({
+            method: 'direct',
+            successionNumber: 1,
+          })}
+          cultivar={createCultivar({
+            sowMethod: 'either',
+            indoorLeadWeeksMin: 3,
+            maxGrowingTempC: 30,
+          })}
+          frost={createFrostWindow()}
+          climate={createClimate()}
+          onUpdate={onUpdate}
+          onDelete={vi.fn()}
+        />
+      );
+
+      fireEvent.click(screen.getByTitle('Start indoors, transplant later'));
+
+      // Re-render with same succession number
+      rerender(
+        <PlantingCard
+          planting={createPlanting({
+            method: 'transplant',
+            successionNumber: 1, // Same number
+            sowDate: '2025-04-24',
+            transplantDate: '2025-05-15',
+            harvestStart: '2025-06-24',
+            harvestEnd: '2025-07-15',
+          })}
+          cultivar={createCultivar({
+            sowMethod: 'either',
+            indoorLeadWeeksMin: 3,
+            maxGrowingTempC: 30,
+          })}
+          frost={createFrostWindow()}
+          climate={createClimate()}
+          onUpdate={onUpdate}
+          onDelete={vi.fn()}
+        />
+      );
+
+      expect(screen.queryByText(/reordered/i)).toBeNull();
+    });
+  });
+
+  // ============================================
   // Selected state
   // ============================================
 

@@ -708,6 +708,152 @@ describe('PlantingTimeline', () => {
     });
   });
 
+  describe('drag callbacks', () => {
+    it('calls onDragEnd on mouseup after a direct sow drag', () => {
+      const onDragEnd = vi.fn();
+      const { container } = render(
+        <PlantingTimeline
+          planting={createPlanting({ method: 'direct' })}
+          frost={createFrostWindow()}
+          onShiftPlanting={vi.fn()}
+          onDragEnd={onDragEnd}
+        />
+      );
+
+      const growingBar = container.querySelector('[class*="barGrowing"]');
+
+      fireEvent.mouseDown(growingBar!, { clientX: 100 });
+      fireEvent.mouseMove(document, { clientX: 200 });
+      fireEvent.mouseUp(document);
+
+      expect(onDragEnd).toHaveBeenCalledOnce();
+    });
+
+    it('calls onDragEnd even when drag has no shift (no-op drag)', () => {
+      const onDragEnd = vi.fn();
+      const { container } = render(
+        <PlantingTimeline
+          planting={createPlanting({ method: 'direct' })}
+          frost={createFrostWindow()}
+          onShiftPlanting={vi.fn()}
+          onDragEnd={onDragEnd}
+        />
+      );
+
+      const growingBar = container.querySelector('[class*="barGrowing"]');
+
+      // Click without moving
+      fireEvent.mouseDown(growingBar!, { clientX: 100 });
+      fireEvent.mouseUp(document);
+
+      expect(onDragEnd).toHaveBeenCalledOnce();
+    });
+
+    it('calls onDragEnd on mouseup for either crop transplant shift drag', () => {
+      const onDragEnd = vi.fn();
+      const planting = createTransplantPlanting({ cultivarId: 'either-cultivar' });
+      const { container } = render(
+        <PlantingTimeline
+          planting={planting}
+          frost={createFrostWindow()}
+          cultivar={createEitherCultivar()}
+          onShiftPlanting={vi.fn()}
+          onDragEnd={onDragEnd}
+        />
+      );
+
+      const growingBar = container.querySelector('[class*="barGrowing"]');
+
+      fireEvent.mouseDown(growingBar!, { clientX: 100 });
+      fireEvent.mouseMove(document, { clientX: 200 });
+      fireEvent.mouseUp(document);
+
+      expect(onDragEnd).toHaveBeenCalledOnce();
+    });
+
+    it('calls onDragConstraintHit when dragging past succession bound', () => {
+      const onDragConstraintHit = vi.fn();
+      const planting = createPlanting({
+        method: 'direct',
+        sowDate: '2025-06-15',
+        harvestStart: '2025-08-15',
+        harvestEnd: '2025-09-15',
+      });
+
+      const { container } = render(
+        <PlantingTimeline
+          planting={planting}
+          frost={createFrostWindow()}
+          cultivar={createCultivar({ frostSensitive: false })}
+          climate={createClimate()}
+          previousHarvestEnd="2025-08-10"
+          onShiftPlanting={vi.fn()}
+          onDragConstraintHit={onDragConstraintHit}
+        />
+      );
+
+      const growingBar = container.querySelector('[class*="barGrowing"]');
+      const track = container.querySelector('[class*="track"]');
+
+      // Mock getBoundingClientRect so pixel-to-days calculation works
+      const mockRect = {
+        left: 0, right: 500, width: 500,
+        top: 0, bottom: 30, height: 30,
+        x: 0, y: 0, toJSON: () => {},
+      };
+      vi.spyOn(track as HTMLElement, 'getBoundingClientRect').mockReturnValue(mockRect);
+
+      // Drag far to the left (large negative deltaX) to exceed the succession bound
+      fireEvent.mouseDown(growingBar!, { clientX: 300 });
+      fireEvent.mouseMove(document, { clientX: 0 });
+
+      expect(onDragConstraintHit).toHaveBeenCalledOnce();
+
+      fireEvent.mouseUp(document);
+    });
+
+    it('does not call onDragConstraintHit when bound is frost (not succession)', () => {
+      const onDragConstraintHit = vi.fn();
+      // Frost-sensitive crop with no previousHarvestEnd → bound reason will be frost or season, not succession
+      const planting = createPlanting({
+        method: 'direct',
+        sowDate: '2025-06-01',
+        harvestStart: '2025-08-01',
+        harvestEnd: '2025-09-15',
+      });
+
+      const { container } = render(
+        <PlantingTimeline
+          planting={planting}
+          frost={createFrostWindow()}
+          cultivar={createCultivar({ frostSensitive: true, directAfterLsfDays: 0 })}
+          climate={createClimate()}
+          onShiftPlanting={vi.fn()}
+          onDragConstraintHit={onDragConstraintHit}
+        />
+      );
+
+      const growingBar = container.querySelector('[class*="barGrowing"]');
+      const track = container.querySelector('[class*="track"]');
+
+      const mockRect = {
+        left: 0, right: 500, width: 500,
+        top: 0, bottom: 30, height: 30,
+        x: 0, y: 0, toJSON: () => {},
+      };
+      vi.spyOn(track as HTMLElement, 'getBoundingClientRect').mockReturnValue(mockRect);
+
+      // Drag left past the frost bound
+      fireEvent.mouseDown(growingBar!, { clientX: 300 });
+      fireEvent.mouseMove(document, { clientX: 0 });
+
+      // Should NOT fire because the binding constraint is frost, not succession
+      expect(onDragConstraintHit).not.toHaveBeenCalled();
+
+      fireEvent.mouseUp(document);
+    });
+  });
+
   describe('cleanup', () => {
     it('removes event listeners on unmount', () => {
       const onShiftPlanting = vi.fn();
