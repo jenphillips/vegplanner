@@ -219,13 +219,13 @@
   font-size: 12px;
   color: var(--muted, #5f6653);
   padding: 8px 12px;
-  background: #fff8e1;
+  background: #f5f5f0;
   border-radius: 6px;
 }
 
 .skippedLabel {
   font-weight: 600;
-  color: #f57c00;
+  color: var(--muted, #5f6653);
 }
 
 .skippedPeriod {
@@ -233,6 +233,25 @@
   background: #ffe0b2;
   border-radius: 4px;
   color: #e65100;
+}
+
+.skippedPeriodHot {
+  padding: 2px 6px;
+  background: #ffebee;
+  border-radius: 4px;
+  color: #c62828;
+}
+
+.skippedPeriodCold {
+  padding: 2px 6px;
+  background: #e3f2fd;
+  border-radius: 4px;
+  color: #1565c0;
+}
+
+.gapReason {
+  font-weight: 600;
+  font-size: 11px;
 }
 
 .inlineHint {

@@ -7,9 +7,16 @@ import {
   calculateNextSuccession,
   calculateAvailableWindowsAfter,
   createPlantingFromWindow,
+  getOutdoorGrowingConstraints,
 } from '@/lib/succession';
 import { PlantingList } from '@/components/plantings/PlantingList';
 import styles from './CultivarCard.module.css';
+
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const formatDate = (iso: string) => {
+  const d = new Date(iso + 'T00:00:00Z');
+  return `${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCDate()}`;
+};
 
 type CultivarCardProps = {
   cultivar: Cultivar;
@@ -108,6 +115,10 @@ export function CultivarCard({
 
   // Calculate available succession windows to show potential
   const allWindows = calculateSuccessionWindows(cultivar, frost, climate);
+
+  // Day-level temperature constraints for display
+  const year = new Date(frost.lastSpringFrost + 'T00:00:00Z').getUTCFullYear();
+  const growingConstraints = getOutdoorGrowingConstraints(cultivar, climate, year);
 
   // Check if a window overlaps with any existing planting's harvest period
   // This is more robust than comparing sowDate, since users can drag plantings
@@ -285,12 +296,17 @@ export function CultivarCard({
               </div>
             )}
 
-            {allWindows.skippedPeriods.length > 0 && (
+            {growingConstraints.length > 0 && (
               <div className={styles.skippedInfo}>
-                <span className={styles.skippedLabel}>Sowing gaps:</span>
-                {allWindows.skippedPeriods.map((period, i) => (
-                  <span key={i} className={styles.skippedPeriod}>
-                    {period.startDate} – {period.endDate}
+                <span className={styles.skippedLabel}>Can&apos;t grow outdoors:</span>
+                {growingConstraints.map((constraint, i) => (
+                  <span
+                    key={i}
+                    className={constraint.type === 'hot' ? styles.skippedPeriodHot : styles.skippedPeriodCold}
+                    title={constraint.reason}
+                  >
+                    {formatDate(constraint.startDate)} – {formatDate(constraint.endDate)}
+                    <span className={styles.gapReason}> ({constraint.type === 'hot' ? 'too hot' : 'too cold'})</span>
                   </span>
                 ))}
               </div>
