@@ -44,7 +44,6 @@ type Cultivar = {
   maxGrowingTempC?: number;
   optimalTempMinC?: number;
   optimalTempMaxC?: number;
-  tempMarginC?: number;          // Override default 2°C margin
 
   // Garden Layout
   spacingCm?: number;            // Space between plants
@@ -76,9 +75,8 @@ type Cultivar = {
 |-------|---------|---------|
 | `frostSensitive` | Dies at frost? | true for tomatoes |
 | `minGrowingTempC` | Cold limit | 10°C for peppers |
-| `maxGrowingTempC` | Heat limit (causes bolting) | 24°C for spinach |
+| `maxGrowingTempC` | Heat limit (compared directly against avg daily high) | 24°C for spinach |
 | `optimalTempMinC/MaxC` | Best growing range | 15-24°C |
-| `tempMarginC` | Safety buffer override | 3°C for sensitive crops |
 
 ### Harvest Fields
 

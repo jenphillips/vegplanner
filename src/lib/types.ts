@@ -36,7 +36,6 @@ export type Cultivar = {
   maxGrowingTempC?: number | null; // Above this, skip succession (e.g., 24 for spinach)
   optimalTempMinC?: number | null; // Optimal growing range low
   optimalTempMaxC?: number | null; // Optimal growing range high
-  tempMarginC?: number | null; // Per-crop temperature buffer override (default: 2)
   // Spacing for garden bed layout
   spacingCm?: number; // Space between plants in cm (e.g., 60 for tomatoes, 10 for lettuce)
   trailingHabit?: boolean; // true for plants that spill over container edges (petunias, sweet potato vine, etc.)

@@ -1,5 +1,5 @@
 import type { Cultivar, Climate, FrostWindow, SowMethod, Planting, HarvestStyle } from './types';
-import { toDate, addDays, getMonth, ensureNumber } from './dateUtils';
+import { toDate, addDays, ensureNumber, getInterpolatedClimate } from './dateUtils';
 
 // ============================================
 // Harvest Duration Helpers
@@ -19,74 +19,36 @@ function getDefaultHarvestDuration(harvestStyle?: HarvestStyle): number {
 // ============================================
 
 // Safety margin for temperature checks (°C)
-// Since we use monthly averages, actual daily temps will often exceed these,
-// so we add a buffer to be conservative
-const TEMP_MARGIN_C = 2;
+// Applied to both heat and cold thresholds to be conservative.
+// Future: replace with user-configurable conservatism level that interpolates
+// between optimalTemp and minGrowing/maxGrowing ranges.
+const DEFAULT_TEMP_MARGIN_C = 1;
 
 // Buffer before earliest probable frost for frost-sensitive crops (days)
 const FROST_BUFFER_DAYS = 4;
 
 /**
- * Check if a date falls within acceptable temperature range for the cultivar.
- * Uses monthly average HIGH temps to check max tolerance (heat-sensitive crops)
- * and monthly average LOW temps to check min tolerance (cold-sensitive crops).
- * Applies a safety margin (per-crop or default 2°C) to be conservative.
+ * Classify a temperature viability reason as 'hot', 'cold', or 'unknown'.
+ * Used to split gaps when the failure type transitions (e.g., summer heat → fall cold).
  */
-function isTemperatureViable(
-  date: string,
-  cultivar: Cultivar,
-  climate: Climate
-): { viable: boolean; reason?: string } {
-  const month = getMonth(date);
-  const monthData = climate.monthlyAvgC[String(month)];
-
-  if (!monthData) {
-    return { viable: true }; // No data, assume viable
-  }
-
-  const avgHigh = monthData.tmax_c;
-  const avgLow = monthData.tmin_c;
-  const minGrowing = cultivar.minGrowingTempC;
-  const maxGrowing = cultivar.maxGrowingTempC;
-  const margin = cultivar.tempMarginC ?? TEMP_MARGIN_C;
-
-  // For cold check: compare avg low against cultivar's minimum tolerance
-  // Apply margin to be conservative (effective min is slightly higher)
-  if (minGrowing != null && avgLow != null) {
-    const effectiveMin = minGrowing + margin;
-    if (avgLow < effectiveMin) {
-      return {
-        viable: false,
-        reason: `Too cold (avg low ${avgLow}°C < min ${minGrowing}°C + ${margin}° margin)`,
-      };
-    }
-  }
-
-  // For heat check: compare avg high against cultivar's maximum tolerance
-  // Apply margin to be conservative (effective max is slightly lower)
-  if (maxGrowing != null && avgHigh != null) {
-    const effectiveMax = maxGrowing - margin;
-    if (avgHigh > effectiveMax) {
-      return {
-        viable: false,
-        reason: `Too hot (avg high ${avgHigh}°C > max ${maxGrowing}°C - ${margin}° margin)`,
-      };
-    }
-  }
-
-  return { viable: true };
+function getReasonType(reason: string | undefined): 'hot' | 'cold' | 'unknown' {
+  if (!reason) return 'unknown';
+  if (/Too hot/i.test(reason)) return 'hot';
+  if (/too cold|Soil too cold/i.test(reason)) return 'cold';
+  return 'unknown';
 }
 
 /**
  * Check if the entire growing period is temperature-viable.
  * Checks each month the plant will be growing.
- * For frost-tolerant crops, we skip cold checks since they can handle frost.
  *
  * Temperature check strategy:
- * - Heat check: Uses avgHigh vs maxGrowingTempC. Only applies during active growth
- *   (sow to harvestStart). Once mature, plants can tolerate some heat during harvest.
- * - Cold check: For frost-sensitive crops, uses avgTemp (not avgLow) vs minGrowingTempC.
- *   This is more realistic since minGrowingTempC is typically about soil/growing conditions,
+ * - Heat check: Uses tmax_c (avg daily high) vs maxGrowingTempC directly.
+ *   Only applies during active growth (sow to harvestStart).
+ * - Cold check for frost-tolerant crops: Uses soil_avg_c vs minGrowingTempC.
+ *   Soil temp better represents ground-level growing conditions for hardy crops.
+ * - Cold check for frost-sensitive crops: Uses tavg_c vs minGrowingTempC.
+ *   This is more realistic since minGrowingTempC is about growing conditions,
  *   not about surviving nighttime lows.
  */
 function isGrowingPeriodViable(
@@ -96,49 +58,48 @@ function isGrowingPeriodViable(
   climate: Climate,
   options?: { checkHeatOnly?: boolean }
 ): { viable: boolean; reason?: string } {
-  let currentDate = startDate;
-  const margin = cultivar.tempMarginC ?? TEMP_MARGIN_C;
+  const minGrowing = cultivar.minGrowingTempC;
+  const maxGrowing = cultivar.maxGrowingTempC;
 
-  while (currentDate <= endDate) {
-    const month = getMonth(currentDate);
-    const monthData = climate.monthlyAvgC[String(month)];
+  let date = startDate;
+  while (date <= endDate) {
+    const interpolated = getInterpolatedClimate(date, climate);
 
-    if (monthData) {
-      const avgHigh = monthData.tmax_c;
-      const avgTemp = monthData.tavg_c;
-      const minGrowing = cultivar.minGrowingTempC;
-      const maxGrowing = cultivar.maxGrowingTempC;
-
-      // Heat check - always applies (even frost-tolerant crops bolt in heat)
-      if (maxGrowing != null && avgHigh != null) {
-        const effectiveMax = maxGrowing - margin;
-        if (avgHigh > effectiveMax) {
-          return {
-            viable: false,
-            reason: `Too hot in month ${month} (avg high ${avgHigh}°C > max ${maxGrowing}°C - ${margin}° margin)`,
-          };
-        }
-      }
-
-      // Cold check - skip for frost-tolerant crops
-      // Use average temp (not low) for a more realistic check - minGrowingTempC is about
-      // growing conditions, not surviving individual cold nights.
-      // We don't apply the same margin for cold checks because:
-      // 1. The minGrowingTempC is typically about soil temp for germination
-      // 2. By June, soil temps lag behind air but are usually adequate
-      // 3. We already switched from tmin to tavg which is more representative
-      if (!options?.checkHeatOnly && cultivar.frostSensitive && minGrowing != null && avgTemp != null) {
-        if (avgTemp < minGrowing) {
-          return {
-            viable: false,
-            reason: `Too cold in month ${month} (avg temp ${avgTemp}°C < min ${minGrowing}°C)`,
-          };
-        }
+    // Heat check - always applies (even frost-tolerant crops bolt in heat)
+    if (maxGrowing != null && interpolated.tmax_c != null) {
+      const effectiveMax = maxGrowing - DEFAULT_TEMP_MARGIN_C;
+      if (interpolated.tmax_c > effectiveMax) {
+        return {
+          viable: false,
+          reason: `Too hot (${interpolated.tmax_c.toFixed(1)}°C avg high > ${effectiveMax}°C effective max)`,
+        };
       }
     }
 
-    // Move to next month
-    currentDate = addDays(currentDate, 30);
+    // Cold check for frost-TOLERANT crops: use soil temperature
+    if (!options?.checkHeatOnly && !cultivar.frostSensitive && minGrowing != null) {
+      const effectiveMin = minGrowing + DEFAULT_TEMP_MARGIN_C;
+      const soilTemp = interpolated.soil_avg_c ?? (interpolated.tavg_c != null ? interpolated.tavg_c - 2 : null);
+      if (soilTemp != null && soilTemp < effectiveMin) {
+        return {
+          viable: false,
+          reason: `Soil too cold (${soilTemp.toFixed(1)}°C < ${effectiveMin}°C effective min)`,
+        };
+      }
+    }
+
+    // Cold check for frost-SENSITIVE crops: use air temperature
+    if (!options?.checkHeatOnly && cultivar.frostSensitive && minGrowing != null) {
+      const effectiveMin = minGrowing + DEFAULT_TEMP_MARGIN_C;
+      if (interpolated.tavg_c != null && interpolated.tavg_c < effectiveMin) {
+        return {
+          viable: false,
+          reason: `Too cold (${interpolated.tavg_c.toFixed(1)}°C avg < ${effectiveMin}°C effective min)`,
+        };
+      }
+    }
+
+    date = addDays(date, 1);
   }
 
   return { viable: true };
@@ -208,6 +169,115 @@ export type SuccessionResult = {
   };
 };
 
+// ============================================
+// Outdoor Growing Constraints (day-level)
+// ============================================
+
+export type GrowingConstraint = {
+  startDate: string; // ISO date (YYYY-MM-DD)
+  endDate: string;   // ISO date (YYYY-MM-DD)
+  type: 'hot' | 'cold';
+  reason: string;    // Human-readable detail for tooltip
+};
+
+/**
+ * Determine which days of the year are outside a cultivar's temperature range.
+ * Iterates day-by-day, checking each day's month's climate data against the
+ * cultivar's temperature tolerances, and groups consecutive non-viable days
+ * into date ranges with hot/cold labels.
+ *
+ * This is a simple temperature comparison — no maturity, sow method, or succession logic.
+ * Uses the same temperature metrics as isGrowingPeriodViable():
+ * - Heat: tmax_c vs maxGrowingTempC
+ * - Cold (frost-tolerant): soil_avg_c vs minGrowingTempC
+ * - Cold (frost-sensitive): tavg_c vs minGrowingTempC
+ */
+export function getOutdoorGrowingConstraints(
+  cultivar: Cultivar,
+  climate: Climate,
+  year: number
+): GrowingConstraint[] {
+  const minGrowing = cultivar.minGrowingTempC;
+  const maxGrowing = cultivar.maxGrowingTempC;
+  const constraints: GrowingConstraint[] = [];
+  let current: { startDate: string; type: 'hot' | 'cold'; reason: string } | null = null;
+
+  const yearEnd = `${year}-12-31`;
+  let date = `${year}-01-01`;
+
+  while (date <= yearEnd) {
+    const interpolated = getInterpolatedClimate(date, climate);
+
+    let dayType: 'hot' | 'cold' | null = null;
+    let reason = '';
+
+    // Heat check (same logic as isGrowingPeriodViable)
+    if (maxGrowing != null && interpolated.tmax_c != null) {
+      const effectiveMax = maxGrowing - DEFAULT_TEMP_MARGIN_C;
+      if (interpolated.tmax_c > effectiveMax) {
+        dayType = 'hot';
+        reason = `Avg high ${interpolated.tmax_c.toFixed(1)}°C exceeds ${effectiveMax}°C effective max`;
+      }
+    }
+
+    // Cold check (only if not already hot — matches isGrowingPeriodViable order)
+    if (!dayType && minGrowing != null) {
+      const effectiveMin = minGrowing + DEFAULT_TEMP_MARGIN_C;
+      if (!cultivar.frostSensitive) {
+        const soilTemp = interpolated.soil_avg_c ?? (interpolated.tavg_c != null ? interpolated.tavg_c - 2 : null);
+        if (soilTemp != null && soilTemp < effectiveMin) {
+          dayType = 'cold';
+          reason = `Soil temp ${soilTemp.toFixed(1)}°C below ${effectiveMin}°C effective min`;
+        }
+      } else if (interpolated.tavg_c != null && interpolated.tavg_c < effectiveMin) {
+        dayType = 'cold';
+        reason = `Avg temp ${interpolated.tavg_c.toFixed(1)}°C below ${effectiveMin}°C effective min`;
+      }
+    }
+
+    if (!dayType) {
+      // Viable day — close any open constraint
+      if (current) {
+        constraints.push({
+          startDate: current.startDate,
+          endDate: addDays(date, -1),
+          type: current.type,
+          reason: current.reason,
+        });
+        current = null;
+      }
+    } else if (current && current.type === dayType) {
+      // Same type — extend, update reason to latest month's values
+      current.reason = reason;
+    } else {
+      // New constraint or type changed (hot↔cold) — close previous, start new
+      if (current) {
+        constraints.push({
+          startDate: current.startDate,
+          endDate: addDays(date, -1),
+          type: current.type,
+          reason: current.reason,
+        });
+      }
+      current = { startDate: date, type: dayType, reason };
+    }
+
+    date = addDays(date, 1);
+  }
+
+  // Close final open constraint
+  if (current) {
+    constraints.push({
+      startDate: current.startDate,
+      endDate: yearEnd,
+      type: current.type,
+      reason: current.reason,
+    });
+  }
+
+  return constraints;
+}
+
 /**
  * Calculate all viable planting windows for a cultivar within a growing season.
  *
@@ -255,7 +325,7 @@ export function calculateSuccessionWindows(
       : cultivar.sowMethod;
 
   // Calculate earliest sow date
-  const earliestSowDate = calculateEarliestSowDate(cultivar, frostWindow, method);
+  const earliestSowDate = calculateEarliestSowDate(cultivar, frostWindow, method, climate);
 
   // Calculate latest possible sow date (must harvest before first fall frost)
   // Use earliest probable frost from climate data if available
@@ -311,14 +381,30 @@ export function calculateSuccessionWindows(
     );
 
     if (!tempCheck.viable) {
-      // Track skipped period
+      // Track skipped period, splitting when reason type changes (hot↔cold)
       if (!skipStartDate) {
+        // Starting a new gap
         skipStartDate = currentSowDate;
+        lastFailureReason = tempCheck.reason;
+      } else {
+        // Already in a gap — check if reason type changed
+        const prevType = getReasonType(lastFailureReason);
+        const newType = getReasonType(tempCheck.reason);
+        if (prevType !== newType && prevType !== 'unknown' && newType !== 'unknown') {
+          // Reason type changed: close current gap segment, start new one
+          skippedPeriods.push({
+            startDate: skipStartDate,
+            endDate: addDays(currentSowDate, -1),
+            reason: lastFailureReason ?? 'Temperature outside viable range',
+          });
+          skipStartDate = currentSowDate;
+          // Do NOT reset previousHarvestEnd — only reset when gap fully closes
+        }
+        lastFailureReason = tempCheck.reason;
       }
-      lastFailureReason = tempCheck.reason;
 
-      // Try next week
-      currentSowDate = addDays(currentSowDate, 7);
+      // Try next day (1-day increments find the exact first viable date)
+      currentSowDate = addDays(currentSowDate, 1);
       continue;
     }
 
@@ -327,9 +413,33 @@ export function calculateSuccessionWindows(
       skippedPeriods.push({
         startDate: skipStartDate,
         endDate: addDays(currentSowDate, -1),
-        reason: tempCheck.reason ?? 'Temperature outside viable range',
+        reason: lastFailureReason ?? 'Temperature outside viable range',
       });
       skipStartDate = null;
+      // Reset harvest tracking when resuming after a gap (e.g., fall after summer heat)
+      // This ensures fall windows aren't incorrectly compared to spring windows
+      previousHarvestEnd = null;
+    }
+
+    // Check if this window's harvest overlaps significantly with the previous window
+    // This happens when harvests get truncated to the same frost deadline
+    if (previousHarvestEnd) {
+      const prevEndTime = toDate(previousHarvestEnd).getTime();
+      const newStartTime = toDate(plantingDates.harvestStart).getTime();
+      const newEndTime = toDate(plantingDates.harvestEnd).getTime();
+
+      // If new harvest starts before previous ends and they share the same end date,
+      // this window doesn't provide meaningful additional harvest time
+      if (newStartTime < prevEndTime && newEndTime <= prevEndTime) {
+        break;
+      }
+
+      // Also skip if the unique harvest time (after previous ends) is very short (< 1 week)
+      const uniqueHarvestMs = newEndTime - Math.max(newStartTime, prevEndTime);
+      const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+      if (uniqueHarvestMs < oneWeekMs) {
+        break;
+      }
     }
 
     // Add this window
@@ -398,35 +508,79 @@ export function calculateSuccessionWindows(
 }
 
 /**
+ * Find the climate-derived season start: the first month where outdoor conditions
+ * meet the crop's minimum temperature requirements.
+ *
+ * Uses the same temperature metrics as isGrowingPeriodViable():
+ * - Frost-tolerant: soil_avg_c (fallback tavg_c - 2) >= threshold
+ * - Frost-sensitive: tavg_c >= threshold
+ * - No minGrowingTempC set: threshold defaults to 0°C (ground not frozen)
+ */
+function getClimateSeasonStart(
+  cultivar: Cultivar,
+  climate: Climate,
+  year: number
+): string {
+  const threshold = (cultivar.minGrowingTempC ?? 0) + DEFAULT_TEMP_MARGIN_C;
+  const yearEnd = `${year}-12-31`;
+  let date = `${year}-01-01`;
+
+  while (date <= yearEnd) {
+    const interpolated = getInterpolatedClimate(date, climate);
+
+    if (cultivar.frostSensitive) {
+      if (interpolated.tavg_c != null && interpolated.tavg_c >= threshold) {
+        return date;
+      }
+    } else {
+      const soilTemp = interpolated.soil_avg_c ?? (interpolated.tavg_c != null ? interpolated.tavg_c - 2 : null);
+      if (soilTemp != null && soilTemp >= threshold) {
+        return date;
+      }
+    }
+
+    date = addDays(date, 1);
+  }
+
+  // No date meets threshold - return late date so frost-based calculation wins
+  return `${year}-12-31`;
+}
+
+/**
  * Calculate the earliest viable sow date based on frost window and cultivar requirements.
- * Frost-tolerant crops can be sown much earlier (as soon as soil is workable).
+ * Frost-tolerant crops can start from the climate-derived season start (first month
+ * where soil/air temp meets the crop's minimum). The temperature check in
+ * isGrowingPeriodViable() provides further day-level filtering.
  */
 function calculateEarliestSowDate(
   cultivar: Cultivar,
   frostWindow: FrostWindow,
-  method: SowMethod
+  method: SowMethod,
+  climate: Climate
 ): string {
   const springFrost = frostWindow.lastSpringFrost;
   const year = new Date(`${springFrost}T00:00:00Z`).getUTCFullYear();
-
-  // For frost-tolerant direct sow crops, allow sowing from early April
-  // (as soon as ground is workable in most northern climates)
-  if (method === 'direct' && !cultivar.frostSensitive) {
-    const earlyStart = `${year}-04-01`;
-    const frostBasedStart = addDays(springFrost, ensureNumber(cultivar.directAfterLsfDays, 0));
-    // Use whichever is earlier
-    return earlyStart < frostBasedStart ? earlyStart : frostBasedStart;
-  }
+  const seasonStart = getClimateSeasonStart(cultivar, climate, year);
 
   if (method === 'direct') {
-    const offset = ensureNumber(cultivar.directAfterLsfDays, 0);
-    return addDays(springFrost, offset);
+    const frostBasedStart = addDays(springFrost, ensureNumber(cultivar.directAfterLsfDays, 0));
+    // Frost-tolerant crops can start from climate-derived season start
+    if (!cultivar.frostSensitive) {
+      return seasonStart < frostBasedStart ? seasonStart : frostBasedStart;
+    }
+    return frostBasedStart;
   }
 
   if (method === 'transplant') {
-    // For transplants, calculate when to start seeds indoors
     const transplantAfter = ensureNumber(cultivar.transplantAfterLsfDays, 0);
-    const transplantDate = addDays(springFrost, transplantAfter);
+    let transplantDate = addDays(springFrost, transplantAfter);
+
+    // Frost-tolerant transplants can go out at climate-derived season start
+    if (!cultivar.frostSensitive && seasonStart < transplantDate) {
+      transplantDate = seasonStart;
+    }
+
+    // Calculate when to start seeds indoors (before transplant date)
     const leadWeeks = ensureNumber(cultivar.indoorLeadWeeksMax, 6);
     return addDays(transplantDate, -leadWeeks * 7);
   }
@@ -734,7 +888,8 @@ export function calculateNextSuccession(
   const latestSowDate = calculateLatestSowDate(cultivar, frostWindow, climate);
 
   // Iterate forward to find the next viable window (may need to skip hot periods)
-  const maxIterations = 52; // ~1 year of weekly checks
+  // With 1-day increments, we need ~365 iterations to search a full year
+  const maxIterations = 365;
   let iterations = 0;
 
   while (iterations < maxIterations && proposedSowDate <= latestSowDate) {
@@ -773,8 +928,8 @@ export function calculateNextSuccession(
       };
     }
 
-    // Temperature not viable or overlaps - skip forward one week and try again
-    proposedSowDate = addDays(proposedSowDate, 7);
+    // Temperature not viable or overlaps - skip forward one day and try again
+    proposedSowDate = addDays(proposedSowDate, 1);
     iterations++;
   }
 
@@ -819,7 +974,7 @@ export function calculateAvailableWindowsAfter(
   );
 
   const availableWindows: PlantingWindow[] = [];
-  const maxIterations = 52; // ~1 year of weekly checks
+  const maxIterations = 365; // ~1 year of daily checks
   let iterations = 0;
   let successionNumber = getNextSuccessionNumber(existingPlantings, cultivar.id);
 
@@ -848,6 +1003,10 @@ export function calculateAvailableWindowsAfter(
     });
   };
 
+  // Track the previous window's harvest end to chain non-overlapping windows.
+  // Each window's harvest should start when the previous one ends.
+  let previousWindowHarvestEnd: string | null = null;
+
   while (iterations < maxIterations && currentSowDate <= latestSowDate) {
     const plantingDates = calculatePlantingDates(
       currentSowDate,
@@ -869,13 +1028,18 @@ export function calculateAvailableWindowsAfter(
     // Check that harvest starts after the reference date
     const harvestStartsAfter = plantingDates.harvestStart >= afterHarvestEnd;
 
+    // Check that harvest starts at or after the previous window's harvest end
+    // (succession windows should not have overlapping harvest periods)
+    const harvestAfterPrevious = !previousWindowHarvestEnd ||
+      plantingDates.harvestStart >= previousWindowHarvestEnd;
+
     // Check for overlap with existing plantings
     const hasOverlap = overlapsExistingPlanting(
       plantingDates.harvestStart,
       plantingDates.harvestEnd
     );
 
-    if (tempCheck.viable && harvestStartsAfter && !hasOverlap) {
+    if (tempCheck.viable && harvestStartsAfter && harvestAfterPrevious && !hasOverlap) {
       availableWindows.push({
         sowDate: currentSowDate,
         transplantDate: plantingDates.transplantDate,
@@ -884,22 +1048,46 @@ export function calculateAvailableWindowsAfter(
         method,
         successionNumber: successionNumber++,
       });
+
+      previousWindowHarvestEnd = plantingDates.harvestEnd;
+
+      // Jump to the sow date targeting harvest start = this window's harvest end.
+      // This chains windows for continuous harvest coverage, matching the logic
+      // in calculateSuccessionWindows.
+      const nextSowDate = calculateNextSowDateForContinuousHarvest(
+        plantingDates.harvestEnd,
+        cultivar,
+        method
+      );
+
+      // If the next sow date doesn't advance, we've exhausted viable windows
+      if (nextSowDate <= currentSowDate) {
+        break;
+      }
+
+      currentSowDate = nextSowDate;
+      iterations++;
+      continue;
     }
 
-    // Move to next week
-    currentSowDate = addDays(currentSowDate, 7);
+    // Not viable — advance by 1 day to find the exact first viable date
+    currentSowDate = addDays(currentSowDate, 1);
     iterations++;
   }
 
   return availableWindows;
 }
 
+export type MethodChangeResult =
+  | { viable: true; updates: Partial<Planting> }
+  | { viable: false; reason: string };
+
 /**
  * Recalculate planting dates when switching between direct sow and transplant methods.
  *
  * When switching Direct → Transplant:
- * - Keep sowDate as indoor sow date
- * - Add transplantDate = sowDate + indoorLeadWeeksMin * 7
+ * - Preserve outdoor timing: old sowDate becomes new transplantDate
+ * - Calculate indoor sowDate backwards: transplantDate - indoorLeadWeeksMin weeks
  * - Recalculate harvestStart based on maturityBasis
  * - Recalculate harvestEnd based on duration/frost
  *
@@ -909,8 +1097,8 @@ export function calculateAvailableWindowsAfter(
  * - Recalculate harvestStart = sowDate + maturityDays
  * - Recalculate harvestEnd
  *
- * After recalculating, if the new dates land in an unfavorable temperature window,
- * auto-adjust to the next viable window for that method.
+ * Returns { viable: false, reason } if the converted dates are not temperature-viable,
+ * so the caller can show a notice instead of silently changing to a different date.
  */
 export function recalculatePlantingForMethodChange(
   planting: Planting,
@@ -919,33 +1107,42 @@ export function recalculatePlantingForMethodChange(
   frostWindow: FrostWindow,
   climate?: Climate,
   previousHarvestEnd?: string
-): Partial<Planting> {
-  // Determine the anchor date based on current method
-  let newSowDate: string;
-
-  if (planting.method === 'transplant' && newMethod === 'direct') {
-    // Transplant → Direct: use transplant date as new sow date
-    newSowDate = planting.transplantDate ?? planting.sowDate;
-  } else {
-    // Direct → Transplant or same method: keep sow date
-    newSowDate = planting.sowDate;
-  }
-
-  // Calculate dates for the new method
+): MethodChangeResult {
   const leadWeeks = ensureNumber(cultivar.indoorLeadWeeksMin, 4);
+  let newSowDate: string;
   let transplantDate: string | undefined;
   let harvestStart: string;
 
-  if (newMethod === 'transplant') {
-    transplantDate = addDays(newSowDate, leadWeeks * 7);
+  if (planting.method === 'direct' && newMethod === 'transplant') {
+    // Direct → Transplant: preserve outdoor timing
+    // The old sowDate (outdoor planting day) becomes the new transplantDate
+    // Calculate indoor sowDate backwards from that
+    transplantDate = planting.sowDate;
+    newSowDate = addDays(planting.sowDate, -leadWeeks * 7);
     if (cultivar.maturityBasis === 'from_transplant') {
       harvestStart = addDays(transplantDate, cultivar.maturityDays);
     } else {
       harvestStart = addDays(newSowDate, cultivar.maturityDays);
     }
-  } else {
+  } else if (planting.method === 'transplant' && newMethod === 'direct') {
+    // Transplant → Direct: use transplant date as new sow date
+    newSowDate = planting.transplantDate ?? planting.sowDate;
     transplantDate = undefined;
     harvestStart = addDays(newSowDate, cultivar.maturityDays);
+  } else {
+    // Same method or fallback
+    newSowDate = planting.sowDate;
+    if (newMethod === 'transplant') {
+      transplantDate = addDays(newSowDate, leadWeeks * 7);
+      if (cultivar.maturityBasis === 'from_transplant') {
+        harvestStart = addDays(transplantDate, cultivar.maturityDays);
+      } else {
+        harvestStart = addDays(newSowDate, cultivar.maturityDays);
+      }
+    } else {
+      transplantDate = undefined;
+      harvestStart = addDays(newSowDate, cultivar.maturityDays);
+    }
   }
 
   // Calculate harvest end
@@ -980,42 +1177,21 @@ export function recalculatePlantingForMethodChange(
     const tempCheck = isGrowingPeriodViable(outdoorStart, harvestStart, cultivar, climate);
 
     if (!tempCheck.viable) {
-      // Try to find the next viable window for this method
-      // We need to create a modified cultivar that forces the specific method
-      const methodCultivar = {
-        ...cultivar,
-        sowMethod: newMethod as SowMethod,
+      return {
+        viable: false,
+        reason: tempCheck.reason ?? 'Temperature outside viable range for this method',
       };
-
-      const afterDate = previousHarvestEnd ?? addDays(newSowDate, -1);
-      const availableWindows = calculateAvailableWindowsAfter(
-        methodCultivar,
-        frostWindow,
-        climate,
-        afterDate,
-        [] // Don't check for overlaps - we're replacing this planting
-      );
-
-      if (availableWindows.length > 0) {
-        const nextWindow = availableWindows[0];
-        return {
-          sowDate: nextWindow.sowDate,
-          sowDateOverride: undefined, // Clear override since we're recalculating
-          transplantDate: nextWindow.transplantDate,
-          harvestStart: nextWindow.harvestStart,
-          harvestEnd: nextWindow.harvestEnd,
-        };
-      }
-      // No viable window found - return calculated dates anyway
-      // The timeline will show them in an unfavorable period
     }
   }
 
   return {
-    sowDate: newSowDate,
-    sowDateOverride: undefined, // Clear override since timing context changed
-    transplantDate,
-    harvestStart,
-    harvestEnd,
+    viable: true,
+    updates: {
+      sowDate: newSowDate,
+      sowDateOverride: undefined, // Clear override since timing context changed
+      transplantDate,
+      harvestStart,
+      harvestEnd,
+    },
   };
 }

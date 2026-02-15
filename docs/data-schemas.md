@@ -59,7 +59,6 @@ type Cultivar = {
   maxGrowingTempC?: number;      // Maximum viable temperature (°C)
   optimalTempMinC?: number;      // Optimal range low (°C)
   optimalTempMaxC?: number;      // Optimal range high (°C)
-  tempMarginC?: number;          // Safety margin override (default: 2°C)
 
   // Garden layout
   spacingCm?: number;            // Space between plants in cm
@@ -118,6 +117,20 @@ type PlantingStatus =
   | "completed"
   | "failed";
 ```
+
+---
+
+### MethodChangeResult
+
+Returned by `recalculatePlantingForMethodChange()` when switching a planting between direct sow and transplant:
+
+```typescript
+type MethodChangeResult =
+  | { viable: true; updates: Partial<Planting> }
+  | { viable: false; reason: string };
+```
+
+If the converted dates land in an unfavorable temperature period, returns `{ viable: false, reason }` so the UI can show a notice explaining why the switch isn't possible (e.g., "Too hot in month 7").
 
 ---
 

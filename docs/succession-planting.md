@@ -52,10 +52,9 @@ Each cultivar can define temperature tolerances:
 |-------|---------|---------|
 | `minGrowingTempC` | Too cold below this | 10°C for tomatoes |
 | `maxGrowingTempC` | Bolts/fails above this | 24°C for spinach |
-| `tempMarginC` | Safety buffer (default 2°C) | Per-crop override |
 | `frostSensitive` | Dies at frost | true for tomatoes |
 
-The algorithm checks monthly average temperatures against these thresholds.
+The algorithm checks day-by-day interpolated temperatures against these thresholds with a 1°C safety margin applied (e.g., effective max = `maxGrowingTempC - 1`, effective min = `minGrowingTempC + 1`). Future: the margin will be replaced by a user-configurable conservatism level that interpolates between `optimalTemp` and `min/maxGrowingTemp` ranges.
 
 ### Harvest Styles
 
@@ -72,9 +71,14 @@ For continuous harvest crops without an explicit duration, harvest extends until
 
 ```
 Earliest Sow Date:
-├── Frost-tolerant direct sow: April 1 or (last spring frost + offset), whichever is earlier
+├── Frost-tolerant direct sow: climate-derived season start or (last spring frost + offset),
+│     whichever is earlier.
+│     Season start = first date where interpolated soil temp >= minGrowingTempC (or >= 0°C if no min set).
+│     Monthly averages are linearly interpolated (midpoint = 15th of each month).
+│     This is fully data-driven — warmer zones get earlier starts, colder zones later.
+├── Frost-tolerant transplant: same climate-derived start for outdoor date, minus indoor lead weeks
 ├── Frost-sensitive direct sow: last spring frost + directAfterLsfDays
-└── Transplant: transplant date - indoor lead weeks
+└── Frost-sensitive transplant: (last spring frost + transplantAfterLsfDays) - indoor lead weeks
 
 Latest Sow Date:
 ├── Frost-sensitive: earliest fall frost - buffer - maturity days
@@ -102,16 +106,19 @@ Harvest end:
 
 ### Step 3: Check Temperature Viability
 
-For each potential window, check if the growing period is viable:
+For each potential window, check if the growing period is viable. The function iterates through each calendar month the period spans (not sampling every 30 days), ensuring no month is skipped:
 
 ```
 Outdoor start = transplantDate (if transplant) or sowDate (if direct)
 Check period  = outdoor start through harvestStart
 
-For each month in that period:
+For each calendar month in that period:
 ├── Heat check: Is avgHigh > maxGrowingTempC - margin?
 │   └── If yes: NOT VIABLE (too hot)
-└── Cold check (frost-sensitive only): Is avgTemp < minGrowingTempC?
+├── Cold check (frost-tolerant): Is soil_avg_c < minGrowingTempC?
+│   └── Fallback: if soil_avg_c unavailable, uses tavg_c - 2°C
+│   └── If yes: NOT VIABLE (soil too cold)
+└── Cold check (frost-sensitive): Is avgTemp < minGrowingTempC?
     └── If yes: NOT VIABLE (too cold)
 ```
 
@@ -132,12 +139,12 @@ This targets the new planting's harvest to begin exactly when the previous ends.
 
 ### Step 5: Skip Unfavorable Periods
 
-If temperature check fails, advance by one week and try again. This continues until:
+If temperature check fails, advance by one day and try again. Using 1-day increments finds the exact first viable date rather than overshooting by up to a week. This continues until:
 - A viable window is found (add it, continue to next succession)
 - Latest sow date is exceeded (stop generating windows)
 - Maximum successions reached (default 10)
 
-Skipped periods are tracked for display in the UI.
+Skipped periods are tracked for display in the UI. When a gap transitions between reason types (e.g., "too hot" → "too cold"), it is split into separate segments so each displays an accurate label. This commonly occurs with cool-season crops where summer heat gives way to autumn soil cooling.
 
 ### Step 6: Handle Edge Cases
 
@@ -152,7 +159,7 @@ Skipped periods are tracked for display in the UI.
 
 **Spring-fall gap crops** (e.g., spinach):
 - Spring plantings continue until heat makes them unviable
-- Algorithm skips summer months
+- Algorithm skips summer months (day by day, up to 365 days of searching)
 - Resumes with fall plantings when temperatures allow
 
 ## Example: Spinach Succession
@@ -171,7 +178,7 @@ Window 2: Sow May 16 → Harvest Jun 30-Jul 21
   └── Check viability: July avgHigh (29°C) > 24°C - 2°C margin
   └── NOT VIABLE - too hot
 
-Skip forward week by week...
+Skip forward day by day...
 
 Window 2 (adjusted): Sow Aug 20 → Harvest Oct 4-Oct 25
   └── Check viability: Sep/Oct temps are fine
@@ -195,44 +202,76 @@ Returns:
 ```
 
 ### `calculateNextSuccession(cultivar, frostWindow, climate, existingPlantings)`
-Calculate the next succession window based on existing plantings. Used when adding a single new planting to an existing series.
+Calculate the next succession window based on existing plantings. Used when adding a single new planting to an existing series. Searches up to 365 days forward to find the next viable date, allowing it to jump across large heat gaps (e.g., summer to fall).
 
 ### `calculateAvailableWindowsAfter(cultivar, frostWindow, climate, afterDate, existingPlantings)`
-Find all remaining viable windows after a given date. Useful for showing available options when manually adjusting plantings.
+Find all remaining viable succession windows after a given date. Windows are chained for continuous harvest coverage — each window's harvest starts when the previous one ends, with no overlapping harvest periods. Filters out windows that overlap with existing plantings.
 
 ### `isGrowingPeriodViable(startDate, endDate, cultivar, climate, options?)`
 Check if a date range is temperature-viable for a cultivar. Returns `{ viable: boolean; reason?: string }`. Used internally by the succession algorithm and useful for drag-to-reschedule validation.
 
 Options:
-- `checkHeatOnly: true` - Skip cold check (useful for frost-tolerant crops)
+- `checkHeatOnly: true` - Skip cold check (useful when only heat tolerance matters)
 
 ### `renumberPlantingsForCrop(allPlantings, cropName, cultivarId, variety?)`
 Renumber succession numbers to match chronological sow date order. Called automatically when plantings are added or dates change.
 
 ### `recalculatePlantingForMethodChange(planting, newMethod, cultivar, frostWindow, climate?)`
-Recalculate dates when switching between direct sow and transplant. If the new dates land in an unfavorable period, auto-adjusts to the next viable window.
+Recalculate dates when switching between direct sow and transplant. Returns a discriminated union:
+
+```typescript
+type MethodChangeResult =
+  | { viable: true; updates: Partial<Planting> }
+  | { viable: false; reason: string };
+```
+
+When switching **Direct → Transplant**, the old sowDate (outdoor planting day) becomes the new transplantDate, and the indoor sowDate is calculated backwards. This preserves outdoor timing rather than delaying harvest. When the converted dates land in an unfavorable period, the function returns `{ viable: false, reason }` so the caller can show a notice explaining why the switch isn't possible.
 
 ## Temperature Checking Details
 
-### Heat Check Strategy
-Uses `avgHigh` (daily maximum average) against `maxGrowingTempC`. Only applies during active growth (sow/transplant to harvestStart). Rationale: mature plants are more heat-tolerant than actively growing ones.
+### Quick Reference
 
-### Cold Check Strategy
-Uses `avgTemp` (daily average) against `minGrowingTempC`. Only applies to frost-sensitive crops. Rationale: `minGrowingTempC` typically represents soil/growing conditions, not survival of overnight lows.
+| Check | Climate metric | Compared against | Which crops | Code locations |
+|---|---|---|---|---|
+| Too hot | `tmax_c` (avg daily high) | `maxGrowingTempC - 1°C` | All | `isGrowingPeriodViable`, `getOutdoorGrowingConstraints` |
+| Too cold | `soil_avg_c` (avg soil at 10cm) | `minGrowingTempC + 1°C` | Frost-tolerant (`frostSensitive: false`) | Same + `getClimateSeasonStart` |
+| Too cold | `tavg_c` (avg air temp) | `minGrowingTempC + 1°C` | Frost-sensitive (`frostSensitive: true`) | Same + `getClimateSeasonStart` |
+
+The `frostSensitive` flag on the cultivar determines which cold-check path is taken. `tmin_c` (avg daily minimum) is stored in climate data but not currently used by any logic.
 
 ### Safety Margin
-Default 2°C margin applied to heat checks only (effective max = `maxGrowingTempC - margin`). Cold checks compare directly against `minGrowingTempC` without margin, since we already use `tavg_c` (average temp) rather than `tmin_c` (average low). Can be overridden per-cultivar with `tempMarginC`. Since we use monthly averages, actual daily temps often exceed these values.
+A default 1°C safety margin (`DEFAULT_TEMP_MARGIN_C`) is applied to all temperature checks. Heat effective max = `maxGrowingTempC - 1`, cold effective min = `minGrowingTempC + 1`. This provides conservative scheduling since interpolated values are still averages — actual daily temps will vary above and below. Future: replace with a user-configurable conservatism level that interpolates between `optimalTemp` and `min/maxGrowingTemp` ranges (the data model already has both).
+
+### Heat Check Strategy
+Uses `tmax_c` (average daily high) against `maxGrowingTempC - 1°C margin`. Only checks during active growth (outdoor start to harvestStart). Using `tmax_c` (daily highs rather than daily averages) plus the margin provides conservatism. Day-by-day interpolation precisely identifies the warmest dates.
+
+### Cold Check Strategy
+
+**Frost-tolerant crops:** Uses `soil_avg_c` (average soil temperature at 10cm) against `minGrowingTempC + 1°C margin`. Soil temperature better represents ground-level growing conditions for hardy crops that can survive frost but still need workable soil for growth and germination. If `soil_avg_c` is unavailable in the climate data, falls back to `tavg_c - 2°C` (conservative thermal lag approximation).
+
+**Frost-sensitive crops:** Uses `tavg_c` (average air temperature) against `minGrowingTempC + 1°C margin`. Average temperature is more realistic than overnight lows, since `minGrowingTempC` represents growing conditions rather than frost survival.
+
+### Temperature Interpolation
+Monthly averages are linearly interpolated to estimate daily values. Each monthly average is assigned to the 15th of its month (midpoint), and values between midpoints are linearly interpolated. This produces smooth temperature transitions instead of abrupt month-boundary changes. For example, if May tmax is 17°C and June tmax is 21°C, the interpolated tmax on June 1 is ~19.1°C rather than jumping from 17 to 21 at the month boundary. December-January wraps are handled correctly. Interpolation utilities are in `src/lib/dateUtils.ts` (`interpolateClimateValue`, `getInterpolatedClimate`).
 
 ### Frost Handling
 - Frost-sensitive crops: must finish harvest before earliest probable frost (minus 4-day buffer)
 - Frost-tolerant crops: can extend harvest ~3 weeks past typical frost date
+
+### Season Extension with Frost Protection
+
+**Spring (supported):** Set `transplantAfterLsfDays` or `directAfterLsfDays` to a negative number to start earlier than the last spring frost. For example, `transplantAfterLsfDays: -14` means "transplant 2 weeks before last frost," representing use of row covers, cold frames, or cloches. For frost-tolerant crops, the algorithm takes the earlier of the frost-based start and the climate-derived season start (when soil/air temp meets `minGrowingTempC`), so negative frost offsets are effective when the temperature threshold is already met.
+
+**Fall (not yet supported per-cultivar):** The fall deadline is currently hardcoded: frost-sensitive crops end at `earliestFallFrost - 4 days`, frost-tolerant crops end at `typicalFallFrost + 21 days`. There is no per-cultivar field to extend the fall season for crops grown under protection. Possible future approaches:
+- A `fallFrostExtensionDays` cultivar field to push the fall deadline later for protected plantings
+- Adjusting `firstFallFrost` dates in the climate data to represent protected conditions (affects all crops globally)
 
 ## Detailed Examples
 
 ### Example 1: Spinach (heat-sensitive, frost-tolerant, direct sow)
 
 **Cultivar data:**
-- `maxGrowingTempC: 21`, `tempMarginC: undefined` (uses default 2)
+- `maxGrowingTempC: 21`
 - `frostSensitive: false`
 - `directAfterLsfDays: -28`
 - `maturityDays: 40`, `harvestDurationDays: 21`
@@ -244,30 +283,23 @@ Default 2°C margin applied to heat checks only (effective max = `maxGrowingTemp
 - Sept avg high: 19°C
 
 **Calculation:**
-- Effective max temp: 21 - 2 = 19°C
-- Earliest sow: April 1 (frost-tolerant, can start early)
-- Latest sow: ~Sept 22 (can grow past frost)
+- Heat limit: tmax > 21°C (crosses ~mid-June with interpolation)
+- Earliest sow: ~April 8 (interpolated soil reaches 4°C between Mar 15 and Apr 15)
+- Latest sow: ~Sept 12 (can grow past frost)
 
-**Spring window (sow April 1):**
-- Outdoor: April 1
-- Harvest start: May 11 (April 1 + 40 days)
-- Check April (10°C high) → OK
-- Check May (17°C high) → 17 < 19 → OK ✓
-- Harvest end: June 1 (May 11 + 21 days)
-
-**Next succession (sow April 22):**
-- Target harvest start = previous harvest end (June 1)
-- Sow = June 1 - 40 days = April 22
-- Check April/May temps → OK ✓
-- Harvest: June 1 - June 22
+**Spring window (sow ~April 8):**
+- Outdoor: April 8
+- Harvest start: May 18 (April 8 + 40 days)
+- Interpolated tmax through this period stays < 19°C → OK ✓
+- Harvest end: June 8 (May 18 + 21 days)
 
 **Summer gap:**
-- Sow May 13 → harvest starts June 22, growing through June
-- June avg high 21°C > 19°C effective max → SKIP
-- Continue skipping through August
-- Resume sowing Sept 2 when temps drop
+- With interpolation, tmax exceeds 19°C around May 31
+- Continue skipping day by day through September
+- Interpolated tmax drops to 19.0°C at Sep 15, but latest sow is Sep 12
+- Heat clears too late for fall plantings at this location
 
-**Result:** 2 spring plantings (April 1, April 22), gap June-Aug, 2 fall plantings (Sept 2, Sept 22)
+**Result:** Spring plantings only (starting ~April 8). No fall window because interpolated heat clears 3 days after the latest sow deadline.
 
 ---
 
@@ -360,61 +392,50 @@ Step by step:
 
 **Calculation:**
 - Effective max: 25 - 2 = 23°C
+- Climate-derived season start: interpolated soil reaches 10°C at May 15 (midpoint of month 5)
 - Target transplant date: June 1 (frost date + 0)
-- Earliest sow date: April 20 (June 1 - 6 weeks using `indoorLeadWeeksMax`)
-- Actual transplant date: May 18 (April 20 + 4 weeks using `indoorLeadWeeksMin`)
-- Harvest start: July 12 (May 18 + 55 days)
+- Climate-derived start May 15 < June 1, so transplant from May 15
+- Earliest sow date: Apr 3 (May 15 - 6 weeks using `indoorLeadWeeksMax`)
 
-**Temperature check (May 18 - July 12):**
-- May: 17°C < 23°C → OK
-- June: 21°C < 23°C → OK
-- July: 24°C > 23°C → FAIL
+**Spring window (sow ~Apr 3):**
+- Transplant: May 1 (Apr 3 + 4 weeks using `indoorLeadWeeksMin`)
+- Harvest start: Jun 25 (May 1 + 55 days from transplant)
+- Check May/June temps → both < 23°C → OK ✓
+- Harvest end: Jul 16 (Jun 25 + 21 days)
 
-**Spring window attempt:**
-- Growing period extends into July when it's too hot
-- July is too hot → spring window fails
+**Summer gap (sow ~Apr 24 onward):**
+- Growing period now extends into July
+- July avg high 24°C > 23°C effective max → too hot
+- Continue skipping through August (also 24°C)
+- When growing period moves to September/October, October soil (9°C) < 10°C → too cold
+- Gap is split into two segments: "too hot" (summer) + "too cold" (fall soil)
 
 **Fall window:**
-- Resume sowing when temps drop in late summer
-- Check Sept (19°C) → OK ✓
+- Resume sowing when growing period fits entirely within viable months
+- Depends on climate; may or may not find viable fall dates
 
-**Result:** Only fall plantings viable. To get spring gai lan, would need earlier transplanting (negative `transplantAfterLsfDays`) to harvest before July heat.
+**Result:** One spring planting, then a split gap showing both the summer heat and fall cold constraints.
 
 ---
 
 ### Example 5: Lettuce Little Gem (frost-tolerant, heat-sensitive, direct sow)
 
 **Cultivar data:**
-- `maxGrowingTempC: 24`, `tempMarginC: undefined`
+- `maxGrowingTempC: 24`
 - `frostSensitive: false`
 - `directAfterLsfDays: -21`
 - `maturityDays: 50`, `harvestDurationDays: 14`
 
-**Climate:**
+**Climate (Sussex, NB):**
 - May avg high: 17°C
 - June avg high: 21°C
-- July avg high: 24°C
+- July/Aug avg high: 24°C
 
 **Calculation:**
-- Effective max: 24 - 2 = 22°C
-- Earliest sow: April 1 (frost-tolerant)
+- Heat limit: tmax > 24°C
+- Earliest sow: ~April 8 (interpolated soil reaches 4°C around Apr 8)
 
-**Spring windows:**
-- Sow April 1 → harvest May 21 - June 4, check April/May → OK ✓
-- Sow April 15 → harvest June 4 - June 18, check April/May → OK ✓
-- Sow April 29 → harvest June 18 - July 2, check May/June → OK (June 21°C < 22°C) ✓
-- Sow May 13 → harvest July 2 - July 16, check May/June → OK ✓
-- Sow May 27 → harvest July 16 - July 30, check June → OK ✓
-
-**Summer gap:**
-- Sow June 10 → harvest July 30, growing through July
-- July avg high 24°C > 22°C effective max → SKIP
-- Continue skipping through August
-
-**Fall windows:**
-- Resume Sept 2 when temps drop
-
-**Result:** 5 spring plantings (April 1 through May 27), gap June-Aug, fall plantings resume Sept 2
+**Result:** Sussex tmax peaks at exactly 24°C (July/Aug), which does not exceed the 24°C threshold (strict `>` comparison). Lettuce has no summer heat gap in this climate and can be planted throughout the growing season. In warmer climates where tmax exceeds 24°C, summer gaps would appear.
 
 ## Diagnostic Output
 
@@ -424,7 +445,7 @@ When no windows are found, `SuccessionResult.diagnostic` explains why:
 {
   earliestSowDate: "2025-05-04",
   latestSowDate: "2025-09-12",
-  noWindowsReason: "Too hot in month 7 (avg high 24°C > max 25°C - 2° margin)"
+  noWindowsReason: "Too hot (24.0°C avg high > 23°C max)"
 }
 ```
 
@@ -435,7 +456,7 @@ skippedPeriods: [
   {
     startDate: "2025-06-03",
     endDate: "2025-08-26",
-    reason: "Too hot in month 6 (avg high 21°C > max 21°C - 2° margin)"
+    reason: "Too hot (21.1°C avg high > 21°C max)"
   }
 ]
 ```
@@ -448,12 +469,11 @@ skippedPeriods: [
 |-------|------|-------------|
 | `frostSensitive` | boolean | Whether crop is killed by frost |
 | `minGrowingTempC` | number | Minimum temperature for growth (cold check) |
-| `maxGrowingTempC` | number | Maximum temperature before bolting/stress (heat check) |
-| `tempMarginC` | number | Override default 2°C safety margin |
+| `maxGrowingTempC` | number | Maximum temperature before bolting/stress (compared directly against tmax_c) |
 | `harvestDurationDays` | number \| null | Fixed harvest window, or null for "until frost" |
 | `harvestStyle` | 'single' \| 'continuous' | Affects default duration if not specified |
-| `directAfterLsfDays` | number | Days after last frost for direct sowing (negative = before) |
-| `transplantAfterLsfDays` | number | Days after last frost for transplanting |
+| `directAfterLsfDays` | number | Days after last frost for direct sowing (negative = before frost, e.g. `-28` for 4 weeks early with frost protection) |
+| `transplantAfterLsfDays` | number | Days after last frost for transplanting (negative = before frost, e.g. `-14` for row covers/cold frames) |
 | `indoorLeadWeeksMin` | number | Minimum weeks indoors; used to calculate transplant date from sow date |
 | `indoorLeadWeeksMax` | number | Maximum weeks indoors; used to calculate earliest possible sow date |
 | `maturityBasis` | 'from_sow' \| 'from_transplant' | When maturity countdown starts |
@@ -461,10 +481,13 @@ skippedPeriods: [
 
 ### Climate Data Used
 
+All monthly values are linearly interpolated between midpoints (15th of each month) to estimate daily temperatures. See `interpolateClimateValue()` in `src/lib/dateUtils.ts`.
+
 | Field | Used For |
 |-------|----------|
-| `monthlyAvgC[month].tmax_c` | Heat check - avg daily high |
-| `monthlyAvgC[month].tavg_c` | Cold check - avg daily temp |
+| `monthlyAvgC[month].tmax_c` | Heat check - avg daily high (interpolated) |
+| `monthlyAvgC[month].tavg_c` | Cold check for frost-sensitive crops - avg daily temp (interpolated) |
+| `monthlyAvgC[month].soil_avg_c` | Cold check for frost-tolerant crops - avg soil temp at 10cm (interpolated) |
 | `firstFallFrost.earliest` | Frost deadline for frost-sensitive crops |
 | `firstFallFrost.typical` | Extended season end for frost-tolerant crops |
 | `lastSpringFrost.typical` | Not used (algorithm uses `frostWindow.lastSpringFrost` instead) |

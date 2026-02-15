@@ -4,6 +4,13 @@
 
 Vegplanner is a garden planning app built with Next.js 16, React 19, and TypeScript. It helps gardeners schedule plantings with temperature-aware succession planning and visualize garden bed layouts.
 
+## Environment Setup
+
+Node.js is managed via nvm. To access node/npm in shell commands:
+```bash
+source ~/.zshrc && npm run dev
+```
+
 ## Key Commands
 
 ```bash
@@ -49,10 +56,23 @@ Tasks are generated at runtime from planting dates. Only completion state (`Task
 When plantings are added or dates change, `renumberPlantingsForCrop()` is called to keep succession numbers in chronological order. Always use `addAndRenumber()` or `updateAndRenumber()` from `usePlantings`.
 
 ### Temperature Viability
-The succession algorithm checks `isGrowingPeriodViable()` using monthly climate data. Heat checks use `tmax_c`, cold checks use `tavg_c`. A 2°C safety margin is applied by default.
+The succession algorithm checks `isGrowingPeriodViable()` using day-by-day interpolated climate data. Heat checks use `tmax_c` vs `maxGrowingTempC`, cold checks use `soil_avg_c` (frost-tolerant) or `tavg_c` (frost-sensitive) vs `minGrowingTempC`. A 1°C safety margin is applied by default (`DEFAULT_TEMP_MARGIN_C`).
 
 ### Placement Quantity
 When a planting is placed in a garden bed, the placement's `quantity` becomes authoritative. Plantings can be split across multiple placements.
+
+### React Hooks Rules
+**Don't call setState directly in useEffect** - the linter will flag this. Instead:
+- For initializing state from localStorage/external source, use a lazy initializer:
+  ```typescript
+  // Bad - triggers lint error
+  const [unit, setUnit] = useState('kg');
+  useEffect(() => { setUnit(getFromLocalStorage()); }, []);
+
+  // Good - lazy initializer
+  const [unit, setUnit] = useState(() => getFromLocalStorage());
+  ```
+- For syncing with props, derive state during render or use the prop directly
 
 ## Documentation
 
@@ -98,7 +118,7 @@ See `docs/data-schemas.md` for complete field documentation.
 ### Modifying Succession Logic
 1. Edit `src/lib/succession.ts`
 2. Update examples in `docs/succession-planting.md` if behavior changes
-3. Temperature checks happen in `isGrowingPeriodViable()` and `isTemperatureViable()`
+3. Temperature checks happen in `isGrowingPeriodViable()`
 
 ### Adding a New Task Type
 1. Add to `TaskType` union in `src/lib/types.ts`
