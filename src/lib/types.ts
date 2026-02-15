@@ -10,6 +10,41 @@ export type Season = 'spring' | 'fall';
 export type HarvestStyle = 'single' | 'continuous';
 export type PlantType = 'vegetable' | 'flower';
 
+// Yield categories for quantity estimation (more granular for accuracy)
+export type YieldCategory =
+  // Tomatoes - different growth habits have different yields
+  | 'tomato_indeterminate'  // Vining, 3-6 kg/plant over long season
+  | 'tomato_determinate'    // Bush, 2-4 kg/plant concentrated
+  | 'tomato_cherry'         // High count, 2-4 kg/plant
+  // Peppers
+  | 'pepper_large'          // Bell peppers, 2-3 kg/plant
+  | 'pepper_small'          // Hot peppers, 1-1.5 kg/plant (use less per serving)
+  // Cucurbits
+  | 'cucumber'              // 3-5 kg/plant
+  | 'squash_summer'         // Zucchini etc, 4-6 kg/plant (very prolific)
+  | 'squash_winter'         // 3-5 kg/plant, stores well
+  // Legumes
+  | 'bean_bush'             // 0.2-0.3 kg/plant
+  | 'bean_pole'             // 0.4-0.5 kg/plant
+  | 'pea'                   // 0.2-0.3 kg/plant
+  // Leafy greens - harvest stage matters
+  | 'greens_head'           // Head lettuce, cabbage - single harvest, 0.3-0.5 kg
+  | 'greens_leaf'           // Cut-and-come-again lettuce, chard - 0.3-0.5 kg
+  | 'greens_baby'           // Baby leaf/microgreens - 0.1-0.2 kg
+  | 'greens_cooking'        // Spinach, kale - cooking greens, 0.3-0.4 kg
+  // Root vegetables
+  | 'root_large'            // Beets, turnips - 0.2-0.3 kg/plant
+  | 'root_small'            // Carrots, radishes - 0.1-0.15 kg/plant
+  // Alliums
+  | 'allium_bulb'           // Onions, shallots - 0.15-0.2 kg/plant
+  | 'allium_green'          // Scallions, leeks - 0.1 kg/plant
+  // Brassicas
+  | 'brassica_head'         // Broccoli, cauliflower - 0.4-0.6 kg/plant
+  | 'brassica_leafy'        // Kale, collards - 0.3-0.5 kg/plant
+  // Other
+  | 'herb'                  // Fresh herbs - 0.1 kg/plant
+  | 'flower';               // Cut flowers (count-based)
+
 export type Cultivar = {
   id: string;
   crop: string;
@@ -43,6 +78,9 @@ export type Cultivar = {
   isPerennial?: boolean; // true for asparagus, strawberries, rhubarb, etc.
   perennialHarvestStartDaysAfterLSF?: number; // Harvest start relative to last spring frost (e.g., 14)
   notes?: string;
+  // Yield estimation fields
+  yieldCategory?: YieldCategory;     // Category for default yield lookup
+  yieldPerPlantKg?: number;          // Override for specific cultivars
 };
 
 export type PlantingPlan = {

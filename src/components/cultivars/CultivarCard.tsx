@@ -8,8 +8,10 @@ import {
   calculateAvailableWindowsAfter,
   createPlantingFromWindow,
   getOutdoorGrowingConstraints,
+  type PlantingWindow,
 } from '@/lib/succession';
 import { PlantingList } from '@/components/plantings/PlantingList';
+import { QuantityEstimator } from './QuantityEstimator';
 import styles from './CultivarCard.module.css';
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -24,6 +26,7 @@ type CultivarCardProps = {
   climate: Climate;
   plantings: Planting[];
   onAddPlanting: (planting: Omit<Planting, 'id' | 'createdAt'>) => void;
+  onAddMultiplePlantings: (plantings: Omit<Planting, 'id' | 'createdAt'>[]) => void;
   onUpdatePlanting: (id: string, updates: Partial<Planting>) => void;
   onDeletePlanting: (id: string) => void;
   forceExpanded?: boolean;
@@ -35,6 +38,7 @@ export function CultivarCard({
   climate,
   plantings,
   onAddPlanting,
+  onAddMultiplePlantings,
   onUpdatePlanting,
   onDeletePlanting,
   forceExpanded,
@@ -65,6 +69,29 @@ export function CultivarCard({
   };
   const [quantity, setQuantity] = useState<number | null>(4);
   const [selectedPlantingId, setSelectedPlantingId] = useState<string | null>(null);
+  const [showEstimator, setShowEstimator] = useState(false);
+
+  const handleApplyEstimate = (estimatedQuantity: number) => {
+    setQuantity(estimatedQuantity);
+    setShowEstimator(false);
+  };
+
+  const handleGenerateSuccessions = (windows: PlantingWindow[], plantsEach: number) => {
+    // Generate multiple succession plantings from the provided windows
+    setShowEstimator(false);
+
+    // Filter out windows that overlap with existing plantings
+    const availableWindows = windows.filter((w) => !windowOverlapsPlanting(w));
+
+    // Create all plantings and add them in a single operation (avoids race condition)
+    const newPlantings = availableWindows.map((window) =>
+      createPlantingFromWindow(window, cultivar, plantsEach)
+    );
+
+    if (newPlantings.length > 0) {
+      onAddMultiplePlantings(newPlantings);
+    }
+  };
 
   const cultivarPlantings = plantings
     .filter((p) => p.cultivarId === cultivar.id)
@@ -240,6 +267,14 @@ export function CultivarCard({
                 className={styles.quantityInput}
                 title="Leave empty to set quantity when placing in garden bed"
               />
+              <button
+                type="button"
+                onClick={() => setShowEstimator(!showEstimator)}
+                className={styles.estimatorButton}
+                title="Get help estimating how many plants you need"
+              >
+                {showEstimator ? 'Close' : 'Help me estimate'}
+              </button>
               {cultivarPlantings.length === 0 ? (
                 <button
                   onClick={handleGenerateInitial}
@@ -284,6 +319,18 @@ export function CultivarCard({
                 </>
               )}
             </div>
+
+            {/* Inline quantity estimator */}
+            {showEstimator && (
+              <QuantityEstimator
+                cultivar={cultivar}
+                climate={climate}
+                frostWindow={frost}
+                onApplyEstimate={handleApplyEstimate}
+                onClose={() => setShowEstimator(false)}
+                onGenerateSuccessions={handleGenerateSuccessions}
+              />
+            )}
 
             {/* Show diagnostic when no windows available */}
             {allWindows.windows.length === 0 && allWindows.diagnostic && (

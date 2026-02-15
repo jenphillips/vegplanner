@@ -58,6 +58,7 @@ export default function Home() {
     deleteAllForCultivar,
     updateAndRenumber,
     addAndRenumber,
+    addMultipleAndRenumber,
   } = usePlantings();
 
   const {
@@ -105,6 +106,16 @@ export default function Home() {
     const cultivar = data.cultivars.find((c) => c.id === planting.cultivarId);
     if (cultivar) {
       await addAndRenumber(planting, cultivar.crop, cultivar.variety);
+    }
+  };
+
+  const handleAddMultiplePlantings = async (
+    plantings: Parameters<typeof addMultipleAndRenumber>[0]
+  ) => {
+    if (plantings.length === 0) return;
+    const cultivar = data.cultivars.find((c) => c.id === plantings[0].cultivarId);
+    if (cultivar) {
+      await addMultipleAndRenumber(plantings, cultivar.crop, cultivar.variety);
     }
   };
 
@@ -226,6 +237,7 @@ export default function Home() {
                     climate={data.climate}
                     plantings={plantings}
                     onAddPlanting={handleAddPlanting}
+                    onAddMultiplePlantings={handleAddMultiplePlantings}
                     onUpdatePlanting={handleUpdatePlanting}
                     onDeletePlanting={handleDeletePlanting}
                     forceExpanded={expandAll}
@@ -267,6 +279,7 @@ export default function Home() {
                     climate={data.climate}
                     plantings={plantings}
                     onAddPlanting={handleAddPlanting}
+                    onAddMultiplePlantings={handleAddMultiplePlantings}
                     onUpdatePlanting={handleUpdatePlanting}
                     onDeletePlanting={handleDeletePlanting}
                     forceExpanded={expandAll}

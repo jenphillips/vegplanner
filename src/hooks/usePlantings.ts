@@ -87,6 +87,31 @@ export function usePlantings() {
     [data, save]
   );
 
+  // Add multiple plantings at once (avoids race condition when adding in a loop)
+  const addMultipleAndRenumber = useCallback(
+    async (
+      plantings: Omit<Planting, 'id' | 'createdAt'>[],
+      cropName: string,
+      variety?: string
+    ) => {
+      if (plantings.length === 0) return [];
+
+      const newPlantings: Planting[] = plantings.map((planting) => ({
+        ...planting,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+      }));
+
+      // Add all new plantings, then renumber
+      const cultivarId = plantings[0].cultivarId;
+      const withNew = [...data, ...newPlantings];
+      const renumbered = renumberPlantingsForCrop(withNew, cropName, cultivarId, variety);
+      await save(renumbered);
+      return newPlantings;
+    },
+    [data, save]
+  );
+
   const deleteAllForCultivar = useCallback(
     async (cultivarId: string) => {
       const remaining = data.filter((p) => p.cultivarId !== cultivarId);
@@ -107,6 +132,7 @@ export function usePlantings() {
     renumberPlantings,
     updateAndRenumber,
     addAndRenumber,
+    addMultipleAndRenumber,
     refetch,
   };
 }

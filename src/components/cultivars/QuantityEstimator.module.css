@@ -1,0 +1,538 @@
+.container {
+  background: #f8faf5;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.headerControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unitToggle {
+  display: flex;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.unitActive,
+.unitInactive {
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.unitActive {
+  background: var(--accent, #2f6f4e);
+  color: #fff;
+}
+
+.unitInactive {
+  background: #fff;
+  color: var(--muted, #5f6653);
+}
+
+.unitInactive:hover {
+  background: #f5f5f0;
+}
+
+.title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text, #1f2614);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--muted, #5f6653);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Method selector for direct sow vs transplant */
+.methodSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border, #e5e5de);
+}
+
+.methodToggle {
+  display: flex;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 6px;
+  overflow: hidden;
+  align-self: flex-start;
+}
+
+.methodActive,
+.methodInactive {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.methodActive {
+  background: var(--accent, #2f6f4e);
+  color: #fff;
+}
+
+.methodInactive {
+  background: #fff;
+  color: var(--muted, #5f6653);
+}
+
+.methodInactive:hover {
+  background: #f5f5f0;
+}
+
+.methodHint {
+  font-size: 12px;
+  color: var(--accent, #2f6f4e);
+  font-style: italic;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field > label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text, #1f2614);
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.inputRow button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text, #1f2614);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.inputRow button:hover:not(:disabled) {
+  border-color: var(--accent, #2f6f4e);
+  background: #eef5ea;
+}
+
+.inputRow button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.value {
+  font-size: 18px;
+  font-weight: 600;
+  min-width: 32px;
+  text-align: center;
+  color: var(--text, #1f2614);
+}
+
+.radioGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.radioOption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 6px;
+  background: #fff;
+  transition: all 0.15s ease;
+}
+
+.radioOption:hover {
+  border-color: var(--accent, #2f6f4e);
+}
+
+.radioOption:has(input:checked) {
+  border-color: var(--accent, #2f6f4e);
+  background: #eef5ea;
+}
+
+.radioOption input {
+  margin: 0;
+  accent-color: var(--accent, #2f6f4e);
+}
+
+.radioOption span {
+  color: var(--text, #1f2614);
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider {
+  flex: 1;
+  height: 6px;
+  appearance: none;
+  background: #e0e0d8;
+  border-radius: 3px;
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent, #2f6f4e);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent, #2f6f4e);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sliderValue {
+  min-width: 70px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text, #1f2614);
+  text-align: right;
+}
+
+.servingHint {
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+  font-style: italic;
+}
+
+.results {
+  margin-top: 16px;
+  padding: 12px;
+  background: #e8f5e9;
+  border-radius: 6px;
+}
+
+.recommendation {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--muted, #5f6653);
+}
+
+.recommendedValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent, #2f6f4e);
+}
+
+.range {
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+}
+
+.successionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(47, 111, 78, 0.08);
+  border-radius: 4px;
+}
+
+.successionText {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent, #2f6f4e);
+}
+
+.successionHint {
+  font-size: 11px;
+  color: var(--muted, #5f6653);
+}
+
+.breakdown {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+}
+
+.detailsToggle {
+  display: block;
+  margin-top: 12px;
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+  cursor: pointer;
+  text-align: left;
+}
+
+.detailsToggle:hover {
+  color: var(--accent, #2f6f4e);
+}
+
+.details {
+  margin-top: 8px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailRow span:first-child {
+  color: var(--muted, #5f6653);
+}
+
+.detailRow span:last-child {
+  color: var(--text, #1f2614);
+  text-align: right;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.cancelButton,
+.applyButton,
+.generateButton {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cancelButton {
+  background: none;
+  border: 1px solid var(--border, #e5e5de);
+  color: var(--text, #1f2614);
+}
+
+.cancelButton:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.applyButton {
+  background: linear-gradient(120deg, var(--accent, #2f6f4e), var(--accent-strong, #1f4a33));
+  border: none;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(31, 74, 51, 0.2);
+}
+
+.applyButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(31, 74, 51, 0.25);
+}
+
+.generateButton {
+  background: #fff;
+  border: 1px solid var(--accent, #2f6f4e);
+  color: var(--accent, #2f6f4e);
+}
+
+.generateButton:hover {
+  background: #eef5ea;
+}
+
+/* Growing periods selector */
+.periodsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.periodOption {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 6px;
+  background: #fff;
+  transition: all 0.15s ease;
+}
+
+.periodOption:hover {
+  border-color: var(--accent, #2f6f4e);
+}
+
+.periodOption.periodSelected {
+  border-color: var(--accent, #2f6f4e);
+  background: #eef5ea;
+}
+
+.periodMain {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.periodMain input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--accent, #2f6f4e);
+}
+
+.periodMethodRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 24px;
+  flex-wrap: wrap;
+}
+
+.periodMethodToggle {
+  display: flex;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.periodMethodToggle .methodActive,
+.periodMethodToggle .methodInactive {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.periodMethodToggle .methodActive {
+  background: var(--accent, #2f6f4e);
+  color: #fff;
+}
+
+.periodMethodToggle .methodInactive {
+  background: #fff;
+  color: var(--muted, #5f6653);
+}
+
+.periodMethodToggle .methodInactive:hover {
+  background: #f5f5f0;
+}
+
+.methodAdvice {
+  font-size: 11px;
+  color: var(--accent, #2f6f4e);
+  font-style: italic;
+}
+
+.periodLabel {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text, #1f2614);
+}
+
+.periodDates {
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+}
+
+.periodWeeks {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent, #2f6f4e);
+  background: rgba(47, 111, 78, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.periodsHint {
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+  font-style: italic;
+}
+
+.periodsWarning {
+  font-size: 12px;
+  color: #b86a00;
+  padding: 8px 10px;
+  background: #fff8e6;
+  border-radius: 4px;
+  border-left: 3px solid #f5a623;
+}
