@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import type { Cultivar, Planting, FrostWindow, Climate } from '@/lib/types';
 import { recalculatePlantingForMethodChange } from '@/lib/succession';
 import { PlantingTimeline } from './PlantingTimeline';
@@ -97,10 +98,12 @@ export function PlantingCard({
     }
   };
 
+  const [methodNotice, setMethodNotice] = useState<string | null>(null);
+
   const handleMethodChange = (newMethod: 'direct' | 'transplant') => {
     if (newMethod === planting.method) return;
 
-    const updates = recalculatePlantingForMethodChange(
+    const result = recalculatePlantingForMethodChange(
       planting,
       newMethod,
       cultivar,
@@ -109,9 +112,15 @@ export function PlantingCard({
       previousHarvestEnd
     );
 
+    if (!result.viable) {
+      setMethodNotice(result.reason);
+      return;
+    }
+
+    setMethodNotice(null);
     onUpdate(planting.id, {
       method: newMethod,
-      ...updates,
+      ...result.updates,
     });
   };
 
@@ -203,6 +212,17 @@ export function PlantingCard({
           ×
         </button>
       </div>
+      {methodNotice && (
+        <p className={styles.notice}>
+          Can&apos;t switch method: {methodNotice}
+          <button
+            onClick={() => setMethodNotice(null)}
+            style={{ marginLeft: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#7a5e00', fontWeight: 600 }}
+          >
+            Dismiss
+          </button>
+        </p>
+      )}
       {planting.notes && <p className={styles.notes}>{planting.notes}</p>}
     </div>
   );
