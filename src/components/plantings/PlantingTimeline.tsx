@@ -3,8 +3,14 @@
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import type { Planting, FrostWindow, Climate, Cultivar } from '@/lib/types';
 import { isGrowingPeriodViable } from '@/lib/succession';
+import { daysBetween } from '@/lib/dateUtils';
 import { calculateShiftBounds } from '@/lib/dragConstraints';
 import styles from './PlantingTimeline.module.css';
+
+const formatShortDate = (iso: string) => {
+  const d = new Date(`${iso}T00:00:00Z`);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+};
 
 type PlantingTimelineProps = {
   planting: Planting;
@@ -702,9 +708,9 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
             left: `${barPositions.sow.left}%`,
             width: `${barPositions.sow.width}%`,
           }}
-          title={canDragTransplantShift
-            ? `Sow indoors: ${effectiveSowDate} (drag to shift planting${shiftDays !== 0 ? `: ${shiftDays > 0 ? '+' : ''}${shiftDays} days` : ''})`
-            : `Sow: ${effectiveSowDate}${planting.sowDateOverride ? ' (adjusted)' : ''}`}
+          title={planting.transplantDate
+            ? `Start indoors: ${formatShortDate(effectiveSowDate)} → ${formatShortDate(planting.transplantDate)} (${daysBetween(effectiveSowDate, planting.transplantDate)}d)${canDragTransplantShift && shiftDays !== 0 ? `\nShift: ${shiftDays > 0 ? '+' : ''}${shiftDays} days` : ''}`
+            : `Sow: ${formatShortDate(effectiveSowDate)}${planting.sowDateOverride ? ' (adjusted)' : ''}`}
           onMouseDown={canDragTransplantShift ? handleTransplantShiftMouseDown : handleTransplantMouseDown}
         >
           {/* Drag handle on left edge for transplants */}
@@ -720,7 +726,15 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
             left: `${barPositions.growing.left}%`,
             width: `${barPositions.growing.width}%`,
           }}
-          title={(canDragDirectSow || canDragTransplantShift) ? `Growing (drag to shift planting${shiftDays !== 0 ? `: ${shiftDays > 0 ? '+' : ''}${shiftDays} days` : ''})` : 'Growing'}
+          title={(() => {
+            const growStart = planting.transplantDate ?? planting.sowDate;
+            const label = planting.transplantDate ? 'Grow outdoors' : 'Grow';
+            const info = `${label}: ${formatShortDate(growStart)} → ${formatShortDate(planting.harvestStart)} (${daysBetween(growStart, planting.harvestStart)}d)`;
+            const dragHint = (canDragDirectSow || canDragTransplantShift) && shiftDays !== 0
+              ? `\nShift: ${shiftDays > 0 ? '+' : ''}${shiftDays} days`
+              : '';
+            return info + dragHint;
+          })()}
           onMouseDown={canDragTransplantShift ? handleTransplantShiftMouseDown : handleDirectSowMouseDown}
         />
 
@@ -731,7 +745,13 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
             left: `${barPositions.harvest.left}%`,
             width: `${barPositions.harvest.width}%`,
           }}
-          title={(canDragDirectSow || canDragTransplantShift) ? `Harvest (drag to shift planting${shiftDays !== 0 ? `: ${shiftDays > 0 ? '+' : ''}${shiftDays} days` : ''})` : `Harvest: ${planting.harvestStart} – ${planting.harvestEnd}`}
+          title={(() => {
+            const info = `Harvest: ${formatShortDate(planting.harvestStart)} → ${formatShortDate(planting.harvestEnd)} (${daysBetween(planting.harvestStart, planting.harvestEnd)}d)`;
+            const dragHint = (canDragDirectSow || canDragTransplantShift) && shiftDays !== 0
+              ? `\nShift: ${shiftDays > 0 ? '+' : ''}${shiftDays} days`
+              : '';
+            return info + dragHint;
+          })()}
           onMouseDown={canDragTransplantShift ? handleTransplantShiftMouseDown : handleDirectSowMouseDown}
         />
 
@@ -740,7 +760,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
           <div
             className={styles.markerTransplant}
             style={{ left: `${barPositions.transplant}%` }}
-            title={`Transplant: ${planting.transplantDate}`}
+            title={`Transplant outdoors: ${formatShortDate(planting.transplantDate!)}`}
           />
         )}
 

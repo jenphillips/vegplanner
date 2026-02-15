@@ -282,7 +282,7 @@ describe('PlantingTimeline', () => {
       );
 
       const sowBar = container.querySelector('[class*="barSow"]');
-      expect(sowBar?.getAttribute('title')).toContain('2025-04-15');
+      expect(sowBar?.getAttribute('title')).toContain('Apr 15');
     });
 
     it('shows harvest dates in tooltip for harvest bar', () => {
@@ -296,7 +296,7 @@ describe('PlantingTimeline', () => {
 
       const harvestBar = container.querySelector('[class*="barHarvest"]');
       const title = harvestBar?.getAttribute('title') || '';
-      expect(title).toMatch(/harvest|2025-07-15|2025-09-15/i);
+      expect(title).toMatch(/Harvest: Jul 15 → Sep 15 \(62d\)/);
     });
 
     it('shows transplant date in tooltip for transplant marker', () => {
@@ -306,7 +306,7 @@ describe('PlantingTimeline', () => {
       );
 
       const transplantMarker = container.querySelector('[class*="markerTransplant"]');
-      expect(transplantMarker?.getAttribute('title')).toContain('2025-05-20');
+      expect(transplantMarker?.getAttribute('title')).toContain('Transplant outdoors: May 20');
     });
   });
 
@@ -590,7 +590,7 @@ describe('PlantingTimeline', () => {
 
       const sowBar = container.querySelector('[class*="barSow"]');
       const title = sowBar?.getAttribute('title') || '';
-      expect(title).toContain('2025-04-10');
+      expect(title).toContain('Apr 10');
       expect(title).toContain('adjusted');
     });
   });
