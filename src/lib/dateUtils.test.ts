@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toDate, addDays, addWeeks, daysBetween, getMonth, ensureNumber, interpolateClimateValue, getInterpolatedClimate } from './dateUtils';
+import { toDate, addDays, addWeeks, daysBetween, getMonth, ensureNumber, interpolateClimateValue, getInterpolatedClimate, dayOfYear, buildDailyClimateTable, lookupDailyClimate } from './dateUtils';
 import type { Climate } from './types';
 
 // ============================================
@@ -336,5 +336,103 @@ describe('getInterpolatedClimate', () => {
     // Dec tavg=-5, Jan tavg=-9 → should be between
     expect(result.tavg_c!).toBeLessThan(-5);
     expect(result.tavg_c!).toBeGreaterThan(-9);
+  });
+});
+
+// ============================================
+// dayOfYear
+// ============================================
+
+describe('dayOfYear', () => {
+  it('returns 0 for January 1', () => {
+    expect(dayOfYear('2025-01-01')).toBe(0);
+  });
+
+  it('returns 364 for December 31 (non-leap year)', () => {
+    expect(dayOfYear('2025-12-31')).toBe(364);
+  });
+
+  it('returns 365 for December 31 (leap year)', () => {
+    expect(dayOfYear('2024-12-31')).toBe(365);
+  });
+
+  it('returns 59 for March 1 (non-leap year)', () => {
+    expect(dayOfYear('2025-03-01')).toBe(59);
+  });
+
+  it('returns 60 for March 1 (leap year)', () => {
+    expect(dayOfYear('2024-03-01')).toBe(60);
+  });
+
+  it('returns 181 for July 1 (non-leap year)', () => {
+    expect(dayOfYear('2025-07-01')).toBe(181);
+  });
+});
+
+// ============================================
+// buildDailyClimateTable
+// ============================================
+
+describe('buildDailyClimateTable', () => {
+  it('returns 365 elements for a non-leap year', () => {
+    const table = buildDailyClimateTable(testClimate, 2025);
+    expect(table).toHaveLength(365);
+  });
+
+  it('returns 366 elements for a leap year', () => {
+    const table = buildDailyClimateTable(testClimate, 2024);
+    expect(table).toHaveLength(366);
+  });
+
+  it('matches getInterpolatedClimate for spot-checked dates', () => {
+    const table = buildDailyClimateTable(testClimate, 2025);
+    const checkDates = ['2025-01-01', '2025-03-15', '2025-06-30', '2025-09-01', '2025-12-31'];
+    for (const date of checkDates) {
+      const doy = dayOfYear(date);
+      const expected = getInterpolatedClimate(date, testClimate);
+      expect(table[doy].tavg_c).toBeCloseTo(expected.tavg_c!, 5);
+      expect(table[doy].tmax_c).toBeCloseTo(expected.tmax_c!, 5);
+      expect(table[doy].tmin_c).toBeCloseTo(expected.tmin_c!, 5);
+      expect(table[doy].soil_avg_c).toBeCloseTo(expected.soil_avg_c!, 5);
+    }
+  });
+
+  it('has all four temperature fields on every entry', () => {
+    const table = buildDailyClimateTable(testClimate, 2025);
+    for (const entry of table) {
+      expect(entry).toHaveProperty('tavg_c');
+      expect(entry).toHaveProperty('tmin_c');
+      expect(entry).toHaveProperty('tmax_c');
+      expect(entry).toHaveProperty('soil_avg_c');
+    }
+  });
+});
+
+// ============================================
+// lookupDailyClimate
+// ============================================
+
+describe('lookupDailyClimate', () => {
+  it('returns table value for same-year dates', () => {
+    const table = buildDailyClimateTable(testClimate, 2025);
+    const result = lookupDailyClimate(table, 2025, '2025-06-15', testClimate);
+    // June 15 midpoint exact value
+    expect(result.tavg_c).toBe(17);
+    expect(result.tmax_c).toBe(21);
+  });
+
+  it('falls back to interpolation for cross-year dates', () => {
+    const table = buildDailyClimateTable(testClimate, 2025);
+    const result = lookupDailyClimate(table, 2025, '2026-01-05', testClimate);
+    const expected = getInterpolatedClimate('2026-01-05', testClimate);
+    expect(result.tavg_c).toBeCloseTo(expected.tavg_c!, 5);
+    expect(result.tmax_c).toBeCloseTo(expected.tmax_c!, 5);
+  });
+
+  it('returns same values as direct table access', () => {
+    const table = buildDailyClimateTable(testClimate, 2025);
+    const doy = dayOfYear('2025-07-01');
+    const result = lookupDailyClimate(table, 2025, '2025-07-01', testClimate);
+    expect(result).toBe(table[doy]); // Same reference (O(1) lookup)
   });
 });

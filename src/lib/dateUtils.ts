@@ -98,6 +98,24 @@ export function interpolateClimateValue(
   return valA + t * (valB - valA);
 }
 
+// ============================================
+// Pre-computed Climate Lookup Table
+// ============================================
+
+/** Interpolated climate values for a single day. */
+export type DailyClimate = {
+  tavg_c: number | null;
+  tmin_c: number | null;
+  tmax_c: number | null;
+  soil_avg_c: number | null;
+};
+
+/** A pre-computed climate lookup table for a specific year. */
+export type ClimateTable = {
+  table: DailyClimate[];
+  year: number;
+};
+
 /**
  * Get interpolated climate data for a specific date.
  * Returns all temperature fields interpolated between monthly midpoints.
@@ -105,16 +123,71 @@ export function interpolateClimateValue(
 export function getInterpolatedClimate(
   date: string,
   climate: Climate
-): {
-  tavg_c: number | null;
-  tmin_c: number | null;
-  tmax_c: number | null;
-  soil_avg_c: number | null;
-} {
+): DailyClimate {
   return {
     tavg_c: interpolateClimateValue(date, climate, 'tavg_c'),
     tmin_c: interpolateClimateValue(date, climate, 'tmin_c'),
     tmax_c: interpolateClimateValue(date, climate, 'tmax_c'),
     soil_avg_c: interpolateClimateValue(date, climate, 'soil_avg_c'),
   };
+}
+
+/**
+ * Return the 0-based day-of-year for an ISO date string.
+ * Jan 1 = 0, Dec 31 = 364 (or 365 in leap years).
+ * Uses string parsing to avoid Date object allocation on the hot path.
+ */
+export function dayOfYear(iso: string): number {
+  const year = parseInt(iso.slice(0, 4), 10);
+  const month = parseInt(iso.slice(5, 7), 10) - 1;
+  const day = parseInt(iso.slice(8, 10), 10);
+  return Math.round(
+    (Date.UTC(year, month, day) - Date.UTC(year, 0, 1)) / (24 * 60 * 60 * 1000)
+  );
+}
+
+/**
+ * Build a pre-computed array of daily climate values for an entire year.
+ * One-time cost of 365×4 interpolation calls, then all lookups are O(1).
+ */
+export function buildDailyClimateTable(climate: Climate, year: number): DailyClimate[] {
+  const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  const daysInYear = isLeap ? 366 : 365;
+  const table: DailyClimate[] = new Array(daysInYear);
+
+  const d = new Date(Date.UTC(year, 0, 1));
+  for (let i = 0; i < daysInYear; i++) {
+    const iso = d.toISOString().slice(0, 10);
+    table[i] = {
+      tavg_c: interpolateClimateValue(iso, climate, 'tavg_c'),
+      tmin_c: interpolateClimateValue(iso, climate, 'tmin_c'),
+      tmax_c: interpolateClimateValue(iso, climate, 'tmax_c'),
+      soil_avg_c: interpolateClimateValue(iso, climate, 'soil_avg_c'),
+    };
+    d.setUTCDate(d.getUTCDate() + 1);
+  }
+
+  return table;
+}
+
+/**
+ * O(1) climate lookup from a pre-built table.
+ * Falls back to getInterpolatedClimate for dates outside the table's year.
+ */
+export function lookupDailyClimate(
+  table: DailyClimate[],
+  tableYear: number,
+  date: string,
+  climate: Climate
+): DailyClimate {
+  const dateYear = parseInt(date.slice(0, 4), 10);
+
+  if (dateYear === tableYear) {
+    const doy = dayOfYear(date);
+    if (doy >= 0 && doy < table.length) {
+      return table[doy];
+    }
+  }
+
+  return getInterpolatedClimate(date, climate);
 }
