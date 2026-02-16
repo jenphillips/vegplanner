@@ -155,15 +155,14 @@ export function UnifiedGardenCanvas({
     yCm: number;
   } | null>(null);
 
-  // Clear committedMove once the placement data has been updated
-  useEffect(() => {
-    if (committedMove) {
-      const placement = placements.find((p) => p.id === committedMove.placementId);
-      if (placement && placement.xCm === committedMove.xCm && placement.yCm === committedMove.yCm) {
-        setCommittedMove(null);
-      }
+  // Clear committedMove once the placement data has been updated.
+  // Uses the "adjust state during render" pattern instead of useEffect.
+  if (committedMove) {
+    const placement = placements.find((p) => p.id === committedMove.placementId);
+    if (placement && placement.xCm === committedMove.xCm && placement.yCm === committedMove.yCm) {
+      setCommittedMove(null);
     }
-  }, [placements, committedMove]);
+  }
 
   // Memoize selected plantingId to avoid effect re-running on unrelated placement changes
   const selectedPlantingId = useMemo(() => {

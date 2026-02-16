@@ -273,7 +273,7 @@ describe('interpolateClimateValue', () => {
         ...testClimate,
         monthlyAvgC: {
           ...testClimate.monthlyAvgC,
-          '6': { ...testClimate.monthlyAvgC['6'], soil_avg_c: undefined as unknown as number },
+          '6': { ...testClimate.monthlyAvgC['6'], soil_avg_c: undefined },
         },
       };
       // June 15 has null soil_avg_c — direct midpoint hit but field missing

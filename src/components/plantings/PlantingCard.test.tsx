@@ -256,7 +256,7 @@ describe('PlantingCard', () => {
 
   describe('method toggle', () => {
     it('shows method toggle only for cultivars with sowMethod "either"', () => {
-      const { container } = render(
+      render(
         <PlantingCard
           planting={createPlanting()}
           cultivar={createCultivar({ sowMethod: 'either' })}

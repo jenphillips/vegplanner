@@ -354,7 +354,6 @@ export default function Home() {
               climate={data.climate}
               loading={plantingsLoading}
               onUpdatePlanting={handleUpdatePlanting}
-              onDeletePlanting={handleDeletePlanting}
             />
           </section>
         )}

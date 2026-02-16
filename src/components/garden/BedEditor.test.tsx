@@ -11,6 +11,7 @@ import type { GardenBed } from '@/lib/types';
 const createGardenBed = (overrides: Partial<GardenBed> = {}): GardenBed => ({
   id: 'test-bed-1',
   name: 'Main Bed',
+  shape: 'bed',
   widthCm: 120,
   lengthCm: 240,
   sunExposure: 'full',

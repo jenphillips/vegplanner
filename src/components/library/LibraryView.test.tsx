@@ -165,12 +165,12 @@ describe('LibraryView', () => {
       );
 
       // Spinach should show "Remove from Plan" button
-      const spinachSection = screen.getByText(/Spinach/).closest('[class*="card"]');
-      expect(within(spinachSection!).getByText('In Plan')).toBeInTheDocument();
+      const spinachSection = screen.getByText(/Spinach/).closest('[class*="card"]') as HTMLElement;
+      expect(within(spinachSection).getByText('In Plan')).toBeInTheDocument();
 
       // Tomato should show "Add to Plan" button
-      const tomatoSection = screen.getByText(/Tomato/).closest('[class*="card"]');
-      expect(within(tomatoSection!).queryByText('In Plan')).not.toBeInTheDocument();
+      const tomatoSection = screen.getByText(/Tomato/).closest('[class*="card"]') as HTMLElement;
+      expect(within(tomatoSection).queryByText('In Plan')).not.toBeInTheDocument();
     });
 
     it('shows correct counts in status filter', () => {

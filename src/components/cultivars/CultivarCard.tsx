@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { Cultivar, FrostWindow, Climate, Planting } from '@/lib/types';
 import {
   calculateSuccessionWindows,
@@ -46,19 +46,18 @@ export function CultivarCard({
 }: CultivarCardProps) {
   const [localExpanded, setLocalExpanded] = useState(forceExpanded ?? false);
   const [hasManualOverride, setHasManualOverride] = useState(false);
-  const prevForceExpanded = useRef(forceExpanded);
+  const [prevForceExpanded, setPrevForceExpanded] = useState(forceExpanded);
 
   // When forceExpanded changes (user clicks Expand All / Collapse All),
-  // reset the manual override so the global setting takes effect
-  useEffect(() => {
-    if (prevForceExpanded.current !== forceExpanded) {
-      setHasManualOverride(false);
-      if (forceExpanded !== undefined) {
-        setLocalExpanded(forceExpanded);
-      }
-      prevForceExpanded.current = forceExpanded;
+  // reset the manual override so the global setting takes effect.
+  // Uses the "adjust state during render" pattern instead of useEffect.
+  if (prevForceExpanded !== forceExpanded) {
+    setPrevForceExpanded(forceExpanded);
+    setHasManualOverride(false);
+    if (forceExpanded !== undefined) {
+      setLocalExpanded(forceExpanded);
     }
-  }, [forceExpanded]);
+  }
 
   // If the user has manually toggled this card, use local state;
   // otherwise, defer to forceExpanded (if set) or local state
@@ -145,18 +144,20 @@ export function CultivarCard({
 
   // Build climate lookup table once per (climate, year) — shared across all memoized calculations.
   // Manual useMemo is needed because buildDailyClimateTable is expensive (~1,460 interpolations).
-  // The React Compiler reports "Existing memoization could not be preserved" for these — that's
-  // expected; the compiler skips these expressions and our manual useMemo handles them correctly.
+  // The React Compiler can't preserve these because the memoized object may appear mutable to it;
+  // our manual useMemo handles correctness here.
   const year = useMemo(
     () => new Date(frost.lastSpringFrost + 'T00:00:00Z').getUTCFullYear(),
     [frost.lastSpringFrost]
   );
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const climateTable = useMemo(
     () => ({ table: buildDailyClimateTable(climate, year), year }),
     [climate, year]
   );
 
   // Calculate available succession windows to show potential
+  /* eslint-disable react-hooks/preserve-manual-memoization -- climateTable is stable via useMemo above */
   const allWindows = useMemo(
     () => calculateSuccessionWindows(cultivar, frost, climate, { climateTable }),
     [cultivar, frost, climate, climateTable]
@@ -167,6 +168,7 @@ export function CultivarCard({
     () => getOutdoorGrowingConstraints(cultivar, climate, year, climateTable),
     [cultivar, climate, year, climateTable]
   );
+  /* eslint-enable react-hooks/preserve-manual-memoization */
 
   // Check if a window overlaps with any existing planting's harvest period
   // This is more robust than comparing sowDate, since users can drag plantings

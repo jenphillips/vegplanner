@@ -8,6 +8,7 @@ function createTask(overrides: Partial<Task> = {}): Task {
   return {
     id: 'task-1',
     plantingId: 'planting-1',
+    cultivarId: 'cultivar-1',
     type: 'sow_indoor',
     date: '2025-03-15',
     title: 'Start Tomato Seeds',

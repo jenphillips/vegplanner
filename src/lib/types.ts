@@ -124,7 +124,7 @@ export type MonthlyTemperature = {
   tavg_c: number; // Average air temperature (°C)
   tmin_c: number; // Average daily minimum (°C)
   tmax_c: number; // Average daily maximum (°C)
-  soil_avg_c: number; // Estimated average soil temperature at 10cm depth (°C)
+  soil_avg_c?: number; // Estimated average soil temperature at 10cm depth (°C)
   gdd_base5: number; // Growing degree days (base 5°C) accumulated by end of month
 };
 

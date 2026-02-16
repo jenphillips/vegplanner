@@ -33,7 +33,6 @@ type GardenViewProps = {
   climate?: Climate;
   loading?: boolean;
   onUpdatePlanting?: (id: string, updates: Partial<Planting>) => void;
-  onDeletePlanting?: (id: string) => void;
 };
 
 type Units = 'metric' | 'imperial';
@@ -74,7 +73,7 @@ function getStoredAllowOverlap(): boolean {
   return localStorage.getItem(ALLOW_OVERLAP_STORAGE_KEY) === 'true';
 }
 
-export function GardenView({ plantings, cultivars, frost, climate, loading, onUpdatePlanting, onDeletePlanting }: GardenViewProps) {
+export function GardenView({ plantings, cultivars, frost, climate, loading, onUpdatePlanting }: GardenViewProps) {
   const {
     beds,
     loading: bedsLoading,
@@ -177,12 +176,6 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
       return remaining > 0;
     }),
     [inGroundPlantings, placements]
-  );
-
-  // For backward compatibility - set of planted IDs (used by tooLarge check)
-  const placedPlantingIds = useMemo(
-    () => new Set(placements.map((p) => p.plantingId)),
-    [placements]
   );
 
   // Filter placements to only those for in-ground plantings

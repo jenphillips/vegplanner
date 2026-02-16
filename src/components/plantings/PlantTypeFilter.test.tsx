@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { PlantTypeFilter } from './PlantTypeFilter';
-import type { PlantTypeFilterValue } from './PlantTypeFilter';
 
 // ============================================
 // Tests
@@ -30,7 +29,7 @@ describe('PlantTypeFilter', () => {
 
   describe('active state', () => {
     it('marks "All" as active when value is "all"', () => {
-      const { container } = render(<PlantTypeFilter value="all" onChange={vi.fn()} />);
+      render(<PlantTypeFilter value="all" onChange={vi.fn()} />);
 
       const allButton = screen.getByRole('button', { name: /all/i });
       expect(allButton.className).toContain('active');

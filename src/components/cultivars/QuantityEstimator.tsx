@@ -166,7 +166,6 @@ export function QuantityEstimator({
 
   // For cultivars that support both methods, track selected method per period
   const supportsMultipleMethods = cultivar.sowMethod === 'either';
-  const defaultMethod = cultivar.preferredMethod ?? 'direct';
 
   // Track: which periods are selected, and which method for each period
   const [selectedPeriodIds, setSelectedPeriodIds] = useState<Set<string>>(new Set());
@@ -210,9 +209,12 @@ export function QuantityEstimator({
     return mergePeriods(directPeriodsResult.periods, transplantPeriodsResult.periods);
   }, [directPeriodsResult, transplantPeriodsResult, supportsMultipleMethods]);
 
-  // Initialize selections when merged periods change
-  useMemo(() => {
-    if (mergedPeriods.length > 0 && selectedPeriodIds.size === 0) {
+  // Initialize selections when merged periods change.
+  // Uses the "adjust state during render" pattern instead of useMemo with setState.
+  const [prevMergedPeriods, setPrevMergedPeriods] = useState(mergedPeriods);
+  if (prevMergedPeriods !== mergedPeriods) {
+    setPrevMergedPeriods(mergedPeriods);
+    if (mergedPeriods.length > 0) {
       // Select all periods by default
       setSelectedPeriodIds(new Set(mergedPeriods.map(p => p.id)));
       // Set optimal method for each period
@@ -231,7 +233,7 @@ export function QuantityEstimator({
       }
       setPeriodMethods(methods);
     }
-  }, [mergedPeriods, selectedPeriodIds.size]);
+  }
 
   // Calculate selected weeks based on user's period selection and method choices
   const selectedWeeks = useMemo(() => {
@@ -261,13 +263,6 @@ export function QuantityEstimator({
       }
       return next;
     });
-  };
-
-  const togglePeriodMethod = (periodId: string) => {
-    setPeriodMethods(prev => ({
-      ...prev,
-      [periodId]: prev[periodId] === 'transplant' ? 'direct' : 'transplant',
-    }));
   };
 
   const estimate = useMemo(() => {

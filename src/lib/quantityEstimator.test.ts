@@ -474,7 +474,7 @@ describe('YIELD_DEFAULTS', () => {
 describe('CROP_CATEGORY_MAP', () => {
   it('maps to valid YieldCategory values', () => {
     const validCategories = Object.keys(YIELD_DEFAULTS);
-    for (const [crop, category] of Object.entries(CROP_CATEGORY_MAP)) {
+    for (const [, category] of Object.entries(CROP_CATEGORY_MAP)) {
       expect(validCategories).toContain(category);
     }
   });

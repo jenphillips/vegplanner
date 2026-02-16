@@ -568,9 +568,6 @@ describe('Example 5: Lettuce Little Gem (frost-tolerant, heat-sensitive)', () =>
     // With 1-day increments, the algorithm can now find fall windows
     // that were previously missed with 7-day jumps.
     // Lettuce has 50-day maturity - a narrow but viable fall window may exist
-    const fallWindows = result.windows.filter((w) =>
-      w.sowDate.startsWith('2025-08') || w.sowDate.startsWith('2025-09')
-    );
     // Fall window may or may not exist depending on exact temperature cutoffs
     // Just verify we have windows overall (spring at minimum)
     expect(result.windows.length).toBeGreaterThan(0);

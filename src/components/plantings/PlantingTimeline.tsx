@@ -394,7 +394,9 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     hitMinBoundRef.current = false;
   }, [canDragTransplantShift]);
 
-  // Use refs to access latest values in event handlers without re-attaching listeners
+  // Use refs to access latest values in event handlers without re-attaching listeners.
+  // The ref-current-update pattern is correct here — the React Compiler can't verify it's safe
+  // but this is the standard way to keep stable event handlers that read fresh values.
   const dragStateRef = useRef({ dragType, dragStartX, dragSowDate, shiftDays });
   dragStateRef.current = { dragType, dragStartX, dragSowDate, shiftDays };
 
@@ -453,11 +455,14 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     };
   }, [isDragging, planting.id]);
 
-  // Reset shiftDays when planting data changes (after drag commit)
+  // Reset shiftDays when planting data changes (after drag commit).
+  // isDragging and shiftDays are intentionally excluded: including shiftDays would loop,
+  // and isDragging would cause unwanted resets on drag start/stop.
   useEffect(() => {
     if (!isDragging && shiftDays !== 0) {
       setShiftDays(0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planting.sowDate, planting.harvestStart, planting.harvestEnd]);
 
   // Static timeline elements (don't change during drag)
