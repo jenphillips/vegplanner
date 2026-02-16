@@ -22,8 +22,6 @@ type PlantingTimelineProps = {
   onShiftPlanting?: (id: string, shiftDays: number) => void;
   /** Called when user tries to drag past the minimum bound due to succession overlap */
   onDragConstraintHit?: () => void;
-  /** Called when any drag interaction ends (mouse up), regardless of whether a shift was committed */
-  onDragEnd?: () => void;
   /** Optional selected date to show as a vertical indicator line (for layout calendar view) */
   selectedDate?: string;
 };
@@ -34,7 +32,7 @@ const addDays = (iso: string, days: number) => {
   return d.toISOString().slice(0, 10);
 };
 
-export function PlantingTimeline({ planting, frost, climate, cultivar, previousHarvestEnd, onUpdateSowDate, onShiftPlanting, onDragConstraintHit, onDragEnd, selectedDate }: PlantingTimelineProps) {
+export function PlantingTimeline({ planting, frost, climate, cultivar, previousHarvestEnd, onUpdateSowDate, onShiftPlanting, onDragConstraintHit, selectedDate }: PlantingTimelineProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragSowDate, setDragSowDate] = useState<string | null>(null);
@@ -400,8 +398,8 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
   const dragStateRef = useRef({ dragType, dragStartX, dragSowDate, shiftDays });
   dragStateRef.current = { dragType, dragStartX, dragSowDate, shiftDays };
 
-  const callbacksRef = useRef({ onUpdateSowDate, onShiftPlanting, calculateNewHarvest, pixelToDate, pixelToDays, onDragConstraintHit, onDragEnd });
-  callbacksRef.current = { onUpdateSowDate, onShiftPlanting, calculateNewHarvest, pixelToDate, pixelToDays, onDragConstraintHit, onDragEnd };
+  const callbacksRef = useRef({ onUpdateSowDate, onShiftPlanting, calculateNewHarvest, pixelToDate, pixelToDays, onDragConstraintHit });
+  callbacksRef.current = { onUpdateSowDate, onShiftPlanting, calculateNewHarvest, pixelToDate, pixelToDays, onDragConstraintHit };
 
   // Use document-level mouse events for smooth dragging
   useEffect(() => {
@@ -423,7 +421,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
 
     const handleMouseUp = () => {
       const { dragType, dragSowDate, shiftDays } = dragStateRef.current;
-      const { onUpdateSowDate, onShiftPlanting, calculateNewHarvest, onDragEnd } = callbacksRef.current;
+      const { onUpdateSowDate, onShiftPlanting, calculateNewHarvest } = callbacksRef.current;
 
       if (dragType === 'transplant' && dragSowDate && onUpdateSowDate) {
         const newHarvest = calculateNewHarvest(dragSowDate);
@@ -435,7 +433,6 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
       }
 
       hitMinBoundRef.current = false;
-      onDragEnd?.();
 
       // Reset drag state but keep shiftDays momentarily to prevent flash
       // The shiftDays will be reset when planting data updates

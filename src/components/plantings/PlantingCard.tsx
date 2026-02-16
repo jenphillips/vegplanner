@@ -172,10 +172,6 @@ export function PlantingCard({
     setDragNotice("Can\u2019t move earlier \u2014 harvest would overlap previous planting");
   };
 
-  const handleDragEnd = () => {
-    setDragNotice(null);
-  };
-
   // Detect if a method change caused plantings to reorder.
   // The ref guard ensures this only fires after an explicit method toggle action,
   // not on every successionNumber change.
@@ -225,7 +221,6 @@ export function PlantingCard({
           onUpdateSowDate={disableDrag ? undefined : handleSowDateUpdate}
           onShiftPlanting={disableDrag ? undefined : handleShiftPlanting}
           onDragConstraintHit={handleDragConstraintHit}
-          onDragEnd={handleDragEnd}
           selectedDate={selectedDate}
         />
         <div className={styles.methodToggleSlot}>

@@ -709,68 +709,6 @@ describe('PlantingTimeline', () => {
   });
 
   describe('drag callbacks', () => {
-    it('calls onDragEnd on mouseup after a direct sow drag', () => {
-      const onDragEnd = vi.fn();
-      const { container } = render(
-        <PlantingTimeline
-          planting={createPlanting({ method: 'direct' })}
-          frost={createFrostWindow()}
-          onShiftPlanting={vi.fn()}
-          onDragEnd={onDragEnd}
-        />
-      );
-
-      const growingBar = container.querySelector('[class*="barGrowing"]');
-
-      fireEvent.mouseDown(growingBar!, { clientX: 100 });
-      fireEvent.mouseMove(document, { clientX: 200 });
-      fireEvent.mouseUp(document);
-
-      expect(onDragEnd).toHaveBeenCalledOnce();
-    });
-
-    it('calls onDragEnd even when drag has no shift (no-op drag)', () => {
-      const onDragEnd = vi.fn();
-      const { container } = render(
-        <PlantingTimeline
-          planting={createPlanting({ method: 'direct' })}
-          frost={createFrostWindow()}
-          onShiftPlanting={vi.fn()}
-          onDragEnd={onDragEnd}
-        />
-      );
-
-      const growingBar = container.querySelector('[class*="barGrowing"]');
-
-      // Click without moving
-      fireEvent.mouseDown(growingBar!, { clientX: 100 });
-      fireEvent.mouseUp(document);
-
-      expect(onDragEnd).toHaveBeenCalledOnce();
-    });
-
-    it('calls onDragEnd on mouseup for either crop transplant shift drag', () => {
-      const onDragEnd = vi.fn();
-      const planting = createTransplantPlanting({ cultivarId: 'either-cultivar' });
-      const { container } = render(
-        <PlantingTimeline
-          planting={planting}
-          frost={createFrostWindow()}
-          cultivar={createEitherCultivar()}
-          onShiftPlanting={vi.fn()}
-          onDragEnd={onDragEnd}
-        />
-      );
-
-      const growingBar = container.querySelector('[class*="barGrowing"]');
-
-      fireEvent.mouseDown(growingBar!, { clientX: 100 });
-      fireEvent.mouseMove(document, { clientX: 200 });
-      fireEvent.mouseUp(document);
-
-      expect(onDragEnd).toHaveBeenCalledOnce();
-    });
-
     it('calls onDragConstraintHit when dragging past succession bound', () => {
       const onDragConstraintHit = vi.fn();
       const planting = createPlanting({
