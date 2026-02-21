@@ -546,6 +546,15 @@ export const CROP_CATEGORY_MAP: Record<string, YieldCategory> = {
   'Lemongrass': 'herb',
   'Stevia': 'herb',
 
+  // Other
+  'Sweet Corn': 'bean_pole',
+  'Sweet Potato': 'squash_winter',
+  'Collard Greens': 'greens_cooking',
+  'Okra': 'pepper_small',
+  'Celery': 'greens_head',
+  'Celeriac': 'root_large',
+  'Fennel (Bulbing)': 'root_large',
+
   // Flowers
   'Zinnia': 'flower',
   'Cosmos': 'flower',

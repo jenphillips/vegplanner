@@ -27,18 +27,18 @@ See `docs/cultivar-library-scaling.md` for the overall strategy.
 | Melons | — | 5 | done | Sugar Baby + Crimson Sweet watermelon, Hale's Best Jumbo + Minnesota Midget cantaloupe, Green Flesh honeydew |
 | Perennials/Other | — | 7 | done | Asparagus, strawberry ported; Good King Henry, lovage, horseradish, rhubarb (Victoria + Canada Red) added |
 | Flowers | — | 2 | done | Benary's Giant zinnia, Double Click cosmos ported |
-| Swiss Chard | 3-4 | 0 | pending | Bright Lights, Fordhook Giant, Ruby Red, etc. |
-| Potatoes | 4-6 | 0 | pending | Early (Yukon Gold), mid (Kennebec, Red Pontiac), late (Russet Burbank). Baselines exist; planted from tubers |
-| Sweet Corn | 3-4 | 0 | pending | Silver Queen, Peaches and Cream, etc. Space-intensive |
-| Sweet Potatoes | 2-3 | 0 | pending | Beauregard, Covington, Georgia Jet. Grown from slips |
-| Collard Greens | 2-3 | 0 | pending | Georgia Southern, Vates, Champion |
-| Okra | 2-3 | 0 | pending | Clemson Spineless, Burgundy. Southern staple |
-| Celery/Celeriac | 2-3 | 0 | pending | Tall Utah celery, Brilliant celeriac |
-| Fennel (Bulbing) | 1-2 | 0 | pending | Orion, Finale. Florence/bulbing type (not herb fennel) |
-| Sprouting Broccoli/Broccolini | 2-3 | 0 | pending | Purple Sprouting, Aspabroc broccolini. Baselines exist |
+| Swiss Chard | 3-4 | 4 | done | Bright Lights, Fordhook Giant, Ruby Red, Peppermint |
+| Potatoes | 4-6 | 5 | done | 3 early (Yukon Gold, Red Pontiac, Red Norland) + 1 mid (Kennebec) + 1 late (Russet Burbank). Planted from tubers |
+| Sweet Corn | 3-4 | 3 | done | Peaches and Cream, Golden Bantam, Silver Queen |
+| Sweet Potatoes | 2-3 | 3 | done | Beauregard, Covington, Georgia Jet. Grown from slips |
+| Collard Greens | 2-3 | 3 | done | Georgia Southern, Vates, Champion |
+| Okra | 2-3 | 2 | done | Clemson Spineless, Burgundy |
+| Celery/Celeriac | 2-3 | 3 | done | Tall Utah 52-70 + Tango celery, Brilliant celeriac |
+| Fennel (Bulbing) | 1-2 | 2 | done | Orion, Finale |
+| Sprouting Broccoli/Broccolini | 2-3 | 3 | done | Purple Sprouting + Early Purple Sprouting, Aspabroc broccolini |
 
 **Total target: ~200 varieties**
-**Completed: 220** (203 new + 17 ported from vegplanner.json)
+**Completed: 248** (231 new + 17 ported from vegplanner.json)
 
 ## Varieties ported from vegplanner.json (now in cultivar-library.json)
 
