@@ -444,6 +444,7 @@ export const CROP_CATEGORY_MAP: Record<string, YieldCategory> = {
   'Cucumber': 'cucumber',
   'Cucumber (Slicing)': 'cucumber',
   'Cucumber (Pickling)': 'cucumber',
+  'Cucamelon': 'cucumber',
   'Eggplant': 'cucumber', // Similar yield profile
   'Summer Squash': 'squash_summer',
   'Zucchini': 'squash_summer',
@@ -471,6 +472,7 @@ export const CROP_CATEGORY_MAP: Record<string, YieldCategory> = {
   'Lettuce (Romaine)': 'greens_head',
   'Lettuce (Butterhead)': 'greens_head',
   'Lettuce (Head)': 'greens_head',
+  'Lettuce (Batavian)': 'greens_head',
   'Baby Lettuce': 'greens_baby',
   'Mesclun': 'greens_baby',
   'Spinach': 'greens_cooking',
@@ -483,6 +485,13 @@ export const CROP_CATEGORY_MAP: Record<string, YieldCategory> = {
   'Swiss Chard': 'greens_cooking',
   'Kale': 'greens_cooking',
   'Collards': 'greens_cooking',
+  'Mizuna': 'greens_leaf',
+  'Mâche': 'greens_baby',
+  'Miner\'s Lettuce': 'greens_leaf',
+  'New Zealand Spinach': 'greens_cooking',
+  'Callaloo': 'greens_cooking',
+  'Good King Henry': 'greens_cooking',
+  'Lovage': 'herb',
 
   // Root vegetables - distinguish by size
   'Carrot': 'root_small',
@@ -525,6 +534,17 @@ export const CROP_CATEGORY_MAP: Record<string, YieldCategory> = {
   'Rosemary': 'herb',
   'Mint': 'herb',
   'Chives': 'herb',
+  'Sweet Marjoram': 'herb',
+  'Summer Savory': 'herb',
+  'Winter Savory': 'herb',
+  'Lemon Balm': 'herb',
+  'Tarragon': 'herb',
+  'Chervil': 'herb',
+  'Chamomile': 'herb',
+  'Sorrel': 'herb',
+  'Shiso': 'herb',
+  'Lemongrass': 'herb',
+  'Stevia': 'herb',
 
   // Flowers
   'Zinnia': 'flower',
