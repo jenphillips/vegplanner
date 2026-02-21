@@ -772,7 +772,7 @@ export function getPreservationLabel(plan: PreservationPlan): string {
   switch (plan) {
     case 'none': return 'Fresh only';
     case 'some': return 'Some (few jars)';
-    case 'moderate': return 'Moderate (freezing/canning)';
-    case 'heavy': return 'Heavy (stocking pantry)';
+    case 'moderate': return 'Moderate (freezing, canning, or root cellar)';
+    case 'heavy': return 'Heavy (stocking pantry for winter)';
   }
 }

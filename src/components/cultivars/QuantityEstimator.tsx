@@ -211,7 +211,7 @@ export function QuantityEstimator({
 
   // Initialize selections when merged periods change.
   // Uses the "adjust state during render" pattern instead of useMemo with setState.
-  const [prevMergedPeriods, setPrevMergedPeriods] = useState(mergedPeriods);
+  const [prevMergedPeriods, setPrevMergedPeriods] = useState<MergedPeriod[] | null>(null);
   if (prevMergedPeriods !== mergedPeriods) {
     setPrevMergedPeriods(mergedPeriods);
     if (mergedPeriods.length > 0) {
@@ -280,13 +280,20 @@ export function QuantityEstimator({
   const yieldCategory = getYieldCategory(cultivar);
   const yieldData = YIELD_DEFAULTS[yieldCategory];
 
+  const PORTION_STOPS = [
+    { value: 0.5, label: 'Small' },
+    { value: 0.75, label: 'Light' },
+    { value: 1.0, label: 'Normal' },
+    { value: 1.5, label: 'Generous' },
+    { value: 2.0, label: 'Large' },
+  ];
+
   // Get serving size label with actual quantity
   const getServingSizeLabel = (value: number): string => {
-    if (value <= 0.6) return 'Small';
-    if (value <= 0.9) return 'Light';
-    if (value <= 1.1) return 'Normal';
-    if (value <= 1.5) return 'Generous';
-    return 'Large';
+    const stop = PORTION_STOPS.reduce((closest, s) =>
+      Math.abs(s.value - value) < Math.abs(closest.value - value) ? s : closest
+    );
+    return stop.label;
   };
 
   // Get the scaled serving description with dynamic count
@@ -391,7 +398,7 @@ export function QuantityEstimator({
 
         {/* Preservation plans */}
         <div className={styles.field}>
-          <label>Do you plan to can, freeze, or preserve any?</label>
+          <label>Do you plan to preserve or store any?</label>
           <div className={styles.radioGroup}>
             {PRESERVATION_OPTIONS.map((opt) => (
               <label key={opt} className={styles.radioOption}>
@@ -411,17 +418,30 @@ export function QuantityEstimator({
         {/* Serving size adjustment */}
         <div className={styles.field}>
           <label>How big are your typical portions?</label>
-          <div className={styles.sliderRow}>
+          <div className={styles.sliderContainer}>
             <input
               type="range"
-              min="0.5"
-              max="2"
-              step="0.1"
-              value={servingSize}
-              onChange={(e) => setServingSize(parseFloat(e.target.value))}
+              min={0}
+              max={PORTION_STOPS.length - 1}
+              step={1}
+              value={PORTION_STOPS.reduce((closest, s, i) =>
+                Math.abs(s.value - servingSize) < Math.abs(PORTION_STOPS[closest].value - servingSize) ? i : closest, 0
+              )}
+              onChange={(e) => setServingSize(PORTION_STOPS[parseInt(e.target.value)].value)}
               className={styles.slider}
             />
-            <span className={styles.sliderValue}>{getServingSizeLabel(servingSize)}</span>
+            <div className={styles.sliderTicks}>
+              {PORTION_STOPS.map((stop) => (
+                <button
+                  key={stop.value}
+                  type="button"
+                  className={`${styles.sliderTick} ${servingSize === stop.value ? styles.sliderTickActive : ''}`}
+                  onClick={() => setServingSize(stop.value)}
+                >
+                  {stop.label}
+                </button>
+              ))}
+            </div>
           </div>
           <span className={styles.servingHint}>{getScaledServingDescription()}</span>
         </div>
@@ -599,18 +619,22 @@ export function QuantityEstimator({
         <button type="button" onClick={onClose} className={styles.cancelButton}>
           Cancel
         </button>
+        <button type="button" onClick={handleApply} className={
+          selectedWindows.length > 1 && onGenerateSuccessions
+            ? styles.secondaryButton
+            : styles.primaryButton
+        }>
+          Set plants per succession to {estimate.plantsPerSuccession}
+        </button>
         {selectedWindows.length > 1 && onGenerateSuccessions && (
           <button
             type="button"
             onClick={handleGenerateSuccessions}
-            className={styles.generateButton}
+            className={styles.primaryButton}
           >
             Generate {selectedWindows.length} plantings
           </button>
         )}
-        <button type="button" onClick={handleApply} className={styles.applyButton}>
-          Use {estimate.plantsPerSuccession} plants
-        </button>
       </div>
     </div>
   );
