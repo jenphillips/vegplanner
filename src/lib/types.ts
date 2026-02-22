@@ -8,7 +8,7 @@ export type SowMethod = 'direct' | 'transplant' | 'either';
 export type MaturityBasis = 'from_sow' | 'from_transplant';
 export type Season = 'spring' | 'fall';
 export type HarvestStyle = 'single' | 'continuous';
-export type PlantType = 'vegetable' | 'flower';
+export type PlantType = 'vegetable' | 'herb' | 'flower';
 
 // Yield categories for quantity estimation (more granular for accuracy)
 export type YieldCategory =

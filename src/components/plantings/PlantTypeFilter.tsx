@@ -2,7 +2,7 @@
 
 import styles from './PlantTypeFilter.module.css';
 
-export type PlantTypeFilterValue = 'all' | 'vegetable' | 'flower';
+export type PlantTypeFilterValue = 'all' | 'vegetable' | 'herb' | 'flower';
 
 type PlantTypeFilterProps = {
   value: PlantTypeFilterValue;
@@ -25,6 +25,13 @@ export function PlantTypeFilter({ value, onChange }: PlantTypeFilterProps) {
         onClick={() => onChange('vegetable')}
       >
         Vegetables
+      </button>
+      <button
+        type="button"
+        className={`${styles.option} ${value === 'herb' ? styles.active : ''}`}
+        onClick={() => onChange('herb')}
+      >
+        Herbs
       </button>
       <button
         type="button"

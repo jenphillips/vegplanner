@@ -96,6 +96,10 @@ export default function Home() {
     return plannedCultivars.filter((c) => c.plantType === 'vegetable');
   }, [plannedCultivars]);
 
+  const herbCultivars = useMemo(() => {
+    return plannedCultivars.filter((c) => c.plantType === 'herb');
+  }, [plannedCultivars]);
+
   const flowerCultivars = useMemo(() => {
     return plannedCultivars.filter((c) => c.plantType === 'flower');
   }, [plannedCultivars]);
@@ -248,6 +252,45 @@ export default function Home() {
 
             {/* Seasonal Planting Reference (Baseline Vegetables) */}
             <BaselineTimeline frost={data.frost} climate={data.climate} />
+          </>
+        )}
+
+        {/* Herbs Tab: Herb Cultivar Cards with Planting Management */}
+        {ready && activeTab === 'herbs' && (
+          <>
+            <section className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <h2 className={styles.sectionTitle}>Herb Cultivars & Plantings</h2>
+                  <p className={styles.sectionDesc}>
+                    Click a cultivar to expand and manage succession plantings for
+                    fresh herbs throughout the season.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setExpandAll(!expandAll)}
+                  className={styles.expandButton}
+                >
+                  {expandAll ? 'Collapse All' : 'Expand All'}
+                </button>
+              </div>
+              <div className={styles.cultivarGrid}>
+                {herbCultivars.map((cultivar) => (
+                  <CultivarCard
+                    key={cultivar.id}
+                    cultivar={cultivar}
+                    frost={data.frost}
+                    climate={data.climate}
+                    plantings={plantings}
+                    onAddPlanting={handleAddPlanting}
+                    onAddMultiplePlantings={handleAddMultiplePlantings}
+                    onUpdatePlanting={handleUpdatePlanting}
+                    onDeletePlanting={handleDeletePlanting}
+                    forceExpanded={expandAll}
+                  />
+                ))}
+              </div>
+            </section>
           </>
         )}
 
