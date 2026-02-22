@@ -400,6 +400,92 @@ export const YIELD_DEFAULTS: Record<YieldCategory, {
     yieldDescription: '~30 leaves/plant',
     description: 'Kale, collards - ongoing harvest',
   },
+  // Nightshades & fruiting
+  eggplant: {
+    yieldPerPlantKg: 3,      // 6-12 fruits at ~250-500g each
+    servingSizeKg: 0.1,      // Quarter of an eggplant
+    servingCountBase: 0.25,
+    servingUnit: 'eggplant',
+    servingDescription: 'quarter eggplant',
+    yieldDescription: '~6-12 fruits/plant',
+    description: 'Eggplant, continuous harvest',
+  },
+  // Melons
+  melon: {
+    yieldPerPlantKg: 5,      // 2-4 fruits, variable size
+    servingSizeKg: 0.25,     // 1 wedge/slice
+    servingCountBase: 1,
+    servingUnit: 'wedge',
+    servingDescription: '1 wedge',
+    yieldDescription: '~2-4 fruits/plant',
+    description: 'Cantaloupe, honeydew, watermelon',
+  },
+  // Grain & stalks
+  corn: {
+    yieldPerPlantKg: 0.4,    // 1-2 ears at ~200g each
+    servingSizeKg: 0.2,      // 1 ear
+    servingCountBase: 1,
+    servingUnit: 'ear',
+    servingDescription: '1 ear of corn',
+    yieldDescription: '1-2 ears/plant',
+    description: 'Sweet corn - plant in blocks for pollination',
+  },
+  celery: {
+    yieldPerPlantKg: 0.8,    // 1 bunch
+    servingSizeKg: 0.1,      // 2-3 stalks
+    servingCountBase: 3,
+    servingUnit: 'stalks',
+    servingDescription: '2-3 stalks',
+    yieldDescription: '1 bunch/plant',
+    description: 'Celery - single harvest',
+  },
+  okra: {
+    yieldPerPlantKg: 0.8,    // Many small pods over long season
+    servingSizeKg: 0.08,     // 6-8 pods
+    servingCountBase: 8,
+    servingUnit: 'pods',
+    servingDescription: '6-8 pods',
+    yieldDescription: '~50-60 pods/plant',
+    description: 'Okra - pick pods young and often',
+  },
+  // Tubers
+  potato: {
+    yieldPerPlantKg: 2,      // 8-10 tubers
+    servingSizeKg: 0.2,      // 1-2 potatoes
+    servingCountBase: 2,
+    servingUnit: 'potatoes',
+    servingDescription: '1-2 potatoes',
+    yieldDescription: '~8-10 tubers/plant',
+    description: 'Potatoes, sweet potatoes',
+  },
+  // Perennial fruit & vegetables
+  strawberry: {
+    yieldPerPlantKg: 0.4,    // 25-30 berries
+    servingSizeKg: 0.1,      // ~6 berries
+    servingCountBase: 6,
+    servingUnit: 'berries',
+    servingDescription: '~6 berries',
+    yieldDescription: '~25-30 berries/plant',
+    description: 'Strawberries - June-bearing or day-neutral',
+  },
+  asparagus: {
+    yieldPerPlantKg: 0.3,    // ~20 spears (established plant)
+    servingSizeKg: 0.1,      // ~6 spears
+    servingCountBase: 6,
+    servingUnit: 'spears',
+    servingDescription: '~6 spears',
+    yieldDescription: '~20 spears/plant (established)',
+    description: 'Asparagus - perennial, harvest spring only',
+  },
+  rhubarb: {
+    yieldPerPlantKg: 1.5,    // 8-10 stalks
+    servingSizeKg: 0.2,      // 2-3 stalks
+    servingCountBase: 3,
+    servingUnit: 'stalks',
+    servingDescription: '2-3 stalks',
+    yieldDescription: '~8-10 stalks/plant',
+    description: 'Rhubarb - perennial, harvest spring/early summer',
+  },
   // Other
   herb: {
     yieldPerPlantKg: 0.1,
@@ -423,20 +509,20 @@ export const YIELD_DEFAULTS: Record<YieldCategory, {
 
 // Map crop names to yield categories
 export const CROP_CATEGORY_MAP: Record<string, YieldCategory> = {
-  // Tomatoes - distinguish by growth habit
+  // Tomatoes - distinguish by fruit type
   'Tomato': 'tomato_indeterminate',
+  'Tomato (Beefsteak)': 'tomato_indeterminate',
+  'Tomato (Slicer)': 'tomato_determinate',
+  'Tomato (Paste)': 'tomato_determinate',
+  'Tomato (Cherry)': 'tomato_cherry',
   'Tomato (Indeterminate)': 'tomato_indeterminate',
   'Tomato (Determinate)': 'tomato_determinate',
-  'Cherry Tomato': 'tomato_cherry',
-  'Grape Tomato': 'tomato_cherry',
 
   // Peppers - distinguish by size
   'Pepper': 'pepper_large',
-  'Bell Pepper': 'pepper_large',
-  'Sweet Pepper': 'pepper_large',
-  'Jalapeño': 'pepper_small',
-  'Jalapeño Pepper': 'pepper_small',
-  'Hot Pepper': 'pepper_small',
+  'Pepper (Bell)': 'pepper_large',
+  'Pepper (Sweet)': 'pepper_large',
+  'Pepper (Hot)': 'pepper_small',
   'Cayenne': 'pepper_small',
   'Habanero': 'pepper_small',
 
@@ -445,26 +531,25 @@ export const CROP_CATEGORY_MAP: Record<string, YieldCategory> = {
   'Cucumber (Slicing)': 'cucumber',
   'Cucumber (Pickling)': 'cucumber',
   'Cucamelon': 'cucumber',
-  'Eggplant': 'cucumber', // Similar yield profile
-  'Summer Squash': 'squash_summer',
+  'Eggplant': 'eggplant',
+  'Squash (Summer)': 'squash_summer',
   'Zucchini': 'squash_summer',
   'Yellow Squash': 'squash_summer',
-  'Winter Squash': 'squash_winter',
+  'Squash (Winter)': 'squash_winter',
   'Butternut': 'squash_winter',
-  'Acorn Squash': 'squash_winter',
-  'Spaghetti Squash': 'squash_winter',
+  'Squash (Acorn)': 'squash_winter',
+  'Squash (Spaghetti)': 'squash_winter',
   'Pumpkin': 'squash_winter',
 
   // Legumes - distinguish by growth habit
   'Bean': 'bean_bush',
-  'Bean, Bush': 'bean_bush',
-  'Bush Bean': 'bean_bush',
-  'Pole Bean': 'bean_pole',
-  'Runner Bean': 'bean_pole',
+  'Bean (Bush)': 'bean_bush',
+  'Bean (Pole)': 'bean_pole',
+  'Bean (Runner)': 'bean_pole',
   'Pea': 'pea',
-  'Shelling Pea': 'pea',
-  'Sugar Snap Pea': 'pea',
-  'Snow Pea': 'pea',
+  'Pea (Shelling)': 'pea',
+  'Pea (Sugar Snap)': 'pea',
+  'Pea (Snow)': 'pea',
 
   // Leafy greens - distinguish by harvest style
   'Lettuce': 'greens_leaf',
@@ -496,17 +581,21 @@ export const CROP_CATEGORY_MAP: Record<string, YieldCategory> = {
   // Root vegetables - distinguish by size
   'Carrot': 'root_small',
   'Radish': 'root_small',
+  'Radish (Winter)': 'root_large',
   'Beet': 'root_large',
   'Turnip': 'root_large',
+  'Rutabaga': 'root_large',
   'Parsnip': 'root_large',
-  'Potato': 'root_large',
-  'Potato (Early)': 'root_large',
-  'Potato (Mid-Season)': 'root_large',
-  'Potato (Late)': 'root_large',
+  'Horseradish': 'root_large',
+  'Potato': 'potato',
+  'Potato (Early)': 'potato',
+  'Potato (Mid-Season)': 'potato',
+  'Potato (Late)': 'potato',
+  'Sweet Potato': 'potato',
 
   // Brassicas
   'Broccoli': 'brassica_head',
-  'Sprouting Broccoli': 'brassica_leafy',
+  'Broccoli (Sprouting)': 'brassica_leafy',
   'Broccolini': 'brassica_leafy',
   'Cabbage': 'brassica_head',
   'Cauliflower': 'brassica_head',
@@ -535,8 +624,8 @@ export const CROP_CATEGORY_MAP: Record<string, YieldCategory> = {
   'Mint': 'herb',
   'Chives': 'herb',
   'Sweet Marjoram': 'herb',
-  'Summer Savory': 'herb',
-  'Winter Savory': 'herb',
+  'Savory (Summer)': 'herb',
+  'Savory (Winter)': 'herb',
   'Lemon Balm': 'herb',
   'Tarragon': 'herb',
   'Chervil': 'herb',
@@ -546,14 +635,30 @@ export const CROP_CATEGORY_MAP: Record<string, YieldCategory> = {
   'Lemongrass': 'herb',
   'Stevia': 'herb',
 
+  // Melons
+  'Cantaloupe': 'melon',
+  'Honeydew': 'melon',
+  'Watermelon': 'melon',
+  'Melon': 'melon',
+
+  // Tubers (potatoes in Root section above)
+
+  // Perennials
+  'Asparagus': 'asparagus',
+  'Rhubarb': 'rhubarb',
+  'Strawberry': 'strawberry',
+
   // Other
-  'Sweet Corn': 'bean_pole',
-  'Sweet Potato': 'squash_winter',
+  'Corn (Sweet)': 'corn',
   'Collard Greens': 'greens_cooking',
-  'Okra': 'pepper_small',
-  'Celery': 'greens_head',
+  'Okra': 'okra',
+  'Celery': 'celery',
   'Celeriac': 'root_large',
   'Fennel (Bulbing)': 'root_large',
+  'Tomatillo': 'tomato_determinate',
+  'Ground Cherry': 'tomato_cherry',
+  'Garlic (Hardneck)': 'allium_bulb',
+  'Garlic (Softneck)': 'allium_bulb',
 
   // Flowers
   'Zinnia': 'flower',

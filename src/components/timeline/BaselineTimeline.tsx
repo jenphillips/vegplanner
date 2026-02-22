@@ -48,33 +48,12 @@ const tempColor = (celsius: number) => {
   return lerpColor('e2f5ff', '6aa1d8', t);
 };
 
-// Format crop name: "Pole Bean" -> "Bean - Pole", "Tomato (Determinate)" -> "Tomato - Determinate"
+// Format crop name: "Bean (Pole)" -> "Bean - Pole", "Tomato (Determinate)" -> "Tomato - Determinate"
 const formatCropLabel = (crop: string): string => {
   // Handle parenthetical variants: "Tomato (Determinate)" -> "Tomato - Determinate"
   const parenMatch = crop.match(/^(.+?)\s*\((.+?)\)$/);
   if (parenMatch) {
     return `${parenMatch[1]} - ${parenMatch[2]}`;
-  }
-
-  // Handle prefix variants: "Pole Bean" -> "Bean - Pole", "Bush Bean" -> "Bean - Bush"
-  const prefixPatterns = [
-    { prefix: 'Pole ', base: 'Bean' },
-    { prefix: 'Bush ', base: 'Bean' },
-    { prefix: 'Shelling ', base: 'Pea' },
-    { prefix: 'Sugar Snap ', base: 'Pea' },
-    { prefix: 'Snow ', base: 'Pea' },
-    { prefix: 'Winter ', base: 'Squash' },
-    { prefix: 'Summer ', base: 'Squash' },
-    { prefix: 'Bell ', base: 'Pepper' },
-    { prefix: 'Jalapeño ', base: 'Pepper' },
-    { prefix: 'Sprouting ', base: 'Broccoli' },
-  ];
-
-  for (const { prefix, base } of prefixPatterns) {
-    if (crop.startsWith(prefix) && crop.includes(base)) {
-      const variant = prefix.trim();
-      return `${base} - ${variant}`;
-    }
   }
 
   return crop;

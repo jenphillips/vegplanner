@@ -72,8 +72,8 @@ describe('getYieldCategory', () => {
       ['Broccoli', 'brassica_head'],
       ['Basil', 'herb'],
       ['Zinnia', 'flower'],
-      ['Bush Bean', 'bean_bush'],
-      ['Pole Bean', 'bean_pole'],
+      ['Bean (Bush)', 'bean_bush'],
+      ['Bean (Pole)', 'bean_pole'],
       ['Lettuce (Romaine)', 'greens_head'],
       ['Lettuce', 'greens_leaf'],
     ];
@@ -443,6 +443,8 @@ describe('YIELD_DEFAULTS', () => {
       'root_large', 'root_small',
       'allium_bulb', 'allium_green',
       'brassica_head', 'brassica_leafy',
+      'eggplant', 'melon', 'corn', 'celery', 'okra',
+      'potato', 'strawberry', 'asparagus', 'rhubarb',
       'herb', 'flower',
     ];
     for (const cat of categories) {

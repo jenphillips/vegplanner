@@ -41,6 +41,20 @@ export type YieldCategory =
   // Brassicas
   | 'brassica_head'         // Broccoli, cauliflower - 0.4-0.6 kg/plant
   | 'brassica_leafy'        // Kale, collards - 0.3-0.5 kg/plant
+  // Nightshades & fruiting
+  | 'eggplant'              // Eggplant - 3 kg/plant, 6-12 fruits
+  // Melons
+  | 'melon'                 // Cantaloupe, honeydew, watermelon - 5 kg/plant, 2-4 fruits
+  // Grain & stalks
+  | 'corn'                  // Sweet corn - 0.4 kg/plant, 1-2 ears
+  | 'celery'                // Celery - 0.8 kg/plant, 1 bunch
+  | 'okra'                  // Okra - 0.8 kg/plant, ~50 pods
+  // Tubers
+  | 'potato'                // Potatoes, sweet potatoes - 2 kg/plant, 8-10 tubers
+  // Perennial fruit & vegetables
+  | 'strawberry'            // Strawberry - 0.4 kg/plant, 25-30 berries
+  | 'asparagus'             // Asparagus - 0.3 kg/plant, ~20 spears (established)
+  | 'rhubarb'               // Rhubarb - 1.5 kg/plant, 8-10 stalks
   // Other
   | 'herb'                  // Fresh herbs - 0.1 kg/plant
   | 'flower';               // Cut flowers (count-based)

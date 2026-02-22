@@ -322,7 +322,7 @@ describe('getCropColor', () => {
   it('returns different shades for different crops in same family', () => {
     // Different crops should get potentially different shades based on hash
     const tomatoColor = getCropColor('Solanaceae', 'Tomato');
-    const pepperColor = getCropColor('Solanaceae', 'Bell Pepper');
+    const pepperColor = getCropColor('Solanaceae', 'Pepper (Bell)');
     // Both should be in Solanaceae red shades
     expect(['#c0392b', '#e74c3c', '#ec7063']).toContain(tomatoColor);
     expect(['#c0392b', '#e74c3c', '#ec7063']).toContain(pepperColor);

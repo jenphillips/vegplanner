@@ -13,7 +13,7 @@ See `docs/cultivar-library-scaling.md` for the overall strategy.
 | Lettuce | 10-12 | 11 | done | 3 romaine, 3 butterhead, 3 loose leaf, 2 batavian |
 | Squash | 10-12 | 11 | done | 5 summer (zucchini, crookneck, pattypan) + 6 winter (butternut, delicata, acorn, spaghetti, kuri, pumpkin) |
 | Cucumbers | 6-8 | 9 | done | 5 slicing + 3 pickling + cucamelon |
-| Peas | 6-8 | 8 | done | 3 shelling (Spring, Green Arrow, Lincoln) + 3 snap (Sugar Snap, Sugar Ann, Super Sugar Snap) + 2 snow (Oregon Sugar Pod II, Mammoth Melting Sugar) |
+| Peas | 6-8 | 8 | done | 3 shelling (Spring, Green Arrow, Lincoln) + 3 sugar snap (Sugar Snap, Sugar Ann, Super Sugar Snap) + 2 snow (Oregon Sugar Pod II, Mammoth Melting Sugar) |
 | Carrots | 4-5 | 5 | done | Tendersweet ported + Scarlet Nantes, Bolero (Nantes), Danvers 126, Chantenay Red Core |
 | Beets | 4-5 | 5 | done | Avalanche ported + Detroit Dark Red, Chioggia, Golden, Cylindra |
 | Radishes | 4-5 | 5 | done | 3 spring (Cherry Belle, French Breakfast, Easter Egg) + 2 winter (Watermelon, Miyashige White daikon) |
@@ -29,13 +29,13 @@ See `docs/cultivar-library-scaling.md` for the overall strategy.
 | Flowers | — | 2 | done | Benary's Giant zinnia, Double Click cosmos ported |
 | Swiss Chard | 3-4 | 4 | done | Bright Lights, Fordhook Giant, Ruby Red, Peppermint |
 | Potatoes | 4-6 | 5 | done | 3 early (Yukon Gold, Red Pontiac, Red Norland) + 1 mid (Kennebec) + 1 late (Russet Burbank). Planted from tubers |
-| Sweet Corn | 3-4 | 3 | done | Peaches and Cream, Golden Bantam, Silver Queen |
+| Corn (Sweet) | 3-4 | 3 | done | Peaches and Cream, Golden Bantam, Silver Queen |
 | Sweet Potatoes | 2-3 | 3 | done | Beauregard, Covington, Georgia Jet. Grown from slips |
 | Collard Greens | 2-3 | 3 | done | Georgia Southern, Vates, Champion |
 | Okra | 2-3 | 2 | done | Clemson Spineless, Burgundy |
 | Celery/Celeriac | 2-3 | 3 | done | Tall Utah 52-70 + Tango celery, Brilliant celeriac |
 | Fennel (Bulbing) | 1-2 | 2 | done | Orion, Finale |
-| Sprouting Broccoli/Broccolini | 2-3 | 3 | done | Purple Sprouting + Early Purple Sprouting, Aspabroc broccolini |
+| Broccoli (Sprouting)/Broccolini | 2-3 | 3 | done | Purple Sprouting + Early Purple Sprouting, Aspabroc broccolini |
 
 **Total target: ~200 varieties**
 **Completed: 248** (231 new + 17 ported from vegplanner.json)
@@ -44,7 +44,7 @@ See `docs/cultivar-library-scaling.md` for the overall strategy.
 
 - Tomato: San Marzano, Sweet Million, Cherry Falls
 - Beet: Avalanche
-- Bush Bean: Provider
+- Bean (Bush): Provider
 - Lettuce (Romaine): Little Gem
 - Spinach: Seaside
 - Gai Lan: Green Pearl
@@ -52,7 +52,7 @@ See `docs/cultivar-library-scaling.md` for the overall strategy.
 - Cucumber (Slicing): Tendergreen Burpless
 - Onion (Bulbing): Frontier
 - Shallot: Ambition
-- Shelling Pea: Spring
+- Pea (Shelling): Spring
 - Asparagus: Guelph Millennium
 - Strawberry: Cavendish
 - Zinnia: Benary's Giant Mix (flower)
