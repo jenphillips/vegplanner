@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import climateData from '@/../data/climate.json';
 import libraryData from '@/../data/cultivar-library.json';
 import baselineData from '@/../data/baseline-cultivars.json';
-import { BaselineTimeline } from '@/components/timeline/BaselineTimeline';
 import { CultivarCard } from '@/components/cultivars/CultivarCard';
 import { TabNav, type Tab } from '@/components/tabs/TabNav';
 import { ScheduleView } from '@/components/schedule/ScheduleView';
@@ -250,8 +249,6 @@ export default function Home() {
               </div>
             </section>
 
-            {/* Seasonal Planting Reference (Baseline Vegetables) */}
-            <BaselineTimeline frost={data.frost} climate={data.climate} />
           </>
         )}
 

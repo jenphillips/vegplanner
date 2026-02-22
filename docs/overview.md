@@ -106,7 +106,6 @@ src/
 │   │   ├── DateScrubberTimeline.tsx     # Date selector for layout view
 │   │   └── LayoutCalendarView.tsx       # Planting timeline in garden
 │   ├── tabs/TabNav.tsx                  # Tab navigation
-│   └── timeline/BaselineTimeline.tsx    # Shared timeline component
 ├── lib/
 │   ├── types.ts              # All TypeScript type definitions
 │   ├── dateUtils.ts          # Date manipulation utilities
