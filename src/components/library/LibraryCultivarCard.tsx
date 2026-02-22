@@ -8,6 +8,8 @@ type LibraryCultivarCardProps = {
   inPlan: boolean;
   onAddToPlan: (cultivarId: string) => void;
   onRemoveFromPlan: (cultivarId: string) => void;
+  showCropName?: boolean;
+  displayName?: string;
 };
 
 export function LibraryCultivarCard({
@@ -15,13 +17,15 @@ export function LibraryCultivarCard({
   inPlan,
   onAddToPlan,
   onRemoveFromPlan,
+  showCropName = true,
+  displayName,
 }: LibraryCultivarCardProps) {
-  const methodLabel =
-    cultivar.sowMethod === 'transplant'
-      ? 'Transplant'
-      : cultivar.sowMethod === 'direct'
-        ? 'Direct sow'
-        : 'Either';
+  const methodLabels =
+    cultivar.sowMethod === 'either'
+      ? ['Direct sow', 'Transplant']
+      : cultivar.sowMethod === 'transplant'
+        ? ['Transplant']
+        : ['Direct sow'];
 
   const tempRange =
     cultivar.minGrowingTempC != null && cultivar.maxGrowingTempC != null
@@ -29,36 +33,30 @@ export function LibraryCultivarCard({
       : null;
 
   return (
-    <div className={`${styles.card} ${inPlan ? styles.inPlan : ''}`}>
-      <div className={styles.header}>
-        <div className={styles.titleRow}>
-          <h3 className={styles.title}>
-            {cultivar.crop} — {cultivar.variety}
-          </h3>
-          {inPlan && <span className={styles.inPlanBadge}>In Plan</span>}
-        </div>
-        <div className={styles.meta}>
-          {cultivar.maturityDays} days from {cultivar.maturityBasis === 'from_transplant' ? 'transplant' : 'sow'}
-          {tempRange && <> · {tempRange}</>}
-        </div>
-        <div className={styles.badges}>
-          <span className={cultivar.sowMethod === 'transplant' ? styles.badgeTransplant : styles.badge}>
-            {methodLabel}
-          </span>
-          {cultivar.harvestStyle === 'continuous' && (
-            <span className={styles.harvestBadge}>Continuous</span>
-          )}
-        </div>
+    <div className={`${styles.row} ${inPlan ? styles.inPlan : ''}`}>
+      <div className={styles.name}>
+        {showCropName && <span className={styles.crop}>{cultivar.crop}</span>}
+        <span className={showCropName ? styles.variety : styles.crop}>{displayName ?? cultivar.variety}</span>
       </div>
-      <div className={styles.footer}>
-        {cultivar.notes && (
-          <p className={styles.notes}>{cultivar.notes}</p>
+      <div className={styles.details}>
+        <span className={styles.detail}>{cultivar.maturityDays}d</span>
+        {methodLabels.map((label) => (
+          <span key={label} className={label === 'Transplant' ? styles.badgeTransplant : styles.badge}>
+            {label}
+          </span>
+        ))}
+        {cultivar.harvestStyle === 'continuous' && (
+          <span className={styles.harvestBadge}>Continuous</span>
         )}
+        {tempRange && <span className={styles.detail}>{tempRange}</span>}
+      </div>
+      <div className={styles.action}>
+        {inPlan && <span className={styles.inPlanBadge}>In Plan</span>}
         <button
           onClick={() => inPlan ? onRemoveFromPlan(cultivar.id) : onAddToPlan(cultivar.id)}
           className={inPlan ? styles.removeButton : styles.addButton}
         >
-          {inPlan ? 'Remove from Plan' : 'Add to Plan'}
+          {inPlan ? 'Remove' : 'Add to Plan'}
         </button>
       </div>
     </div>

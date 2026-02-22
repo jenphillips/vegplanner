@@ -1,62 +1,54 @@
-.card {
-  background: var(--panel, #ffffff);
-  border: 1px solid var(--border, #e5e5de);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.card.inPlan {
-  border-color: var(--accent, #2f6f4e);
-  background: linear-gradient(to bottom, #f8fcf9, #ffffff);
-}
-
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 16px 18px 12px;
-}
-
-.titleRow {
+.row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 16px;
+  padding: 10px 16px;
+  background: var(--panel, #ffffff);
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 8px;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-.title {
-  margin: 0;
-  font-size: 16px;
+.row:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.row.inPlan {
+  border-color: var(--accent, #2f6f4e);
+  background: linear-gradient(to right, #f8fcf9, #ffffff);
+}
+
+.name {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.crop {
+  font-size: 14px;
   font-weight: 600;
   color: var(--text, #1f2614);
 }
 
-.inPlanBadge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--accent, #2f6f4e);
-  color: #fff;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.meta {
+.variety {
   font-size: 13px;
   color: var(--muted, #5f6653);
 }
 
-.badges {
+.details {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.detail {
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+  white-space: nowrap;
 }
 
 .badge {
@@ -68,6 +60,7 @@
   color: #2e7d32;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .badgeTransplant {
@@ -79,6 +72,7 @@
   color: #7b1fa2;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .harvestBadge {
@@ -87,44 +81,49 @@
   border-radius: 4px;
   background: #fff3e0;
   color: #e65100;
+  white-space: nowrap;
 }
 
-.footer {
-  padding: 12px 18px 16px;
-  border-top: 1px solid var(--border, #e5e5de);
+.action {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
-.notes {
-  margin: 0;
-  font-size: 13px;
-  color: var(--muted, #5f6653);
-  font-style: italic;
+.inPlanBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent, #2f6f4e);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .addButton,
 .removeButton {
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
-  width: 100%;
+  white-space: nowrap;
 }
 
 .addButton {
   background: linear-gradient(120deg, var(--accent, #2f6f4e), var(--accent-strong, #1f4a33));
   color: #fff;
   border: none;
-  box-shadow: 0 4px 12px rgba(31, 74, 51, 0.2);
+  box-shadow: 0 2px 6px rgba(31, 74, 51, 0.15);
 }
 
 .addButton:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(31, 74, 51, 0.25);
+  box-shadow: 0 4px 10px rgba(31, 74, 51, 0.2);
 }
 
 .removeButton {
@@ -136,4 +135,24 @@
 .removeButton:hover {
   background: #ffebee;
   border-color: #ef9a9a;
+}
+
+@media (max-width: 640px) {
+  .row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .name {
+    min-width: unset;
+    flex: 1 1 100%;
+  }
+
+  .details {
+    flex: 1 1 auto;
+  }
+
+  .action {
+    margin-left: 0;
+  }
 }

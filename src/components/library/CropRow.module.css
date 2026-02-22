@@ -1,0 +1,130 @@
+.cropRow {
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 8px;
+  background: var(--panel, #ffffff);
+  overflow: hidden;
+}
+
+.cropHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+  text-align: left;
+  font: inherit;
+}
+
+.cropHeader:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.chevron {
+  font-size: 10px;
+  color: var(--muted, #5f6653);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.chevronExpanded {
+  transform: rotate(90deg);
+}
+
+.cropName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text, #1f2614);
+}
+
+.varietyCount {
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+}
+
+.typeBadge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.typeBadgeVegetable {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.typeBadgeHerb {
+  background: #e0f2f1;
+  color: #00695c;
+}
+
+.typeBadgeFlower {
+  background: #fce4ec;
+  color: #c62828;
+}
+
+.inPlanSummary {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent, #2f6f4e);
+  margin-left: auto;
+}
+
+.expandedContent {
+  border-top: 1px solid var(--border, #e5e5de);
+  padding: 8px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Family content — contains nested sub-group rows */
+.familyContent {
+  border-top: 1px solid var(--border, #e5e5de);
+  padding: 4px 8px 8px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Nested sub-group row inside a family */
+.nestedRow {
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+}
+
+.nestedRow .cropHeader {
+  padding: 8px 12px;
+}
+
+.nestedRow .cropHeader:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.nestedName {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Default option section */
+.defaultSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.defaultHint {
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+  margin: 0;
+  padding: 0 4px;
+}
+

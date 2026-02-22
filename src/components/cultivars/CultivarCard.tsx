@@ -219,12 +219,12 @@ export function CultivarCard({
       )
     : allWindows.windows.filter((w) => !windowOverlapsPlanting(w));
 
-  const methodLabel =
-    cultivar.sowMethod === 'transplant'
-      ? 'Transplant'
-      : cultivar.sowMethod === 'direct'
-        ? 'Direct sow'
-        : 'Either';
+  const methodLabels =
+    cultivar.sowMethod === 'either'
+      ? ['Direct sow', 'Transplant']
+      : cultivar.sowMethod === 'transplant'
+        ? ['Transplant']
+        : ['Direct sow'];
 
   const tempRange =
     cultivar.minGrowingTempC != null && cultivar.maxGrowingTempC != null
@@ -257,7 +257,9 @@ export function CultivarCard({
             {cultivar.isPerennial && (
               <span className={styles.badgePerennial}>Perennial</span>
             )}
-            <span className={cultivar.sowMethod === 'transplant' ? styles.badgeTransplant : styles.badge}>{methodLabel}</span>
+            {methodLabels.map((label) => (
+              <span key={label} className={label === 'Transplant' ? styles.badgeTransplant : styles.badge}>{label}</span>
+            ))}
             {cultivarPlantings.length > 0 && (
               <span className={styles.countBadge}>
                 {cultivarPlantings.length} planting

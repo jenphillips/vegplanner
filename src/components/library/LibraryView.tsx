@@ -3,19 +3,39 @@
 import { useState, useMemo } from 'react';
 import type { Cultivar, PlantingPlan } from '@/lib/types';
 import { PlantTypeFilter, type PlantTypeFilterValue } from '@/components/plantings/PlantTypeFilter';
-import { LibraryCultivarCard } from './LibraryCultivarCard';
+import { CropRow, CropFamilyRow, type CropGroup, type CropFamily } from './CropRow';
 import styles from './LibraryView.module.css';
 
 type LibraryViewProps = {
   cultivars: Cultivar[];
+  baselines: Cultivar[];
   plans: PlantingPlan[];
   loading: boolean;
   onAddToPlan: (cultivarId: string) => Promise<unknown>;
   onRemoveFromPlan: (cultivarId: string) => Promise<void>;
 };
 
+/** Extract base crop name: "Pepper (Bell)" → "Pepper", "Spinach" → "Spinach" */
+function getBaseCrop(crop: string): string {
+  const match = crop.match(/^(.+?)\s*\(.+\)$/);
+  return match ? match[1] : crop;
+}
+
+/** Find baseline entries that match a crop name (exact or base-crop match). */
+function findBaselinesForCrop(crop: string, baselines: Cultivar[]): Cultivar[] {
+  const exact = baselines.filter((b) => b.crop === crop);
+  if (exact.length > 0) return exact;
+
+  // Match by shared base crop: "Tomato (Cherry)" matches baselines for "Tomato (Determinate)", etc.
+  const inputBase = getBaseCrop(crop);
+  return baselines.filter((b) => {
+    return b.crop === inputBase || getBaseCrop(b.crop) === inputBase;
+  });
+}
+
 export function LibraryView({
   cultivars,
+  baselines,
   plans,
   loading,
   onAddToPlan,
@@ -30,53 +50,103 @@ export function LibraryView({
     [plans]
   );
 
-  const filteredCultivars = useMemo(() => {
-    let result = cultivars;
+  // Compute total counts for the toolbar (before status filter)
+  const totalCounts = useMemo(() => {
+    const inPlan = cultivars.filter((c) => planCultivarIds.has(c.id)).length;
+    return { total: cultivars.length, inPlan, notInPlan: cultivars.length - inPlan };
+  }, [cultivars, planCultivarIds]);
 
-    // Filter by search
+  const cropFamilies = useMemo(() => {
+    let filtered = cultivars;
+
+    // 1. Search filter
     if (search.trim()) {
-      const searchLower = search.toLowerCase().trim();
-      result = result.filter(
+      const q = search.toLowerCase().trim();
+      filtered = filtered.filter(
         (c) =>
-          c.crop.toLowerCase().includes(searchLower) ||
-          c.variety.toLowerCase().includes(searchLower) ||
-          c.notes?.toLowerCase().includes(searchLower)
+          c.crop.toLowerCase().includes(q) ||
+          c.variety.toLowerCase().includes(q) ||
+          c.notes?.toLowerCase().includes(q)
       );
     }
 
-    // Filter by plant type
+    // 2. Plant type filter
     if (typeFilter !== 'all') {
-      result = result.filter((c) => c.plantType === typeFilter);
+      filtered = filtered.filter((c) => c.plantType === typeFilter);
     }
 
-    // Filter by plan status
-    if (statusFilter === 'in-plan') {
-      result = result.filter((c) => planCultivarIds.has(c.id));
-    } else if (statusFilter === 'not-in-plan') {
-      result = result.filter((c) => !planCultivarIds.has(c.id));
+    // 3. Group by full crop name
+    const groupMap = new Map<string, Cultivar[]>();
+    for (const c of filtered) {
+      const group = groupMap.get(c.crop) ?? [];
+      group.push(c);
+      groupMap.set(c.crop, group);
     }
 
-    // Sort alphabetically by crop then variety
-    return result.sort((a, b) => {
-      const cropCompare = a.crop.localeCompare(b.crop);
-      if (cropCompare !== 0) return cropCompare;
-      return a.variety.localeCompare(b.variety);
+    // 4. Build CropGroup objects
+    let groups: CropGroup[] = Array.from(groupMap.entries()).map(([crop, cvs]) => {
+      const sorted = [...cvs].sort((a, b) => a.variety.localeCompare(b.variety));
+      const baselineMatches = findBaselinesForCrop(crop, baselines);
+      const inPlanCount =
+        cvs.filter((c) => planCultivarIds.has(c.id)).length +
+        baselineMatches.filter((b) => planCultivarIds.has(b.id)).length;
+      return {
+        crop,
+        plantType: cvs[0].plantType ?? 'vegetable',
+        cultivars: sorted,
+        baselineCultivars: baselineMatches,
+        inPlanCount,
+      };
     });
-  }, [cultivars, search, typeFilter, statusFilter, planCultivarIds]);
 
-  const inPlanCount = cultivars.filter((c) => planCultivarIds.has(c.id)).length;
-  const notInPlanCount = cultivars.length - inPlanCount;
+    // 5. Status filter at group level
+    if (statusFilter === 'in-plan') {
+      groups = groups.filter((g) => g.inPlanCount > 0);
+    } else if (statusFilter === 'not-in-plan') {
+      groups = groups.filter(
+        (g) => g.inPlanCount < g.cultivars.length + g.baselineCultivars.length
+      );
+    }
+
+    // 6. Group into families by base crop name
+    const familyMap = new Map<string, CropGroup[]>();
+    for (const g of groups) {
+      const base = getBaseCrop(g.crop);
+      const family = familyMap.get(base) ?? [];
+      family.push(g);
+      familyMap.set(base, family);
+    }
+
+    // 7. Build CropFamily objects, sorting sub-groups alphabetically
+    const families: CropFamily[] = Array.from(familyMap.entries()).map(([baseCrop, subGroups]) => {
+      subGroups.sort((a, b) => a.crop.localeCompare(b.crop));
+      return {
+        baseCrop,
+        plantType: subGroups[0].plantType,
+        subGroups,
+        totalCultivars: subGroups.reduce((sum, g) => sum + g.cultivars.length, 0),
+        totalInPlan: subGroups.reduce((sum, g) => sum + g.inPlanCount, 0),
+      };
+    });
+
+    // 8. Sort families alphabetically
+    families.sort((a, b) => a.baseCrop.localeCompare(b.baseCrop));
+
+    return families;
+  }, [cultivars, baselines, search, typeFilter, statusFilter, planCultivarIds]);
 
   if (loading) {
     return <div className={styles.loading}>Loading library...</div>;
   }
+
+  const isSearching = !!search.trim();
 
   return (
     <div className={styles.container}>
       <div className={styles.toolbar}>
         <input
           type="text"
-          placeholder="Search cultivars..."
+          placeholder="Search crops and varieties..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={styles.searchInput}
@@ -88,26 +158,26 @@ export function LibraryView({
             className={`${styles.statusOption} ${statusFilter === 'all' ? styles.active : ''}`}
             onClick={() => setStatusFilter('all')}
           >
-            All ({cultivars.length})
+            All ({totalCounts.total})
           </button>
           <button
             type="button"
             className={`${styles.statusOption} ${statusFilter === 'in-plan' ? styles.active : ''}`}
             onClick={() => setStatusFilter('in-plan')}
           >
-            In Plan ({inPlanCount})
+            In Plan ({totalCounts.inPlan})
           </button>
           <button
             type="button"
             className={`${styles.statusOption} ${statusFilter === 'not-in-plan' ? styles.active : ''}`}
             onClick={() => setStatusFilter('not-in-plan')}
           >
-            Not in Plan ({notInPlanCount})
+            Not in Plan ({totalCounts.notInPlan})
           </button>
         </div>
       </div>
 
-      {filteredCultivars.length === 0 ? (
+      {cropFamilies.length === 0 ? (
         <div className={styles.empty}>
           {search.trim() || typeFilter !== 'all' || statusFilter !== 'all'
             ? 'No cultivars match your filters'
@@ -115,15 +185,27 @@ export function LibraryView({
         </div>
       ) : (
         <div className={styles.grid}>
-          {filteredCultivars.map((cultivar) => (
-            <LibraryCultivarCard
-              key={cultivar.id}
-              cultivar={cultivar}
-              inPlan={planCultivarIds.has(cultivar.id)}
-              onAddToPlan={onAddToPlan}
-              onRemoveFromPlan={onRemoveFromPlan}
-            />
-          ))}
+          {cropFamilies.map((family) =>
+            family.subGroups.length === 1 ? (
+              <CropRow
+                key={family.baseCrop}
+                group={family.subGroups[0]}
+                planCultivarIds={planCultivarIds}
+                onAddToPlan={onAddToPlan}
+                onRemoveFromPlan={onRemoveFromPlan}
+                defaultExpanded={isSearching}
+              />
+            ) : (
+              <CropFamilyRow
+                key={family.baseCrop}
+                family={family}
+                planCultivarIds={planCultivarIds}
+                onAddToPlan={onAddToPlan}
+                onRemoveFromPlan={onRemoveFromPlan}
+                defaultExpanded={isSearching}
+              />
+            )
+          )}
         </div>
       )}
     </div>

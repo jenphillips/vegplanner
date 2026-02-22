@@ -38,11 +38,29 @@ describe('LibraryCultivarCard', () => {
         />
       );
 
-      expect(screen.getByText(/Tomato — Cherokee Purple/)).toBeInTheDocument();
+      expect(screen.getByText('Tomato')).toBeInTheDocument();
+      expect(screen.getByText('Cherokee Purple')).toBeInTheDocument();
     });
 
-    it('renders maturity days from sow', () => {
-      const cultivar = createCultivar({ maturityDays: 65, maturityBasis: 'from_sow' });
+    it('hides crop name when showCropName is false', () => {
+      const cultivar = createCultivar({ crop: 'Tomato', variety: 'Cherokee Purple' });
+
+      render(
+        <LibraryCultivarCard
+          cultivar={cultivar}
+          inPlan={false}
+          onAddToPlan={vi.fn()}
+          onRemoveFromPlan={vi.fn()}
+          showCropName={false}
+        />
+      );
+
+      expect(screen.queryByText('Tomato')).not.toBeInTheDocument();
+      expect(screen.getByText('Cherokee Purple')).toBeInTheDocument();
+    });
+
+    it('renders maturity days', () => {
+      const cultivar = createCultivar({ maturityDays: 65 });
 
       render(
         <LibraryCultivarCard
@@ -53,22 +71,7 @@ describe('LibraryCultivarCard', () => {
         />
       );
 
-      expect(screen.getByText(/65 days from sow/)).toBeInTheDocument();
-    });
-
-    it('renders maturity days from transplant', () => {
-      const cultivar = createCultivar({ maturityDays: 75, maturityBasis: 'from_transplant' });
-
-      render(
-        <LibraryCultivarCard
-          cultivar={cultivar}
-          inPlan={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
-      );
-
-      expect(screen.getByText(/75 days from transplant/)).toBeInTheDocument();
+      expect(screen.getByText('65d')).toBeInTheDocument();
     });
 
     it('renders temperature range when both min and max provided', () => {
@@ -99,36 +102,6 @@ describe('LibraryCultivarCard', () => {
       );
 
       expect(screen.queryByText(/°C/)).not.toBeInTheDocument();
-    });
-
-    it('renders notes when provided', () => {
-      const cultivar = createCultivar({ notes: 'Heat tolerant variety' });
-
-      render(
-        <LibraryCultivarCard
-          cultivar={cultivar}
-          inPlan={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
-      );
-
-      expect(screen.getByText('Heat tolerant variety')).toBeInTheDocument();
-    });
-
-    it('does not render notes paragraph when not provided', () => {
-      const cultivar = createCultivar({ notes: undefined });
-
-      const { container } = render(
-        <LibraryCultivarCard
-          cultivar={cultivar}
-          inPlan={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
-      );
-
-      expect(container.querySelector('[class*="notes"]')).not.toBeInTheDocument();
     });
   });
 
@@ -163,7 +136,7 @@ describe('LibraryCultivarCard', () => {
       expect(screen.getByText('Transplant')).toBeInTheDocument();
     });
 
-    it('shows Either for either method', () => {
+    it('shows both Direct sow and Transplant badges for either method', () => {
       const cultivar = createCultivar({ sowMethod: 'either' });
 
       render(
@@ -175,7 +148,8 @@ describe('LibraryCultivarCard', () => {
         />
       );
 
-      expect(screen.getByText('Either')).toBeInTheDocument();
+      expect(screen.getByText('Direct sow')).toBeInTheDocument();
+      expect(screen.getByText('Transplant')).toBeInTheDocument();
     });
   });
 
@@ -257,7 +231,7 @@ describe('LibraryCultivarCard', () => {
       expect(screen.getByRole('button', { name: 'Add to Plan' })).toBeInTheDocument();
     });
 
-    it('shows Remove from Plan button when in plan', () => {
+    it('shows Remove button when in plan', () => {
       const cultivar = createCultivar();
 
       render(
@@ -269,7 +243,7 @@ describe('LibraryCultivarCard', () => {
         />
       );
 
-      expect(screen.getByRole('button', { name: 'Remove from Plan' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Remove' })).toBeInTheDocument();
     });
   });
 
@@ -307,7 +281,7 @@ describe('LibraryCultivarCard', () => {
         />
       );
 
-      await user.click(screen.getByRole('button', { name: 'Remove from Plan' }));
+      await user.click(screen.getByRole('button', { name: 'Remove' }));
 
       expect(onRemoveFromPlan).toHaveBeenCalledWith('test-id');
     });

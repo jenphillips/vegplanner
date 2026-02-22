@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { LibraryView } from './LibraryView';
@@ -12,6 +12,7 @@ const createCultivar = (overrides: Partial<Cultivar> = {}): Cultivar => ({
   id: 'cultivar-1',
   crop: 'Spinach',
   variety: 'Bloomsdale',
+  plantType: 'vegetable',
   germDaysMin: 5,
   germDaysMax: 10,
   maturityDays: 40,
@@ -28,6 +29,13 @@ const createPlan = (overrides: Partial<PlantingPlan> = {}): PlantingPlan => ({
   ...overrides,
 });
 
+const defaultProps = {
+  baselines: [] as Cultivar[],
+  loading: false,
+  onAddToPlan: vi.fn(),
+  onRemoveFromPlan: vi.fn(),
+};
+
 // ============================================
 // Tests
 // ============================================
@@ -36,13 +44,7 @@ describe('LibraryView', () => {
   describe('loading state', () => {
     it('shows loading message when loading', () => {
       render(
-        <LibraryView
-          cultivars={[]}
-          plans={[]}
-          loading={true}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={[]} plans={[]} {...defaultProps} loading={true} />
       );
 
       expect(screen.getByText('Loading library...')).toBeInTheDocument();
@@ -50,13 +52,7 @@ describe('LibraryView', () => {
 
     it('does not show loading message when not loading', () => {
       render(
-        <LibraryView
-          cultivars={[]}
-          plans={[]}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={[]} plans={[]} {...defaultProps} />
       );
 
       expect(screen.queryByText('Loading library...')).not.toBeInTheDocument();
@@ -66,13 +62,7 @@ describe('LibraryView', () => {
   describe('empty state', () => {
     it('shows empty message when no cultivars', () => {
       render(
-        <LibraryView
-          cultivars={[]}
-          plans={[]}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={[]} plans={[]} {...defaultProps} />
       );
 
       expect(screen.getByText('No cultivars in library')).toBeInTheDocument();
@@ -83,94 +73,96 @@ describe('LibraryView', () => {
       const cultivar = createCultivar({ crop: 'Tomato' });
 
       render(
-        <LibraryView
-          cultivars={[cultivar]}
-          plans={[]}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={[cultivar]} plans={[]} {...defaultProps} />
       );
 
-      await user.type(screen.getByPlaceholderText('Search cultivars...'), 'Spinach');
+      await user.type(screen.getByPlaceholderText('Search crops and varieties...'), 'Zucchini');
 
       expect(screen.getByText('No cultivars match your filters')).toBeInTheDocument();
     });
   });
 
-  describe('rendering cultivars', () => {
-    it('renders all cultivars', () => {
+  describe('rendering crop groups', () => {
+    it('renders crop rows for each unique crop', () => {
       const cultivars = [
         createCultivar({ id: 'c1', crop: 'Spinach', variety: 'Bloomsdale' }),
         createCultivar({ id: 'c2', crop: 'Tomato', variety: 'Cherokee Purple' }),
       ];
 
       render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={[]}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} />
       );
 
-      expect(screen.getByText(/Spinach — Bloomsdale/)).toBeInTheDocument();
-      expect(screen.getByText(/Tomato — Cherokee Purple/)).toBeInTheDocument();
+      expect(screen.getByText('Spinach')).toBeInTheDocument();
+      expect(screen.getByText('Tomato')).toBeInTheDocument();
     });
 
-    it('sorts cultivars alphabetically by crop then variety', () => {
+    it('groups multiple varieties under one crop', () => {
       const cultivars = [
-        createCultivar({ id: 'c1', crop: 'Tomato', variety: 'Roma' }),
+        createCultivar({ id: 'c1', crop: 'Spinach', variety: 'Bloomsdale' }),
         createCultivar({ id: 'c2', crop: 'Spinach', variety: 'Giant' }),
-        createCultivar({ id: 'c3', crop: 'Spinach', variety: 'Bloomsdale' }),
       ];
 
-      const { container } = render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={[]}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+      render(
+        <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} />
       );
 
-      const cards = container.querySelectorAll('[class*="card"]');
-      const texts = Array.from(cards).map((card) => card.textContent);
+      expect(screen.getByText('Spinach')).toBeInTheDocument();
+      expect(screen.getByText('2 varieties')).toBeInTheDocument();
+    });
 
-      // Should be ordered: Spinach Bloomsdale, Spinach Giant, Tomato Roma
-      expect(texts[0]).toContain('Spinach — Bloomsdale');
-      expect(texts[1]).toContain('Spinach — Giant');
-      expect(texts[2]).toContain('Tomato — Roma');
+    it('shows cultivar details when crop row is expanded', async () => {
+      const user = userEvent.setup();
+      const cultivars = [
+        createCultivar({ id: 'c1', crop: 'Spinach', variety: 'Bloomsdale' }),
+        createCultivar({ id: 'c2', crop: 'Spinach', variety: 'Giant' }),
+      ];
+
+      render(
+        <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} />
+      );
+
+      // Varieties hidden when collapsed
+      expect(screen.queryByText('Bloomsdale')).not.toBeInTheDocument();
+
+      // Expand the Spinach row
+      await user.click(screen.getByText('Spinach'));
+
+      // Now varieties are visible
+      expect(screen.getByText('Bloomsdale')).toBeInTheDocument();
+      expect(screen.getByText('Giant')).toBeInTheDocument();
+    });
+
+    it('sorts crop groups alphabetically', () => {
+      const cultivars = [
+        createCultivar({ id: 'c1', crop: 'Tomato', variety: 'Roma' }),
+        createCultivar({ id: 'c2', crop: 'Spinach', variety: 'Bloomsdale' }),
+      ];
+
+      render(
+        <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} />
+      );
+
+      const buttons = screen.getAllByRole('button', { expanded: false });
+      const cropHeaders = buttons.filter((b) => b.textContent?.includes('variet'));
+      expect(cropHeaders[0].textContent).toContain('Spinach');
+      expect(cropHeaders[1].textContent).toContain('Tomato');
     });
   });
 
   describe('plan status', () => {
-    it('marks cultivars in plan correctly', () => {
+    it('shows in-plan summary on crop row', () => {
       const cultivars = [
-        createCultivar({ id: 'c1', crop: 'Spinach' }),
-        createCultivar({ id: 'c2', crop: 'Tomato' }),
+        createCultivar({ id: 'c1', crop: 'Spinach', variety: 'Bloomsdale' }),
+        createCultivar({ id: 'c2', crop: 'Spinach', variety: 'Giant' }),
       ];
       const plans = [createPlan({ cultivarId: 'c1' })];
 
       render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={plans}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={cultivars} plans={plans} {...defaultProps} />
       );
 
-      // Spinach should show "Remove from Plan" button
-      const spinachSection = screen.getByText(/Spinach/).closest('[class*="card"]') as HTMLElement;
-      expect(within(spinachSection).getByText('In Plan')).toBeInTheDocument();
-
-      // Tomato should show "Add to Plan" button
-      const tomatoSection = screen.getByText(/Tomato/).closest('[class*="card"]') as HTMLElement;
-      expect(within(tomatoSection).queryByText('In Plan')).not.toBeInTheDocument();
+      expect(screen.getByText('1 in plan')).toBeInTheDocument();
     });
 
     it('shows correct counts in status filter', () => {
@@ -182,13 +174,7 @@ describe('LibraryView', () => {
       const plans = [createPlan({ cultivarId: 'c1' })];
 
       render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={plans}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={cultivars} plans={plans} {...defaultProps} />
       );
 
       expect(screen.getByText('All (3)')).toBeInTheDocument();
@@ -206,65 +192,28 @@ describe('LibraryView', () => {
       ];
 
       render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={[]}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} />
       );
 
-      await user.type(screen.getByPlaceholderText('Search cultivars...'), 'Spinach');
+      await user.type(screen.getByPlaceholderText('Search crops and varieties...'), 'Spinach');
 
-      expect(screen.getByText(/Spinach/)).toBeInTheDocument();
-      expect(screen.queryByText(/Tomato/)).not.toBeInTheDocument();
+      expect(screen.getByText('Spinach')).toBeInTheDocument();
+      expect(screen.queryByText('Tomato')).not.toBeInTheDocument();
     });
 
-    it('filters by variety name', async () => {
+    it('auto-expands crop rows when searching', async () => {
       const user = userEvent.setup();
       const cultivars = [
-        createCultivar({ id: 'c1', variety: 'Bloomsdale' }),
-        createCultivar({ id: 'c2', variety: 'Roma' }),
+        createCultivar({ id: 'c1', crop: 'Spinach', variety: 'Bloomsdale' }),
       ];
 
       render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={[]}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} />
       );
 
-      await user.type(screen.getByPlaceholderText('Search cultivars...'), 'Roma');
+      await user.type(screen.getByPlaceholderText('Search crops and varieties...'), 'Bloom');
 
-      expect(screen.getByText(/Roma/)).toBeInTheDocument();
-      expect(screen.queryByText(/Bloomsdale/)).not.toBeInTheDocument();
-    });
-
-    it('filters by notes', async () => {
-      const user = userEvent.setup();
-      const cultivars = [
-        createCultivar({ id: 'c1', crop: 'Spinach', notes: 'Heat tolerant' }),
-        createCultivar({ id: 'c2', crop: 'Lettuce', notes: 'Bolt resistant' }),
-      ];
-
-      render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={[]}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
-      );
-
-      await user.type(screen.getByPlaceholderText('Search cultivars...'), 'heat');
-
-      expect(screen.getByText(/Spinach/)).toBeInTheDocument();
-      expect(screen.queryByText(/Lettuce/)).not.toBeInTheDocument();
+      expect(screen.getByText('Bloomsdale')).toBeInTheDocument();
     });
 
     it('search is case-insensitive', async () => {
@@ -272,23 +221,17 @@ describe('LibraryView', () => {
       const cultivar = createCultivar({ crop: 'Tomato' });
 
       render(
-        <LibraryView
-          cultivars={[cultivar]}
-          plans={[]}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={[cultivar]} plans={[]} {...defaultProps} />
       );
 
-      await user.type(screen.getByPlaceholderText('Search cultivars...'), 'TOMATO');
+      await user.type(screen.getByPlaceholderText('Search crops and varieties...'), 'TOMATO');
 
-      expect(screen.getByText(/Tomato/)).toBeInTheDocument();
+      expect(screen.getByText('Tomato')).toBeInTheDocument();
     });
   });
 
   describe('status filter', () => {
-    it('filters to show only in-plan cultivars', async () => {
+    it('filters to show only in-plan crop groups', async () => {
       const user = userEvent.setup();
       const cultivars = [
         createCultivar({ id: 'c1', crop: 'Spinach' }),
@@ -297,22 +240,16 @@ describe('LibraryView', () => {
       const plans = [createPlan({ cultivarId: 'c1' })];
 
       render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={plans}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={cultivars} plans={plans} {...defaultProps} />
       );
 
       await user.click(screen.getByText('In Plan (1)'));
 
-      expect(screen.getByText(/Spinach/)).toBeInTheDocument();
-      expect(screen.queryByText(/Tomato/)).not.toBeInTheDocument();
+      expect(screen.getByText('Spinach')).toBeInTheDocument();
+      expect(screen.queryByText('Tomato')).not.toBeInTheDocument();
     });
 
-    it('filters to show only not-in-plan cultivars', async () => {
+    it('filters to show only not-in-plan crop groups', async () => {
       const user = userEvent.setup();
       const cultivars = [
         createCultivar({ id: 'c1', crop: 'Spinach' }),
@@ -321,48 +258,13 @@ describe('LibraryView', () => {
       const plans = [createPlan({ cultivarId: 'c1' })];
 
       render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={plans}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={cultivars} plans={plans} {...defaultProps} />
       );
 
       await user.click(screen.getByText('Not in Plan (1)'));
 
-      expect(screen.queryByText(/Spinach/)).not.toBeInTheDocument();
-      expect(screen.getByText(/Tomato/)).toBeInTheDocument();
-    });
-
-    it('shows all when All clicked', async () => {
-      const user = userEvent.setup();
-      const cultivars = [
-        createCultivar({ id: 'c1', crop: 'Spinach' }),
-        createCultivar({ id: 'c2', crop: 'Tomato' }),
-      ];
-      const plans = [createPlan({ cultivarId: 'c1' })];
-
-      render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={plans}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
-      );
-
-      // First filter to in-plan only
-      await user.click(screen.getByText('In Plan (1)'));
-      expect(screen.queryByText(/Tomato/)).not.toBeInTheDocument();
-
-      // Then click All
-      await user.click(screen.getByText('All (2)'));
-
-      expect(screen.getByText(/Spinach/)).toBeInTheDocument();
-      expect(screen.getByText(/Tomato/)).toBeInTheDocument();
+      expect(screen.queryByText('Spinach')).not.toBeInTheDocument();
+      expect(screen.getByText('Tomato')).toBeInTheDocument();
     });
   });
 
@@ -375,60 +277,57 @@ describe('LibraryView', () => {
       ];
 
       render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={[]}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} />
       );
 
-      // Click on flower filter
       await user.click(screen.getByText('Flowers'));
 
-      expect(screen.queryByText(/Spinach/)).not.toBeInTheDocument();
-      expect(screen.getByText(/Zinnia/)).toBeInTheDocument();
+      expect(screen.queryByText('Spinach')).not.toBeInTheDocument();
+      expect(screen.getByText('Zinnia')).toBeInTheDocument();
     });
   });
 
-  describe('combined filters', () => {
-    it('applies multiple filters together', async () => {
+  describe('default entry support', () => {
+    it('shows default option when crop row is expanded', async () => {
       const user = userEvent.setup();
       const cultivars = [
         createCultivar({ id: 'c1', crop: 'Spinach', variety: 'Bloomsdale' }),
-        createCultivar({ id: 'c2', crop: 'Spinach', variety: 'Giant' }),
-        createCultivar({ id: 'c3', crop: 'Tomato', variety: 'Roma' }),
       ];
-      const plans = [
-        createPlan({ id: 'p1', cultivarId: 'c1' }),
-        createPlan({ id: 'p2', cultivarId: 'c3' }),
+      const baselines = [
+        createCultivar({ id: 'baseline-spinach', crop: 'Spinach', variety: 'Baseline' }),
       ];
 
       render(
-        <LibraryView
-          cultivars={cultivars}
-          plans={plans}
-          loading={false}
-          onAddToPlan={vi.fn()}
-          onRemoveFromPlan={vi.fn()}
-        />
+        <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} baselines={baselines} />
       );
 
-      // Search for Spinach
-      await user.type(screen.getByPlaceholderText('Search cultivars...'), 'Spinach');
-      // Filter to in-plan only
-      await user.click(screen.getByText('In Plan (2)'));
+      await user.click(screen.getByText('Spinach'));
 
-      // Only Spinach Bloomsdale should match (in plan + matches search)
-      expect(screen.getByText(/Bloomsdale/)).toBeInTheDocument();
-      expect(screen.queryByText(/Giant/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/Roma/)).not.toBeInTheDocument();
+      expect(screen.getByText('Default')).toBeInTheDocument();
+      expect(screen.getByText('Bloomsdale')).toBeInTheDocument();
+    });
+
+    it('shows explanatory hint when default entry exists', async () => {
+      const user = userEvent.setup();
+      const cultivars = [
+        createCultivar({ id: 'c1', crop: 'Spinach', variety: 'Bloomsdale' }),
+      ];
+      const baselines = [
+        createCultivar({ id: 'baseline-spinach', crop: 'Spinach', variety: 'Baseline' }),
+      ];
+
+      render(
+        <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} baselines={baselines} />
+      );
+
+      await user.click(screen.getByText('Spinach'));
+
+      expect(screen.getByText(/Don't see your variety/)).toBeInTheDocument();
     });
   });
 
   describe('interactions', () => {
-    it('calls onAddToPlan when add button clicked', async () => {
+    it('calls onAddToPlan when add button clicked inside expanded crop row', async () => {
       const user = userEvent.setup();
       const onAddToPlan = vi.fn().mockResolvedValue(undefined);
       const cultivar = createCultivar({ id: 'test-cultivar' });
@@ -437,12 +336,12 @@ describe('LibraryView', () => {
         <LibraryView
           cultivars={[cultivar]}
           plans={[]}
-          loading={false}
+          {...defaultProps}
           onAddToPlan={onAddToPlan}
-          onRemoveFromPlan={vi.fn()}
         />
       );
 
+      await user.click(screen.getByText('Spinach'));
       await user.click(screen.getByRole('button', { name: 'Add to Plan' }));
 
       expect(onAddToPlan).toHaveBeenCalledWith('test-cultivar');
@@ -458,15 +357,139 @@ describe('LibraryView', () => {
         <LibraryView
           cultivars={[cultivar]}
           plans={[plan]}
-          loading={false}
-          onAddToPlan={vi.fn()}
+          {...defaultProps}
           onRemoveFromPlan={onRemoveFromPlan}
         />
       );
 
-      await user.click(screen.getByRole('button', { name: 'Remove from Plan' }));
+      await user.click(screen.getByText('Spinach'));
+      await user.click(screen.getByRole('button', { name: 'Remove' }));
 
       expect(onRemoveFromPlan).toHaveBeenCalledWith('test-cultivar');
+    });
+  });
+
+  describe('nested crop families', () => {
+    const pepperCultivars = [
+      createCultivar({ id: 'p1', crop: 'Pepper (Bell)', variety: 'California Wonder' }),
+      createCultivar({ id: 'p2', crop: 'Pepper (Bell)', variety: 'King of the North' }),
+      createCultivar({ id: 'p3', crop: 'Pepper (Hot)', variety: 'Cayenne' }),
+      createCultivar({ id: 'p4', crop: 'Pepper (Sweet)', variety: 'Shishito' }),
+    ];
+
+    it('renders a family header for crops with multiple sub-groups', () => {
+      render(
+        <LibraryView cultivars={pepperCultivars} plans={[]} {...defaultProps} />
+      );
+
+      // Should show "Pepper" as the family header with total count
+      expect(screen.getByText('Pepper')).toBeInTheDocument();
+      expect(screen.getByText('4 varieties')).toBeInTheDocument();
+    });
+
+    it('shows sub-group headers when family is expanded', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <LibraryView cultivars={pepperCultivars} plans={[]} {...defaultProps} />
+      );
+
+      // Sub-groups hidden when collapsed
+      expect(screen.queryByText('Bell')).not.toBeInTheDocument();
+
+      // Expand the Pepper family
+      await user.click(screen.getByText('Pepper'));
+
+      // Sub-group headers should appear with qualifier names
+      expect(screen.getByText('Bell')).toBeInTheDocument();
+      expect(screen.getByText('Hot')).toBeInTheDocument();
+      expect(screen.getByText('Sweet')).toBeInTheDocument();
+    });
+
+    it('shows cultivar cards when sub-group is expanded', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <LibraryView cultivars={pepperCultivars} plans={[]} {...defaultProps} />
+      );
+
+      // Expand family, then expand Bell sub-group
+      await user.click(screen.getByText('Pepper'));
+      await user.click(screen.getByText('Bell'));
+
+      expect(screen.getByText('California Wonder')).toBeInTheDocument();
+      expect(screen.getByText('King of the North')).toBeInTheDocument();
+      // Hot varieties should still be hidden
+      expect(screen.queryByText('Cayenne')).not.toBeInTheDocument();
+    });
+
+    it('keeps single-sub-group crops as flat rows', () => {
+      const cultivars = [
+        createCultivar({ id: 'c1', crop: 'Spinach', variety: 'Bloomsdale' }),
+        ...pepperCultivars,
+      ];
+
+      render(
+        <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} />
+      );
+
+      // Spinach should be a flat row (no nesting)
+      expect(screen.getByText('Spinach')).toBeInTheDocument();
+      expect(screen.getByText('1 variety')).toBeInTheDocument();
+
+      // Pepper should be a family row
+      expect(screen.getByText('Pepper')).toBeInTheDocument();
+      expect(screen.getByText('4 varieties')).toBeInTheDocument();
+    });
+
+    it('shows total in-plan count on family header', () => {
+      const plans = [
+        createPlan({ cultivarId: 'p1' }),
+        createPlan({ cultivarId: 'p3' }),
+      ];
+
+      render(
+        <LibraryView cultivars={pepperCultivars} plans={plans} {...defaultProps} />
+      );
+
+      expect(screen.getByText('2 in plan')).toBeInTheDocument();
+    });
+
+    it('auto-expands both levels when searching', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <LibraryView cultivars={pepperCultivars} plans={[]} {...defaultProps} />
+      );
+
+      // Search for a term that matches cultivars across multiple sub-groups
+      await user.type(screen.getByPlaceholderText('Search crops and varieties...'), 'Pepper');
+
+      // Family header, sub-groups, and cultivar cards should all be visible
+      expect(screen.getByText('Pepper')).toBeInTheDocument();
+      expect(screen.getByText('Bell')).toBeInTheDocument();
+      expect(screen.getByText('Hot')).toBeInTheDocument();
+      expect(screen.getByText('Sweet')).toBeInTheDocument();
+      expect(screen.getByText('California Wonder')).toBeInTheDocument();
+      expect(screen.getByText('Cayenne')).toBeInTheDocument();
+    });
+
+    it('sorts families alphabetically alongside flat crops', () => {
+      const cultivars = [
+        createCultivar({ id: 'c1', crop: 'Tomato', variety: 'Roma' }),
+        ...pepperCultivars,
+        createCultivar({ id: 'c2', crop: 'Arugula', variety: 'Roquette' }),
+      ];
+
+      render(
+        <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} />
+      );
+
+      const buttons = screen.getAllByRole('button', { expanded: false });
+      const cropHeaders = buttons.filter((b) => b.textContent?.includes('variet'));
+      expect(cropHeaders[0].textContent).toContain('Arugula');
+      expect(cropHeaders[1].textContent).toContain('Pepper');
+      expect(cropHeaders[2].textContent).toContain('Tomato');
     });
   });
 });

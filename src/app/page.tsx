@@ -414,7 +414,8 @@ export default function Home() {
               </div>
             </div>
             <LibraryView
-              cultivars={data.cultivars}
+              cultivars={libraryCultivars}
+              baselines={baselineCultivars}
               plans={plans}
               loading={plansLoading}
               onAddToPlan={addPlan}
