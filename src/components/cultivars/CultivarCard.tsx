@@ -273,7 +273,50 @@ export function CultivarCard({
 
       {expanded && (
         <div className={styles.content}>
-          {/* Planting controls */}
+          {/* Growing constraints */}
+          {growingConstraints.length > 0 && (
+            <div className={styles.skippedInfo}>
+              <span className={styles.skippedLabel}>Can&apos;t grow outdoors:</span>
+              {growingConstraints.map((constraint, i) => (
+                <span
+                  key={i}
+                  className={constraint.type === 'hot' ? styles.skippedPeriodHot : styles.skippedPeriodCold}
+                  title={constraint.reason}
+                >
+                  {formatDate(constraint.startDate)} – {formatDate(constraint.endDate)}
+                  <span className={styles.gapReason}> ({constraint.type === 'hot' ? 'too hot' : 'too cold'})</span>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Show diagnostic when no windows available */}
+          {allWindows.windows.length === 0 && allWindows.diagnostic && (
+            <div className={styles.diagnosticWarning}>
+              <strong>No planting windows available:</strong>{' '}
+              {allWindows.diagnostic.noWindowsReason}
+              <div className={styles.diagnosticDetails}>
+                Sow range: {allWindows.diagnostic.earliestSowDate} – {allWindows.diagnostic.latestSowDate}
+              </div>
+            </div>
+          )}
+
+          {/* Existing plantings */}
+          {cultivarPlantings.length > 0 && (
+            <PlantingList
+              plantings={cultivarPlantings}
+              cultivar={cultivar}
+              frost={frost}
+              climate={climate}
+              onUpdate={onUpdatePlanting}
+              onDelete={onDeletePlanting}
+              selectedPlantingId={selectedPlantingId}
+              onSelectPlanting={handleSelectPlanting}
+            />
+          )}
+
+          {/* Planting controls — hide for perennials once a planting exists */}
+          {!(cultivar.isPerennial && cultivarPlantings.length > 0) && (
           <div className={styles.controls}>
             <div className={styles.actionRow}>
               <label htmlFor={`qty-${cultivar.id}`}>
@@ -314,7 +357,7 @@ export function CultivarCard({
                         : 'Generate first planting'
                   }
                 >
-                  {cultivar.isPerennial ? 'Add Perennial' : 'Generate Initial Planting'}
+                  {cultivar.isPerennial ? 'Add Perennial Planting' : 'Generate Initial Planting'}
                 </button>
               ) : (
                 <>
@@ -357,47 +400,7 @@ export function CultivarCard({
                 onGenerateSuccessions={handleGenerateSuccessions}
               />
             )}
-
-            {/* Show diagnostic when no windows available */}
-            {allWindows.windows.length === 0 && allWindows.diagnostic && (
-              <div className={styles.diagnosticWarning}>
-                <strong>No planting windows available:</strong>{' '}
-                {allWindows.diagnostic.noWindowsReason}
-                <div className={styles.diagnosticDetails}>
-                  Sow range: {allWindows.diagnostic.earliestSowDate} – {allWindows.diagnostic.latestSowDate}
-                </div>
-              </div>
-            )}
-
-            {growingConstraints.length > 0 && (
-              <div className={styles.skippedInfo}>
-                <span className={styles.skippedLabel}>Can&apos;t grow outdoors:</span>
-                {growingConstraints.map((constraint, i) => (
-                  <span
-                    key={i}
-                    className={constraint.type === 'hot' ? styles.skippedPeriodHot : styles.skippedPeriodCold}
-                    title={constraint.reason}
-                  >
-                    {formatDate(constraint.startDate)} – {formatDate(constraint.endDate)}
-                    <span className={styles.gapReason}> ({constraint.type === 'hot' ? 'too hot' : 'too cold'})</span>
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
-
-          {/* Existing plantings */}
-          {cultivarPlantings.length > 0 && (
-            <PlantingList
-              plantings={cultivarPlantings}
-              cultivar={cultivar}
-              frost={frost}
-              climate={climate}
-              onUpdate={onUpdatePlanting}
-              onDelete={onDeletePlanting}
-              selectedPlantingId={selectedPlantingId}
-              onSelectPlanting={handleSelectPlanting}
-            />
           )}
 
           {/* Cultivar details */}

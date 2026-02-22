@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Cultivar, Planting, FrostWindow, Climate } from '@/lib/types';
 import { recalculatePlantingForMethodChange } from '@/lib/succession';
 import { PlantingTimeline } from './PlantingTimeline';
@@ -18,6 +18,8 @@ type PlantingCardProps = {
   isSelected?: boolean;
   onSelect?: (id: string) => void;
   disableDrag?: boolean;
+  /** Number of plants already placed in garden beds. Quantity cannot be reduced below this. */
+  placedQuantity?: number;
   /** Optional selected date to show as a vertical indicator line (for layout calendar view) */
   selectedDate?: string;
 };
@@ -54,6 +56,7 @@ export function PlantingCard({
   isSelected,
   onSelect,
   disableDrag,
+  placedQuantity,
   selectedDate,
 }: PlantingCardProps) {
   const handleDelete = () => {
@@ -101,6 +104,47 @@ export function PlantingCard({
   const [methodNotice, setMethodNotice] = useState<string | null>(null);
   const [reorderNotice, setReorderNotice] = useState<string | null>(null);
   const [dragNotice, setDragNotice] = useState<string | null>(null);
+
+  // Quantity inline editing
+  const [isEditingQuantity, setIsEditingQuantity] = useState(false);
+  const [quantityDraft, setQuantityDraft] = useState('');
+  const quantityInputRef = useRef<HTMLInputElement>(null);
+  const quantityCommittedRef = useRef(false);
+  const minQuantity = Math.max(1, placedQuantity ?? 0);
+
+  const commitQuantity = useCallback(() => {
+    if (quantityCommittedRef.current) return;
+    quantityCommittedRef.current = true;
+    setIsEditingQuantity(false);
+    const parsed = parseInt(quantityDraft);
+    if (isNaN(parsed)) return;
+    const clamped = Math.max(minQuantity, parsed);
+    if (clamped !== planting.quantity) {
+      onUpdate(planting.id, { quantity: clamped });
+    }
+  }, [quantityDraft, minQuantity, planting.quantity, planting.id, onUpdate]);
+
+  const handleQuantityClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    quantityCommittedRef.current = false;
+    setQuantityDraft(String(planting.quantity ?? ''));
+    setIsEditingQuantity(true);
+  };
+
+  const handleQuantityKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      commitQuantity();
+    } else if (e.key === 'Escape') {
+      setIsEditingQuantity(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isEditingQuantity && quantityInputRef.current) {
+      quantityInputRef.current.focus();
+      quantityInputRef.current.select();
+    }
+  }, [isEditingQuantity]);
 
   // Refs for detecting reorder after method change
   const pendingMethodChangeRef = useRef(false);
@@ -205,9 +249,6 @@ export function PlantingCard({
           onKeyDown={onSelect ? (e) => e.key === 'Enter' && handleInfoClick() : undefined}
         >
           <span className={styles.label}>{planting.label}</span>
-          <span className={styles.quantity}>
-            {planting.quantity != null ? planting.quantity : <em className={styles.quantityUnset}>—</em>}
-          </span>
           <span className={styles.dateRange}>
             {formatDate(displaySowDate)} → {formatDate(planting.harvestEnd)}
           </span>
@@ -231,6 +272,33 @@ export function PlantingCard({
             />
           )}
         </div>
+        {isEditingQuantity ? (
+          <input
+            ref={quantityInputRef}
+            type="number"
+            className={styles.quantityInput}
+            value={quantityDraft}
+            min={minQuantity}
+            onChange={(e) => setQuantityDraft(e.target.value)}
+            onBlur={commitQuantity}
+            onKeyDown={handleQuantityKeyDown}
+          />
+        ) : (
+          <span
+            className={styles.quantity}
+            onClick={handleQuantityClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleQuantityClick(e as unknown as React.MouseEvent); }}
+            title={
+              (placedQuantity ?? 0) > 0
+                ? `${placedQuantity} placed in garden beds`
+                : 'Click to edit quantity'
+            }
+          >
+            {planting.quantity != null ? planting.quantity : <em className={styles.quantityUnset}>—</em>}
+          </span>
+        )}
         <button
           onClick={handleDelete}
           className={styles.deleteButton}

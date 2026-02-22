@@ -52,11 +52,37 @@
 
 .quantity {
   font-size: 11px;
-  color: var(--muted, #5f6653);
+  color: var(--text, #1f2614);
   background: #e8e8e4;
+  border: 1px solid transparent;
   padding: 1px 6px;
   border-radius: 999px;
   white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.quantity:hover {
+  border-color: var(--accent, #2f6f4e);
+}
+
+.quantityInput {
+  width: 48px;
+  font-size: 11px;
+  padding: 1px 4px;
+  border: 1px solid var(--accent, #2f6f4e);
+  border-radius: 999px;
+  background: #fff;
+  text-align: center;
+  outline: none;
+  line-height: 1;
+  -moz-appearance: textfield;
+}
+
+.quantityInput::-webkit-inner-spin-button,
+.quantityInput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .quantityUnset {

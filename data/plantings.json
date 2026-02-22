@@ -42,19 +42,6 @@
     "createdAt": "2026-01-12T00:30:54.288Z"
   },
   {
-    "cultivarId": "asparagus-guelph-millennium",
-    "label": "Asparagus - Guelph Millennium #1",
-    "quantity": 8,
-    "sowDate": "2025-06-15",
-    "harvestStart": "2025-06-15",
-    "harvestEnd": "2025-07-27",
-    "method": "direct",
-    "status": "planned",
-    "successionNumber": 1,
-    "id": "943733bc-f04d-4f8a-a4ca-1c225b33782f",
-    "createdAt": "2026-02-08T17:32:22.602Z"
-  },
-  {
     "cultivarId": "strawberry-cavendish",
     "label": "Strawberry - Cavendish #1",
     "quantity": 9,
@@ -378,5 +365,57 @@
     "id": "a2b368fb-6824-498e-975c-373aa9caff95",
     "createdAt": "2026-02-15T18:58:42.691Z",
     "transplantDate": "2025-08-30"
+  },
+  {
+    "cultivarId": "asparagus-guelph-millennium",
+    "label": "Asparagus - Guelph Millennium #1",
+    "quantity": 4,
+    "sowDate": "2025-06-15",
+    "harvestStart": "2025-06-15",
+    "harvestEnd": "2025-07-27",
+    "method": "direct",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "1b8c505d-8056-455b-9a77-a74db90657c9",
+    "createdAt": "2026-02-22T18:52:21.177Z"
+  },
+  {
+    "cultivarId": "pea-spring",
+    "label": "Pea (Shelling) - Spring #1",
+    "quantity": 4,
+    "sowDate": "2025-04-20",
+    "harvestStart": "2025-06-11",
+    "harvestEnd": "2025-07-02",
+    "method": "direct",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "c7eb2b7b-5152-44d9-a4d6-778511383a7d",
+    "createdAt": "2026-02-22T19:55:36.628Z"
+  },
+  {
+    "cultivarId": "pea-spring",
+    "label": "Pea (Shelling) - Spring #2",
+    "quantity": 4,
+    "sowDate": "2025-08-22",
+    "harvestStart": "2025-10-13",
+    "harvestEnd": "2025-11-01",
+    "method": "direct",
+    "status": "planned",
+    "successionNumber": 2,
+    "id": "71916f3c-71b0-4f89-9a81-4a457b63df26",
+    "createdAt": "2026-02-22T20:00:42.801Z"
+  },
+  {
+    "cultivarId": "carrot-tendersweet",
+    "label": "Carrot - Tendersweet #1",
+    "quantity": 4,
+    "sowDate": "2025-04-20",
+    "harvestStart": "2025-07-04",
+    "harvestEnd": "2025-07-18",
+    "method": "direct",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "1da47c0b-6ab1-4da4-9b7a-aa71e3858ed8",
+    "createdAt": "2026-02-22T20:01:43.862Z"
   }
 ]

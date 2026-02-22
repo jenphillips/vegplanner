@@ -14,6 +14,7 @@ type PlantingListProps = {
   onDelete: (id: string) => void;
   selectedPlantingId?: string | null;
   onSelectPlanting?: (id: string) => void;
+  placedQuantityMap?: Map<string, number>;
 };
 
 export function PlantingList({
@@ -25,6 +26,7 @@ export function PlantingList({
   onDelete,
   selectedPlantingId,
   onSelectPlanting,
+  placedQuantityMap,
 }: PlantingListProps) {
   if (plantings.length === 0) {
     return null;
@@ -46,6 +48,7 @@ export function PlantingList({
             onDelete={onDelete}
             isSelected={selectedPlantingId === planting.id}
             onSelect={onSelectPlanting}
+            placedQuantity={placedQuantityMap?.get(planting.id)}
           />
         ))}
       </div>

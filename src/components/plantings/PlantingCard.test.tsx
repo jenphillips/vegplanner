@@ -547,6 +547,167 @@ describe('PlantingCard', () => {
   });
 
   // ============================================
+  // Quantity editing
+  // ============================================
+
+  describe('quantity editing', () => {
+    it('enters edit mode when quantity is clicked', () => {
+      render(
+        <PlantingCard
+          planting={createPlanting({ quantity: 10 })}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={vi.fn()}
+          onDelete={vi.fn()}
+        />
+      );
+      fireEvent.click(screen.getByText('10'));
+      expect(screen.getByRole('spinbutton')).toBeTruthy();
+      expect((screen.getByRole('spinbutton') as HTMLInputElement).value).toBe('10');
+    });
+
+    it('commits value on blur', () => {
+      const onUpdate = vi.fn();
+      render(
+        <PlantingCard
+          planting={createPlanting({ quantity: 10 })}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={onUpdate}
+          onDelete={vi.fn()}
+        />
+      );
+      fireEvent.click(screen.getByText('10'));
+      const input = screen.getByRole('spinbutton');
+      fireEvent.change(input, { target: { value: '15' } });
+      fireEvent.blur(input);
+      expect(onUpdate).toHaveBeenCalledWith('planting-1', { quantity: 15 });
+    });
+
+    it('commits value on Enter', () => {
+      const onUpdate = vi.fn();
+      render(
+        <PlantingCard
+          planting={createPlanting({ quantity: 10 })}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={onUpdate}
+          onDelete={vi.fn()}
+        />
+      );
+      fireEvent.click(screen.getByText('10'));
+      const input = screen.getByRole('spinbutton');
+      fireEvent.change(input, { target: { value: '20' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+      expect(onUpdate).toHaveBeenCalledWith('planting-1', { quantity: 20 });
+    });
+
+    it('cancels on Escape without saving', () => {
+      const onUpdate = vi.fn();
+      render(
+        <PlantingCard
+          planting={createPlanting({ quantity: 10 })}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={onUpdate}
+          onDelete={vi.fn()}
+        />
+      );
+      fireEvent.click(screen.getByText('10'));
+      const input = screen.getByRole('spinbutton');
+      fireEvent.change(input, { target: { value: '99' } });
+      fireEvent.keyDown(input, { key: 'Escape' });
+      expect(onUpdate).not.toHaveBeenCalled();
+      // Should exit edit mode
+      expect(screen.queryByRole('spinbutton')).toBeNull();
+    });
+
+    it('does not call onUpdate when value is unchanged', () => {
+      const onUpdate = vi.fn();
+      render(
+        <PlantingCard
+          planting={createPlanting({ quantity: 10 })}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={onUpdate}
+          onDelete={vi.fn()}
+        />
+      );
+      fireEvent.click(screen.getByText('10'));
+      const input = screen.getByRole('spinbutton');
+      fireEvent.blur(input); // blur without changing
+      expect(onUpdate).not.toHaveBeenCalled();
+    });
+
+    it('clamps value to placedQuantity minimum', () => {
+      const onUpdate = vi.fn();
+      render(
+        <PlantingCard
+          planting={createPlanting({ quantity: 10 })}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={onUpdate}
+          onDelete={vi.fn()}
+          placedQuantity={8}
+        />
+      );
+      fireEvent.click(screen.getByText('10'));
+      const input = screen.getByRole('spinbutton');
+      fireEvent.change(input, { target: { value: '5' } });
+      fireEvent.blur(input);
+      expect(onUpdate).toHaveBeenCalledWith('planting-1', { quantity: 8 });
+    });
+
+    it('clamps value to 1 when no placedQuantity', () => {
+      const onUpdate = vi.fn();
+      render(
+        <PlantingCard
+          planting={createPlanting({ quantity: 10 })}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={onUpdate}
+          onDelete={vi.fn()}
+        />
+      );
+      fireEvent.click(screen.getByText('10'));
+      const input = screen.getByRole('spinbutton');
+      fireEvent.change(input, { target: { value: '0' } });
+      fireEvent.blur(input);
+      expect(onUpdate).toHaveBeenCalledWith('planting-1', { quantity: 1 });
+    });
+
+    it('does not trigger onSelect when quantity is clicked', () => {
+      const onSelect = vi.fn();
+      render(
+        <PlantingCard
+          planting={createPlanting({ quantity: 10 })}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={vi.fn()}
+          onDelete={vi.fn()}
+          onSelect={onSelect}
+        />
+      );
+      fireEvent.click(screen.getByText('10'));
+      expect(onSelect).not.toHaveBeenCalled();
+    });
+
+    it('shows placement tooltip when placedQuantity is provided', () => {
+      render(
+        <PlantingCard
+          planting={createPlanting({ quantity: 10 })}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={vi.fn()}
+          onDelete={vi.fn()}
+          placedQuantity={6}
+        />
+      );
+      expect(screen.getByTitle('6 placed in garden beds')).toBeTruthy();
+    });
+  });
+
+  // ============================================
   // Selected state
   // ============================================
 
