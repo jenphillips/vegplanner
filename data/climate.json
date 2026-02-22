@@ -1,0 +1,46 @@
+{
+  "frostWindow": {
+    "id": "default-frost",
+    "lastSpringFrost": "2025-06-01",
+    "firstFallFrost": "2025-10-05"
+  },
+  "climate": {
+    "location": "Sussex, NB",
+    "coordinates": { "lat": 45.722, "lon": -65.507 },
+    "elevation_m": 55,
+    "source": "WeatherSpark/Environment Canada 1991-2020 Climate Normals",
+    "monthlyAvgC": {
+      "1":  { "tavg_c": -8,  "tmin_c": -12, "tmax_c": -3,  "soil_avg_c": -1,  "gdd_base5": 0 },
+      "2":  { "tavg_c": -7,  "tmin_c": -11, "tmax_c": -2,  "soil_avg_c": -1,  "gdd_base5": 0 },
+      "3":  { "tavg_c": -2,  "tmin_c": -6,  "tmax_c": 3,   "soil_avg_c": 0,   "gdd_base5": 0 },
+      "4":  { "tavg_c": 5,   "tmin_c": 1,   "tmax_c": 10,  "soil_avg_c": 4,   "gdd_base5": 15 },
+      "5":  { "tavg_c": 11,  "tmin_c": 6,   "tmax_c": 17,  "soil_avg_c": 10,  "gdd_base5": 200 },
+      "6":  { "tavg_c": 16,  "tmin_c": 12,  "tmax_c": 21,  "soil_avg_c": 16,  "gdd_base5": 530 },
+      "7":  { "tavg_c": 19,  "tmin_c": 15,  "tmax_c": 24,  "soil_avg_c": 19,  "gdd_base5": 965 },
+      "8":  { "tavg_c": 19,  "tmin_c": 14,  "tmax_c": 24,  "soil_avg_c": 19,  "gdd_base5": 1400 },
+      "9":  { "tavg_c": 15,  "tmin_c": 10,  "tmax_c": 19,  "soil_avg_c": 15,  "gdd_base5": 1700 },
+      "10": { "tavg_c": 8,   "tmin_c": 4,   "tmax_c": 13,  "soil_avg_c": 9,   "gdd_base5": 1800 },
+      "11": { "tavg_c": 2,   "tmin_c": -1,  "tmax_c": 6,   "soil_avg_c": 4,   "gdd_base5": 1810 },
+      "12": { "tavg_c": -4,  "tmin_c": -8,  "tmax_c": 0,   "soil_avg_c": 1,   "gdd_base5": 1810 }
+    },
+    "lastSpringFrost": {
+      "earliest": "04-19",
+      "typical": "05-06",
+      "latest": "05-24",
+      "probability10": "04-22",
+      "probability50": "05-06",
+      "probability90": "05-20"
+    },
+    "firstFallFrost": {
+      "earliest": "09-26",
+      "typical": "10-11",
+      "latest": "10-26",
+      "probability10": "09-28",
+      "probability50": "10-11",
+      "probability90": "10-23"
+    },
+    "growingSeasonDays": 159,
+    "annualGDD": 1810,
+    "notes": "Data derived from WeatherSpark and Environment Canada climate normals. Soil temperatures are estimates based on air temperature with ~2 week lag. GDD calculated with base 5°C, cumulative by month end. Growing season averages 159 days (May 6 - Oct 11). Zone 5a."
+  }
+}

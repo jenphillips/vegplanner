@@ -1,7 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import plannerData from '@/../data/vegplanner.json';
+import climateData from '@/../data/climate.json';
+import libraryData from '@/../data/cultivar-library.json';
+import baselineData from '@/../data/baseline-cultivars.json';
 import { BaselineTimeline } from '@/components/timeline/BaselineTimeline';
 import { CultivarCard } from '@/components/cultivars/CultivarCard';
 import { TabNav, type Tab } from '@/components/tabs/TabNav';
@@ -25,16 +27,14 @@ type LoadedData = {
   climate: Climate;
 };
 
-const dataset = plannerData as {
-  frostWindow: FrostWindow;
-  cultivars: Cultivar[];
-  climate: Climate;
-};
+const climate = climateData as { frostWindow: FrostWindow; climate: Climate };
+const libraryCultivars = (libraryData as { cultivars: Cultivar[] }).cultivars;
+const baselineCultivars = (baselineData as { cultivars: Cultivar[] }).cultivars;
 
 const data: LoadedData = {
-  frost: dataset.frostWindow,
-  cultivars: dataset.cultivars,
-  climate: dataset.climate,
+  frost: climate.frostWindow,
+  cultivars: [...libraryCultivars, ...baselineCultivars],
+  climate: climate.climate,
 };
 
 const daysBetweenExclusive = (startIso: string, endIso: string) => {
