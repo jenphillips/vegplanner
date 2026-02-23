@@ -21,6 +21,7 @@ import { LayoutCalendarView } from './LayoutCalendarView';
 import { PlantTypeFilter, type PlantTypeFilterValue } from '@/components/plantings/PlantTypeFilter';
 import type { Planting, Cultivar, GardenBed, PlantingPlacement } from '@/lib/types';
 import { Lock, LockOpen } from 'lucide-react';
+import { useToast, ToastContainer } from '@/components/ui/Toast';
 import styles from './GardenView.module.css';
 
 // Base scale: 2 pixels per cm at zoom level 1 (must match UnifiedGardenCanvas)
@@ -88,6 +89,9 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
     updatePlacement,
     deletePlacement,
   } = usePlacements();
+
+  // Toast notifications
+  const { toasts, showToast, removeToast } = useToast();
 
   // Editor state
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -191,10 +195,9 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
     for (const planting of plantingsWithRemaining) {
       const cultivar = cultivarMap.get(planting.cultivarId);
       const spacing = cultivar?.spacingCm ?? 30;
-      const quantity = planting.quantity ?? 1;
 
-      // Get ALL valid rectangle configurations (not just the default square-ish one)
-      const allConfigs = getValidRectangleConfigs(quantity, spacing);
+      // Check if at least 1 plant can fit (partial placement is supported)
+      const allConfigs = getValidRectangleConfigs(1, spacing);
 
       let canFitSomewhere = false;
 
@@ -477,6 +480,15 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
     }
   };
 
+  // Handler for partial placement notifications
+  const handlePartialPlacement = useCallback((info: { cropName: string; placedQuantity: number; requestedQuantity: number }) => {
+    const remaining = info.requestedQuantity - info.placedQuantity;
+    showToast(
+      `Placed ${info.placedQuantity} of ${info.requestedQuantity} ${info.cropName}. ${remaining} remaining.`,
+      'warning'
+    );
+  }, [showToast]);
+
   if (isLoading) {
     return (
       <div className={styles.container}>
@@ -624,6 +636,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
               onPlantingQuantityUpdate={handlePlantingQuantityUpdate}
               onZoomChange={handleZoomChange}
               onSelectionChange={handleSelectionChange}
+              onPartialPlacement={handlePartialPlacement}
             />
           )}
         </div>
@@ -745,6 +758,8 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
           onCancel={handleCancelEditor}
         />
       )}
+
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

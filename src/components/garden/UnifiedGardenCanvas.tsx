@@ -60,6 +60,7 @@ type UnifiedGardenCanvasProps = {
   onPlantingQuantityUpdate?: (plantingId: string, quantity: number) => void;
   onZoomChange?: (scale: number) => void;
   onSelectionChange?: (placementId: string | null, plantingId: string | null) => void;
+  onPartialPlacement?: (info: { cropName: string; placedQuantity: number; requestedQuantity: number }) => void;
 };
 
 // Grid line spacing in cm
@@ -107,6 +108,7 @@ export function UnifiedGardenCanvas({
   onPlantingQuantityUpdate,
   onZoomChange,
   onSelectionChange,
+  onPartialPlacement,
 }: UnifiedGardenCanvasProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -127,6 +129,9 @@ export function UnifiedGardenCanvas({
     valid: boolean;
     isContainer?: boolean; // True if dropping onto a container
     containerQuantity?: number; // Number of plants that will be placed in container
+    isPartial?: boolean; // True when fewer than requested will fit
+    partialQuantity?: number; // How many plants will actually be placed
+    requestedQuantity?: number; // How many were originally requested
   } | null>(null);
 
   // State for moving existing placements
@@ -611,6 +616,57 @@ export function UnifiedGardenCanvas({
       }
     }
 
+    // Full quantity doesn't fit — binary search for the largest partial quantity that does
+    if (quantity > 1) {
+      let low = 1;
+      let high = quantity - 1;
+      let bestPartial: { widthCm: number; heightCm: number; cols: number; xCm: number; yCm: number; partialQuantity: number } | null = null;
+
+      while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        const partialConfigs = getValidRectangleConfigs(mid, spacingCm);
+        let found = false;
+
+        for (const config of partialConfigs) {
+          if (found) break;
+          const orientations = [
+            { w: config.widthCm, h: config.heightCm, cols: config.cols },
+            { w: config.heightCm, h: config.widthCm, cols: config.rows },
+          ];
+
+          for (const { w, h, cols } of orientations) {
+            const centeredX = Math.max(0, snapToGrid(relX - w / 2, SNAP_CM));
+            const centeredY = Math.max(0, snapToGrid(relY - h / 2, SNAP_CM));
+
+            if (isPlacementValid(bedId, centeredX, centeredY, w, h, excludeId, plantingDateRange)) {
+              bestPartial = { widthCm: w, heightCm: h, cols, xCm: centeredX, yCm: centeredY, partialQuantity: mid };
+              found = true;
+              break;
+            }
+          }
+        }
+
+        if (found) {
+          low = mid + 1; // Try to fit more
+        } else {
+          high = mid - 1; // Need to fit fewer
+        }
+      }
+
+      if (bestPartial) {
+        return {
+          widthCm: bestPartial.widthCm,
+          heightCm: bestPartial.heightCm,
+          cols: bestPartial.cols,
+          xCm: bestPartial.xCm,
+          yCm: bestPartial.yCm,
+          valid: true,
+          isPartial: true,
+          partialQuantity: bestPartial.partialQuantity,
+        };
+      }
+    }
+
     const defaultFootprint = calculateFootprint(quantity, spacingCm);
     const centeredX = Math.max(0, snapToGrid(relX - defaultFootprint.widthCm / 2, SNAP_CM));
     const centeredY = Math.max(0, snapToGrid(relY - defaultFootprint.heightCm / 2, SNAP_CM));
@@ -659,6 +715,8 @@ export function UnifiedGardenCanvas({
       const bedY = bed.positionY ?? 0;
 
       const isContainer = bed.shape === 'container';
+      const isPartialContainer = isContainer && bestFit.valid && (bestFit.containerQuantity ?? 0) < data.quantity;
+      const isPartialRect = !isContainer && bestFit.isPartial === true;
       setDragPreview({
         bedId: bed.id,
         xCm: bedX + bestFit.xCm,
@@ -669,6 +727,9 @@ export function UnifiedGardenCanvas({
         valid: bestFit.valid,
         isContainer,
         containerQuantity: bestFit.containerQuantity,
+        isPartial: isPartialContainer || isPartialRect,
+        partialQuantity: isPartialRect ? bestFit.partialQuantity : bestFit.containerQuantity,
+        requestedQuantity: data.quantity,
       });
     } catch {
       // Data not available during dragover in some browsers
@@ -719,8 +780,11 @@ export function UnifiedGardenCanvas({
         if (bestFit.isContainer && bestFit.containerQuantity != null) {
           // Container: use the calculated packed quantity
           placementQuantity = bestFit.containerQuantity;
+        } else if (bestFit.isPartial && bestFit.partialQuantity != null) {
+          // Rectangular bed partial fit: use the binary-searched quantity
+          placementQuantity = bestFit.partialQuantity;
         } else {
-          // Rectangular bed: calculate from dimensions
+          // Rectangular bed full fit: calculate from dimensions
           const { quantity: calcQuantity } = calculateQuantityFromDimensions(
             bestFit.widthCm,
             bestFit.heightCm,
@@ -738,6 +802,15 @@ export function UnifiedGardenCanvas({
           cols: bestFit.cols,
           quantity: placementQuantity, // Always store explicit quantity
         });
+
+        // Notify parent if fewer than requested were placed
+        if (placementQuantity < data.quantity) {
+          onPartialPlacement?.({
+            cropName: data.cropName,
+            placedQuantity: placementQuantity,
+            requestedQuantity: data.quantity,
+          });
+        }
       }
     } catch (err) {
       console.error('Failed to parse drop data:', err);
@@ -1457,6 +1530,7 @@ export function UnifiedGardenCanvas({
                 const centerY = toSvgY(bedY) + containerRadius;
                 const plantRadius = (dragPreview.widthCm * scale) / 2;
                 const quantity = dragPreview.containerQuantity ?? 1;
+                const previewColor = !dragPreview.valid ? '#ef4444' : dragPreview.isPartial ? '#f59e0b' : dragPreview.color;
                 const positions = getContainerPlantPositions(
                   quantity,
                   bed.widthCm,
@@ -1473,30 +1547,69 @@ export function UnifiedGardenCanvas({
                         cx={pos.x}
                         cy={pos.y}
                         r={plantRadius}
-                        fill={dragPreview.valid ? dragPreview.color : '#ef4444'}
+                        fill={previewColor}
                         fillOpacity={0.4}
-                        stroke={dragPreview.valid ? dragPreview.color : '#ef4444'}
+                        stroke={previewColor}
                         strokeWidth={2}
                         strokeDasharray={dragPreview.valid ? 'none' : '4 2'}
                       />
                     ))}
+                    {dragPreview.isPartial && dragPreview.partialQuantity != null && (
+                      <text
+                        x={centerX}
+                        y={centerY}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill="#92400e"
+                        fontSize={12}
+                        fontWeight={600}
+                        style={{ pointerEvents: 'none' }}
+                      >
+                        {dragPreview.partialQuantity} of {dragPreview.requestedQuantity}
+                      </text>
+                    )}
                   </>
                 );
               })()
             ) : (
               // Regular bed preview: rectangle
-              <rect
-                x={toSvgX(dragPreview.xCm)}
-                y={toSvgY(dragPreview.yCm)}
-                width={dragPreview.widthCm * scale}
-                height={dragPreview.heightCm * scale}
-                fill={dragPreview.valid ? dragPreview.color : '#ef4444'}
-                fillOpacity={0.3}
-                stroke={dragPreview.valid ? dragPreview.color : '#ef4444'}
-                strokeWidth={2}
-                strokeDasharray={dragPreview.valid ? 'none' : '4 2'}
-                rx={4}
-              />
+              (() => {
+                const previewColor = !dragPreview.valid ? '#ef4444' : dragPreview.isPartial ? '#f59e0b' : dragPreview.color;
+                const rectX = toSvgX(dragPreview.xCm);
+                const rectY = toSvgY(dragPreview.yCm);
+                const rectW = dragPreview.widthCm * scale;
+                const rectH = dragPreview.heightCm * scale;
+                return (
+                  <>
+                    <rect
+                      x={rectX}
+                      y={rectY}
+                      width={rectW}
+                      height={rectH}
+                      fill={previewColor}
+                      fillOpacity={0.3}
+                      stroke={previewColor}
+                      strokeWidth={2}
+                      strokeDasharray={dragPreview.valid ? 'none' : '4 2'}
+                      rx={4}
+                    />
+                    {dragPreview.isPartial && dragPreview.partialQuantity != null && (
+                      <text
+                        x={rectX + rectW / 2}
+                        y={rectY + rectH / 2}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill="#92400e"
+                        fontSize={12}
+                        fontWeight={600}
+                        style={{ pointerEvents: 'none' }}
+                      >
+                        {dragPreview.partialQuantity} of {dragPreview.requestedQuantity}
+                      </text>
+                    )}
+                  </>
+                );
+              })()
             )
           )}
 
