@@ -283,6 +283,16 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
     await deleteBed(bed.id);
   };
 
+  const handleDuplicateBed = async (bed: GardenBed) => {
+    const { id, ...bedData } = bed;
+    await addBed({
+      ...bedData,
+      name: `${bed.name} (copy)`,
+      positionX: (bed.positionX ?? 0) + 30,
+      positionY: (bed.positionY ?? 0) + 30,
+    });
+  };
+
   const handleSaveBed = async (bedData: Omit<GardenBed, 'id'>) => {
     if (editingBed) {
       await updateBed(editingBed.id, bedData);
@@ -606,6 +616,7 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
               selectedDate={selectedDate}
               onEditBed={handleEditBed}
               onDeleteBed={handleDeleteBed}
+              onDuplicateBed={handleDuplicateBed}
               onUpdateBed={updateBed}
               onPlacementCreate={handlePlacementCreate}
               onPlacementUpdate={handlePlacementUpdate}

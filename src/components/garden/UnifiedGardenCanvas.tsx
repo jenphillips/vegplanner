@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
-import { Scissors } from 'lucide-react';
+import { Scissors, Copy, Pencil, Trash2 } from 'lucide-react';
 import {
   calculateFootprint,
   calculateFootprintWithLayout,
@@ -52,6 +52,7 @@ type UnifiedGardenCanvasProps = {
   selectedDate?: string; // ISO date for harvest indicator
   onEditBed: (bed: GardenBed) => void;
   onDeleteBed: (bed: GardenBed) => void;
+  onDuplicateBed: (bed: GardenBed) => void;
   onUpdateBed: (id: string, updates: Partial<GardenBed>) => void;
   onPlacementCreate: (placement: Omit<PlantingPlacement, 'id'>) => void;
   onPlacementUpdate: (id: string, updates: Partial<PlantingPlacement>) => void;
@@ -98,6 +99,7 @@ export function UnifiedGardenCanvas({
   selectedDate,
   onEditBed,
   onDeleteBed,
+  onDuplicateBed,
   onUpdateBed,
   onPlacementCreate,
   onPlacementUpdate,
@@ -1366,11 +1368,35 @@ export function UnifiedGardenCanvas({
                 {/* Bed actions when selected */}
                 {isSelected && !isBeingMoved && (
                   <g>
+                    {/* Duplicate button */}
+                    <g
+                      style={{ cursor: 'pointer' }}
+                      onClick={(e) => { e.stopPropagation(); onDuplicateBed(bed); }}
+                    >
+                      <title>Duplicate</title>
+                      <rect
+                        x={svgX + width - 76}
+                        y={svgY - 24}
+                        width={24}
+                        height={20}
+                        fill="white"
+                        stroke="#ddd"
+                        rx={4}
+                      />
+                      <Copy
+                        x={svgX + width - 70}
+                        y={svgY - 22}
+                        width={12}
+                        height={16}
+                        color="#666"
+                      />
+                    </g>
                     {/* Edit button */}
                     <g
                       style={{ cursor: 'pointer' }}
                       onClick={(e) => { e.stopPropagation(); onEditBed(bed); }}
                     >
+                      <title>Edit</title>
                       <rect
                         x={svgX + width - 50}
                         y={svgY - 24}
@@ -1380,20 +1406,20 @@ export function UnifiedGardenCanvas({
                         stroke="#ddd"
                         rx={4}
                       />
-                      <text
-                        x={svgX + width - 38}
-                        y={svgY - 10}
-                        fontSize={12}
-                        textAnchor="middle"
-                      >
-                        ✏️
-                      </text>
+                      <Pencil
+                        x={svgX + width - 44}
+                        y={svgY - 22}
+                        width={12}
+                        height={16}
+                        color="#666"
+                      />
                     </g>
                     {/* Delete button */}
                     <g
                       style={{ cursor: 'pointer' }}
                       onClick={(e) => { e.stopPropagation(); onDeleteBed(bed); }}
                     >
+                      <title>Delete</title>
                       <rect
                         x={svgX + width - 24}
                         y={svgY - 24}
@@ -1403,14 +1429,13 @@ export function UnifiedGardenCanvas({
                         stroke="#ddd"
                         rx={4}
                       />
-                      <text
-                        x={svgX + width - 12}
-                        y={svgY - 10}
-                        fontSize={12}
-                        textAnchor="middle"
-                      >
-                        🗑️
-                      </text>
+                      <Trash2
+                        x={svgX + width - 18}
+                        y={svgY - 22}
+                        width={12}
+                        height={16}
+                        color="#666"
+                      />
                     </g>
                   </g>
                 )}
