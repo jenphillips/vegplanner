@@ -101,6 +101,14 @@
   width: 52px;
 }
 
+.placementIndicator {
+  display: flex;
+  align-items: center;
+  color: var(--accent, #2f6f4e);
+  cursor: default;
+  flex-shrink: 0;
+}
+
 .deleteButton {
   flex-shrink: 0;
   width: 24px;

@@ -1,3 +1,5 @@
+export type PlacementDetail = { bedName: string; quantity: number };
+
 export type FrostWindow = {
   id: string;
   lastSpringFrost: string; // ISO date (yyyy-mm-dd)

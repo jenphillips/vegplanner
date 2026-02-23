@@ -13,6 +13,8 @@ import { LibraryView } from '@/components/library/LibraryView';
 import { usePlantings } from '@/hooks/usePlantings';
 import { usePlans } from '@/hooks/usePlans';
 import { useTasks } from '@/hooks/useTasks';
+import { usePlacements } from '@/hooks/usePlacements';
+import { useGardenBeds } from '@/hooks/useGardenBeds';
 import type { Cultivar, FrostWindow, Climate } from '@/lib/types';
 import styles from './page.module.css';
 
@@ -72,6 +74,29 @@ export default function Home() {
     loading: tasksLoading,
     toggleTaskComplete,
   } = useTasks(plantings, data.cultivars);
+
+  const { placements } = usePlacements();
+  const { beds } = useGardenBeds();
+
+  // Build maps for placement info on planting cards
+  const { placedQuantityMap, placementDetailsMap } = useMemo(() => {
+    const qtyMap = new Map<string, number>();
+    const detailsMap = new Map<string, Array<{ bedName: string; quantity: number }>>();
+    const bedNameMap = new Map(beds.map((b) => [b.id, b.name]));
+
+    for (const p of placements) {
+      qtyMap.set(p.plantingId, (qtyMap.get(p.plantingId) ?? 0) + p.quantity);
+
+      const existing = detailsMap.get(p.plantingId) ?? [];
+      existing.push({
+        bedName: bedNameMap.get(p.bedId) ?? 'Unknown bed',
+        quantity: p.quantity,
+      });
+      detailsMap.set(p.plantingId, existing);
+    }
+
+    return { placedQuantityMap: qtyMap, placementDetailsMap: detailsMap };
+  }, [placements, beds]);
 
   // Check if app is ready (has static data and plans have loaded)
   const ready = !!data.frost && data.cultivars.length > 0 && !plansLoading;
@@ -244,6 +269,8 @@ export default function Home() {
                     onUpdatePlanting={handleUpdatePlanting}
                     onDeletePlanting={handleDeletePlanting}
                     forceExpanded={expandAll}
+                    placedQuantityMap={placedQuantityMap}
+                    placementDetailsMap={placementDetailsMap}
                   />
                 ))}
               </div>
@@ -284,6 +311,8 @@ export default function Home() {
                     onUpdatePlanting={handleUpdatePlanting}
                     onDeletePlanting={handleDeletePlanting}
                     forceExpanded={expandAll}
+                    placedQuantityMap={placedQuantityMap}
+                    placementDetailsMap={placementDetailsMap}
                   />
                 ))}
               </div>
@@ -323,6 +352,8 @@ export default function Home() {
                     onUpdatePlanting={handleUpdatePlanting}
                     onDeletePlanting={handleDeletePlanting}
                     forceExpanded={expandAll}
+                    placedQuantityMap={placedQuantityMap}
+                    placementDetailsMap={placementDetailsMap}
                   />
                 ))}
               </div>

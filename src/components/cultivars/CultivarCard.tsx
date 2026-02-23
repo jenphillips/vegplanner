@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Cultivar, FrostWindow, Climate, Planting } from '@/lib/types';
+import type { Cultivar, FrostWindow, Climate, Planting, PlacementDetail } from '@/lib/types';
 import {
   calculateSuccessionWindows,
   calculateNextSuccession,
@@ -31,6 +31,8 @@ type CultivarCardProps = {
   onUpdatePlanting: (id: string, updates: Partial<Planting>) => void;
   onDeletePlanting: (id: string) => void;
   forceExpanded?: boolean;
+  placedQuantityMap?: Map<string, number>;
+  placementDetailsMap?: Map<string, PlacementDetail[]>;
 };
 
 export function CultivarCard({
@@ -43,6 +45,8 @@ export function CultivarCard({
   onUpdatePlanting,
   onDeletePlanting,
   forceExpanded,
+  placedQuantityMap,
+  placementDetailsMap,
 }: CultivarCardProps) {
   const [localExpanded, setLocalExpanded] = useState(forceExpanded ?? false);
   const [hasManualOverride, setHasManualOverride] = useState(false);
@@ -312,6 +316,8 @@ export function CultivarCard({
               onDelete={onDeletePlanting}
               selectedPlantingId={selectedPlantingId}
               onSelectPlanting={handleSelectPlanting}
+              placedQuantityMap={placedQuantityMap}
+              placementDetailsMap={placementDetailsMap}
             />
           )}
 

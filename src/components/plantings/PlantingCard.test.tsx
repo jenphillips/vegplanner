@@ -708,6 +708,71 @@ describe('PlantingCard', () => {
   });
 
   // ============================================
+  // Placement indicator
+  // ============================================
+
+  describe('placement indicator', () => {
+    it('shows map pin icon when placementDetails are provided', () => {
+      render(
+        <PlantingCard
+          planting={createPlanting()}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={vi.fn()}
+          onDelete={vi.fn()}
+          placementDetails={[{ bedName: 'Raised Bed 1', quantity: 4 }]}
+        />
+      );
+      expect(screen.getByTitle('Raised Bed 1: 4')).toBeTruthy();
+    });
+
+    it('does not show map pin icon when no placementDetails', () => {
+      render(
+        <PlantingCard
+          planting={createPlanting()}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={vi.fn()}
+          onDelete={vi.fn()}
+        />
+      );
+      expect(screen.queryByTitle(/Raised Bed/)).toBeNull();
+    });
+
+    it('does not show map pin icon for empty placementDetails', () => {
+      render(
+        <PlantingCard
+          planting={createPlanting()}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={vi.fn()}
+          onDelete={vi.fn()}
+          placementDetails={[]}
+        />
+      );
+      expect(screen.queryByTitle(/Raised Bed/)).toBeNull();
+    });
+
+    it('shows all bed names and quantities in tooltip', () => {
+      render(
+        <PlantingCard
+          planting={createPlanting()}
+          cultivar={createCultivar()}
+          frost={createFrostWindow()}
+          onUpdate={vi.fn()}
+          onDelete={vi.fn()}
+          placementDetails={[
+            { bedName: 'Raised Bed 1', quantity: 4 },
+            { bedName: 'Side Bed 2', quantity: 6 },
+          ]}
+        />
+      );
+      const indicator = screen.getByTitle(/Raised Bed 1: 4/);
+      expect(indicator.getAttribute('title')).toContain('Side Bed 2: 6');
+    });
+  });
+
+  // ============================================
   // Selected state
   // ============================================
 

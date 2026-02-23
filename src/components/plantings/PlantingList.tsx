@@ -1,6 +1,6 @@
 'use client';
 
-import type { Cultivar, Planting, FrostWindow, Climate } from '@/lib/types';
+import type { Cultivar, Planting, FrostWindow, Climate, PlacementDetail } from '@/lib/types';
 import { PlantingCard } from './PlantingCard';
 import { TimelineHeader } from './TimelineHeader';
 import styles from './PlantingList.module.css';
@@ -15,6 +15,7 @@ type PlantingListProps = {
   selectedPlantingId?: string | null;
   onSelectPlanting?: (id: string) => void;
   placedQuantityMap?: Map<string, number>;
+  placementDetailsMap?: Map<string, PlacementDetail[]>;
 };
 
 export function PlantingList({
@@ -27,6 +28,7 @@ export function PlantingList({
   selectedPlantingId,
   onSelectPlanting,
   placedQuantityMap,
+  placementDetailsMap,
 }: PlantingListProps) {
   if (plantings.length === 0) {
     return null;
@@ -49,6 +51,7 @@ export function PlantingList({
             isSelected={selectedPlantingId === planting.id}
             onSelect={onSelectPlanting}
             placedQuantity={placedQuantityMap?.get(planting.id)}
+            placementDetails={placementDetailsMap?.get(planting.id)}
           />
         ))}
       </div>

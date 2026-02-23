@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import type { Cultivar, Planting, FrostWindow, Climate } from '@/lib/types';
+import { MapPin } from 'lucide-react';
+import type { Cultivar, Planting, FrostWindow, Climate, PlacementDetail } from '@/lib/types';
 import { recalculatePlantingForMethodChange } from '@/lib/succession';
 import { PlantingTimeline } from './PlantingTimeline';
 import { MethodToggle } from './MethodToggle';
@@ -20,6 +21,8 @@ type PlantingCardProps = {
   disableDrag?: boolean;
   /** Number of plants already placed in garden beds. Quantity cannot be reduced below this. */
   placedQuantity?: number;
+  /** Placement locations with bed names and quantities */
+  placementDetails?: PlacementDetail[];
   /** Optional selected date to show as a vertical indicator line (for layout calendar view) */
   selectedDate?: string;
 };
@@ -57,6 +60,7 @@ export function PlantingCard({
   onSelect,
   disableDrag,
   placedQuantity,
+  placementDetails,
   selectedDate,
 }: PlantingCardProps) {
   const handleDelete = () => {
@@ -272,6 +276,14 @@ export function PlantingCard({
             />
           )}
         </div>
+        {placementDetails && placementDetails.length > 0 && (
+          <span
+            className={styles.placementIndicator}
+            title={placementDetails.map((d) => `${d.bedName}: ${d.quantity}`).join('\n')}
+          >
+            <MapPin size={13} />
+          </span>
+        )}
         {isEditingQuantity ? (
           <input
             ref={quantityInputRef}
