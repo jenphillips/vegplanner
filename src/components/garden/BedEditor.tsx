@@ -120,6 +120,22 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
 
   const isEditing = !!bed;
 
+  // Auto-convert inches >= 12 to feet+inches on blur
+  const handleInchesBlur = (
+    inchesValue: string,
+    feetValue: string,
+    setInches: (v: string) => void,
+    setFeet: (v: string) => void
+  ) => {
+    const totalInches = parseInt(inchesValue, 10);
+    if (isNaN(totalInches) || totalInches < 12) return;
+    const extraFeet = Math.floor(totalInches / 12);
+    const remainingInches = totalInches % 12;
+    const currentFeet = parseInt(feetValue, 10) || 0;
+    setFeet((currentFeet + extraFeet).toString());
+    setInches(remainingInches.toString());
+  };
+
   // Reset form when bed prop changes
   useEffect(() => {
     setName(bed?.name ?? '');
@@ -294,8 +310,8 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
                       type="number"
                       value={widthInches}
                       onChange={(e) => setWidthInches(e.target.value)}
+                      onBlur={() => handleInchesBlur(widthInches, widthFeet, setWidthInches, setWidthFeet)}
                       min="0"
-                      max="11"
                       className={styles.input}
                     />
                     <span className={styles.unitLabel}>in</span>
@@ -357,8 +373,8 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
                         type="number"
                         value={widthInches}
                         onChange={(e) => setWidthInches(e.target.value)}
+                        onBlur={() => handleInchesBlur(widthInches, widthFeet, setWidthInches, setWidthFeet)}
                         min="0"
-                        max="11"
                         className={styles.input}
                       />
                       <span className={styles.unitLabel}>in</span>
@@ -386,8 +402,8 @@ export function BedEditor({ bed, units = 'metric', onSave, onCancel }: BedEditor
                         type="number"
                         value={lengthInches}
                         onChange={(e) => setLengthInches(e.target.value)}
+                        onBlur={() => handleInchesBlur(lengthInches, lengthFeet, setLengthInches, setLengthFeet)}
                         min="0"
-                        max="11"
                         className={styles.input}
                       />
                       <span className={styles.unitLabel}>in</span>
