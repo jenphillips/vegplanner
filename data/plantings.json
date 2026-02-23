@@ -417,5 +417,47 @@
     "successionNumber": 1,
     "id": "1da47c0b-6ab1-4da4-9b7a-aa71e3858ed8",
     "createdAt": "2026-02-22T20:01:43.862Z"
+  },
+  {
+    "cultivarId": "pepper-orange-glow",
+    "label": "Pepper (Bell) - Orange Glow #1",
+    "quantity": 4,
+    "sowDate": "2025-04-20",
+    "transplantDate": "2025-06-15",
+    "harvestStart": "2025-08-26",
+    "harvestEnd": "2025-09-22",
+    "method": "transplant",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "2a79dd94-6965-481b-8a5c-55b5b925c626",
+    "createdAt": "2026-02-22T21:54:03.104Z"
+  },
+  {
+    "cultivarId": "pepper-jalapeno-early",
+    "label": "Pepper (Hot) - Early #1",
+    "quantity": 4,
+    "sowDate": "2025-04-30",
+    "transplantDate": "2025-06-25",
+    "harvestStart": "2025-08-29",
+    "harvestEnd": "2025-09-22",
+    "method": "transplant",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "d18707de-a978-493a-bdb0-5ce03c151cfe",
+    "createdAt": "2026-02-22T21:54:05.211Z"
+  },
+  {
+    "cultivarId": "pepper-pepperoncini-orange",
+    "label": "Pepper (Sweet) - Pepperoncini Orange #1",
+    "quantity": 4,
+    "sowDate": "2025-04-20",
+    "transplantDate": "2025-06-15",
+    "harvestStart": "2025-08-26",
+    "harvestEnd": "2025-09-22",
+    "method": "transplant",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "836ddf79-e356-4f14-a031-e0c7e4fd027f",
+    "createdAt": "2026-02-22T21:54:07.004Z"
   }
 ]

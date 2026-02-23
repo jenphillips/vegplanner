@@ -142,5 +142,158 @@
     "successionOffsetsDays": [
       0
     ]
+  },
+  {
+    "id": "plan-pepper-orange-glow",
+    "cultivarId": "pepper-orange-glow",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-pepper-pepperoncini-orange",
+    "cultivarId": "pepper-pepperoncini-orange",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-pepper-jalapeno-early",
+    "cultivarId": "pepper-jalapeno-early",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-squash-summer",
+    "cultivarId": "baseline-squash-summer",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-squash-bennings-green-tint",
+    "cultivarId": "squash-bennings-green-tint",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-squash-black-beauty",
+    "cultivarId": "squash-black-beauty",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-squash-costata-romanesco",
+    "cultivarId": "squash-costata-romanesco",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-squash-golden-zucchini",
+    "cultivarId": "squash-golden-zucchini",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-squash-yellow-crookneck",
+    "cultivarId": "squash-yellow-crookneck",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-spaghetti-squash",
+    "cultivarId": "baseline-spaghetti-squash",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-squash-spaghetti",
+    "cultivarId": "squash-spaghetti",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-acorn-squash",
+    "cultivarId": "baseline-acorn-squash",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-squash-acorn-table-queen",
+    "cultivarId": "squash-acorn-table-queen",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-squash-winter",
+    "cultivarId": "baseline-squash-winter",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-squash-delicata",
+    "cultivarId": "squash-delicata",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-squash-red-kuri",
+    "cultivarId": "squash-red-kuri",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-squash-butternut-waltham",
+    "cultivarId": "squash-butternut-waltham",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
   }
 ]

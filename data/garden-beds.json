@@ -76,8 +76,8 @@
     "lengthCm": 61,
     "sunExposure": "full",
     "id": "3c5f7691-bd3f-4693-ab7c-2b4be080304a",
-    "positionX": -105,
-    "positionY": -120
+    "positionX": -185,
+    "positionY": -230
   },
   {
     "name": "Garage Bed 2",
@@ -86,8 +86,8 @@
     "lengthCm": 61,
     "sunExposure": "full",
     "id": "e02b3526-88b0-4fd1-b41b-937ef4cde6bf",
-    "positionX": 30,
-    "positionY": -120
+    "positionX": -45,
+    "positionY": -230
   },
   {
     "name": "Deck pot 1",
@@ -106,7 +106,87 @@
     "lengthCm": 30,
     "sunExposure": "full",
     "id": "2628ba69-7f1c-42fa-a97c-ebda08fff750",
-    "positionX": 235,
+    "positionX": 225,
     "positionY": -125
+  },
+  {
+    "name": "Deck pot 3",
+    "shape": "container",
+    "widthCm": 30,
+    "lengthCm": 30,
+    "sunExposure": "full",
+    "id": "f9d01e7d-4daf-4f31-9828-a7d2d15bf0ae",
+    "positionX": 265,
+    "positionY": -125
+  },
+  {
+    "name": "Deck pot 4",
+    "shape": "container",
+    "widthCm": 30,
+    "lengthCm": 30,
+    "sunExposure": "full",
+    "id": "cd53958c-d6ca-4794-b3fb-55c97b8945de",
+    "positionX": 305,
+    "positionY": -125
+  },
+  {
+    "name": "Deck pot 5",
+    "shape": "container",
+    "widthCm": 30,
+    "lengthCm": 30,
+    "sunExposure": "full",
+    "id": "bcb1b421-485e-4d92-b1a0-5cbba65d5f33",
+    "positionX": 345,
+    "positionY": -125
+  },
+  {
+    "name": "Deck pot 6",
+    "shape": "container",
+    "widthCm": 30,
+    "lengthCm": 30,
+    "sunExposure": "full",
+    "id": "a45285c6-4db2-4afa-a7f3-c2179d5f5227",
+    "positionX": 385,
+    "positionY": -125
+  },
+  {
+    "name": "Deck pot 7",
+    "shape": "container",
+    "widthCm": 30,
+    "lengthCm": 30,
+    "sunExposure": "full",
+    "id": "be2d8fd1-e9ff-44b5-bb3d-4d387b023093",
+    "positionX": 425,
+    "positionY": -125
+  },
+  {
+    "name": "Garage Bed 3",
+    "shape": "bed",
+    "widthCm": 122,
+    "lengthCm": 61,
+    "sunExposure": "full",
+    "id": "370761cb-6b06-4de6-a247-da17c5c63413",
+    "positionX": -185,
+    "positionY": -140
+  },
+  {
+    "name": "Garage Bed 4",
+    "shape": "bed",
+    "widthCm": 122,
+    "lengthCm": 61,
+    "sunExposure": "full",
+    "id": "26489b92-7a35-4d88-93e2-ff82ed17e467",
+    "positionX": -45,
+    "positionY": -140
+  },
+  {
+    "name": "Deck pot 7 (copy)",
+    "shape": "container",
+    "widthCm": 30,
+    "lengthCm": 30,
+    "sunExposure": "full",
+    "positionX": 465,
+    "positionY": -125,
+    "id": "7bd3a3d1-5c85-4539-a240-ccb1a0a50370"
   }
 ]
