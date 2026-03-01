@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { MapPin } from 'lucide-react';
 import type { Cultivar, Planting, FrostWindow, Climate, PlacementDetail } from '@/lib/types';
-import { recalculatePlantingForMethodChange } from '@/lib/succession';
+import { recalculatePlantingForMethodChange, calculateFrostDeadline, calculateHarvestEnd } from '@/lib/succession';
+import { addDays } from '@/lib/dateUtils';
 import { PlantingTimeline } from './PlantingTimeline';
 import { MethodToggle } from './MethodToggle';
 import styles from './PlantingCard.module.css';
@@ -80,30 +81,6 @@ export function PlantingCard({
     });
   };
 
-  // Helper to add days to an ISO date string
-  const addDays = (iso: string, days: number) => {
-    const d = new Date(`${iso}T00:00:00Z`);
-    d.setUTCDate(d.getUTCDate() + days);
-    return d.toISOString().slice(0, 10);
-  };
-
-  // Calculate the frost deadline for harvest end calculations
-  const calculateFrostDeadline = () => {
-    const year = new Date(`${frost.lastSpringFrost}T00:00:00Z`).getUTCFullYear();
-    const FROST_BUFFER_DAYS = 4;
-
-    if (cultivar.frostSensitive) {
-      const earliestFrost = climate?.firstFallFrost?.earliest
-        ? `${year}-${climate.firstFallFrost.earliest}`
-        : frost.firstFallFrost;
-      return addDays(earliestFrost, -FROST_BUFFER_DAYS);
-    } else {
-      const typicalFrost = climate?.firstFallFrost?.typical
-        ? `${year}-${climate.firstFallFrost.typical}`
-        : frost.firstFallFrost;
-      return addDays(typicalFrost, 21);
-    }
-  };
 
   const [methodNotice, setMethodNotice] = useState<string | null>(null);
   const [reorderNotice, setReorderNotice] = useState<string | null>(null);
@@ -184,7 +161,6 @@ export function PlantingCard({
   const handleShiftPlanting = (id: string, shiftDays: number) => {
     const newSowDate = addDays(planting.sowDate, shiftDays);
     const newHarvestStart = addDays(planting.harvestStart, shiftDays);
-    let newHarvestEnd = addDays(planting.harvestEnd, shiftDays);
 
     // For transplant plantings, also shift the transplant date
     const newTransplantDate = planting.transplantDate
@@ -192,21 +168,8 @@ export function PlantingCard({
       : undefined;
 
     // Recalculate harvest end based on cultivar settings and frost deadline
-    const frostDeadline = calculateFrostDeadline();
-
-    if (cultivar.harvestDurationDays != null) {
-      // Crop has explicit harvest duration - use it, but cap at frost deadline
-      const durationEnd = addDays(newHarvestStart, cultivar.harvestDurationDays);
-      newHarvestEnd = durationEnd > frostDeadline ? frostDeadline : durationEnd;
-    } else if (cultivar.harvestStyle === 'continuous') {
-      // Continuous harvest until frost
-      newHarvestEnd = frostDeadline;
-    } else {
-      // Single harvest - shift with start, but don't exceed frost deadline
-      if (newHarvestEnd > frostDeadline) {
-        newHarvestEnd = frostDeadline;
-      }
-    }
+    const frostDeadline = calculateFrostDeadline(cultivar, frost, climate);
+    const newHarvestEnd = calculateHarvestEnd(newHarvestStart, cultivar, frostDeadline);
 
     onUpdate(id, {
       sowDate: newSowDate,

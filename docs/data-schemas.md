@@ -55,7 +55,9 @@ type Cultivar = {
   frostSensitive?: boolean;      // If true, harvest ends at first fall frost
 
   // Temperature tolerances (for succession planning)
-  minGrowingTempC?: number;      // Minimum viable temperature (°C)
+  minGrowingTempC?: number;      // Minimum viable temperature for germination/establishment (°C)
+  minGrowingTempTransplantC?: number; // Override min temp for transplant method (°C)
+  minEstablishedGrowthTempC?: number; // Lower threshold after plant is established (~3-4 weeks) (°C)
   maxGrowingTempC?: number;      // Maximum viable temperature (°C)
   optimalTempMinC?: number;      // Optimal range low (°C)
   optimalTempMaxC?: number;      // Optimal range high (°C)

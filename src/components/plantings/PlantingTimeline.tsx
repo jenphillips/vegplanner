@@ -1,9 +1,9 @@
 'use client';
 
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
-import type { Planting, FrostWindow, Climate, Cultivar } from '@/lib/types';
-import { isGrowingPeriodViable } from '@/lib/succession';
-import { daysBetween, buildDailyClimateTable } from '@/lib/dateUtils';
+import type { Planting, FrostWindow, Climate, Cultivar, SowMethod } from '@/lib/types';
+import { isGrowingPeriodViable, calculateFrostDeadline, calculateHarvestEnd } from '@/lib/succession';
+import { addDays, daysBetween, buildDailyClimateTable } from '@/lib/dateUtils';
 import { calculateShiftBounds } from '@/lib/dragConstraints';
 import styles from './PlantingTimeline.module.css';
 
@@ -24,12 +24,6 @@ type PlantingTimelineProps = {
   onDragConstraintHit?: () => void;
   /** Optional selected date to show as a vertical indicator line (for layout calendar view) */
   selectedDate?: string;
-};
-
-const addDays = (iso: string, days: number) => {
-  const d = new Date(`${iso}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
 };
 
 export function PlantingTimeline({ planting, frost, climate, cultivar, previousHarvestEnd, onUpdateSowDate, onShiftPlanting, onDragConstraintHit, selectedDate }: PlantingTimelineProps) {
@@ -59,8 +53,8 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
   const dragBounds = useMemo(() => {
     if (!canDragTransplant || !planting.transplantDate) return null;
 
-    const minWeeks = cultivar.indoorLeadWeeksMin ?? 4;
-    const maxWeeks = cultivar.indoorLeadWeeksMax ?? 8;
+    const minWeeks = cultivar.indoorLeadWeeksMin ?? 6;
+    const maxWeeks = cultivar.indoorLeadWeeksMax ?? 6;
 
     // Earliest sow = transplant - maxWeeks, Latest sow = transplant - minWeeks
     const earliestSow = addDays(planting.transplantDate, -maxWeeks * 7);
@@ -108,7 +102,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     const isShiftViable = (shiftDays: number): boolean => {
       const shiftedStart = addDays(outdoorStart, shiftDays);
       const shiftedHarvestStart = addDays(planting.harvestStart, shiftDays);
-      const result = isGrowingPeriodViable(shiftedStart, shiftedHarvestStart, cultivar, climate, { climateTable });
+      const result = isGrowingPeriodViable(shiftedStart, shiftedHarvestStart, cultivar, climate, { climateTable, method: planting.method as SowMethod });
       return result.viable;
     };
 
@@ -142,7 +136,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
       ranges,
       currentViable,
     };
-  }, [canDragDirectSow, canDragTransplantShift, climate, cultivar, shiftBounds, planting.transplantDate, planting.sowDate, planting.harvestStart, climateTable]);
+  }, [canDragDirectSow, canDragTransplantShift, climate, cultivar, shiftBounds, planting.transplantDate, planting.sowDate, planting.harvestStart, planting.method, climateTable]);
 
   // Track previous shift value to detect drag direction for range jumping
   const prevShiftRef = useRef<number>(0);
@@ -286,22 +280,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
 
   // Calculate the frost deadline for harvest end calculations
   const frostDeadline = useMemo(() => {
-    const year = new Date(`${frost.lastSpringFrost}T00:00:00Z`).getUTCFullYear();
-    const FROST_BUFFER_DAYS = 4;
-
-    if (cultivar?.frostSensitive) {
-      // Use earliest fall frost from climate data if available
-      const earliestFrost = climate?.firstFallFrost?.earliest
-        ? `${year}-${climate.firstFallFrost.earliest}`
-        : frost.firstFallFrost;
-      return addDays(earliestFrost, -FROST_BUFFER_DAYS);
-    } else {
-      // Frost-tolerant crops can extend past typical frost
-      const typicalFrost = climate?.firstFallFrost?.typical
-        ? `${year}-${climate.firstFallFrost.typical}`
-        : frost.firstFallFrost;
-      return addDays(typicalFrost, 21);
-    }
+    return calculateFrostDeadline(cultivar ?? { frostSensitive: false }, frost, climate);
   }, [frost, climate, cultivar?.frostSensitive]);
 
   // Calculate new harvest dates when sow date changes
@@ -333,22 +312,8 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     // Shift harvest start earlier by the new amount
     const newHarvestStart = addDays(baselineHarvestStart, -newShift);
 
-    // For harvest end: extend to frost deadline if the crop has explicit duration,
-    // or if the original harvest was truncated by frost
-    let newHarvestEnd: string;
-
-    if (cultivar.harvestDurationDays != null) {
-      // Crop has explicit harvest duration - use it, but cap at frost deadline
-      const durationEnd = addDays(newHarvestStart, cultivar.harvestDurationDays);
-      newHarvestEnd = durationEnd > frostDeadline ? frostDeadline : durationEnd;
-    } else if (cultivar.harvestStyle === 'continuous') {
-      // Continuous harvest until frost
-      newHarvestEnd = frostDeadline;
-    } else {
-      // Single harvest - just shift with start
-      const baselineHarvestEnd = addDays(planting.harvestEnd, currentOverrideShift);
-      newHarvestEnd = addDays(baselineHarvestEnd, -newShift);
-    }
+    // Recalculate harvest end based on cultivar settings and frost deadline
+    const newHarvestEnd = calculateHarvestEnd(newHarvestStart, cultivar, frostDeadline);
 
     return { harvestStart: newHarvestStart, harvestEnd: newHarvestEnd };
   }, [cultivar, planting, frostDeadline]);
@@ -541,23 +506,9 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     const shiftedHarvestStart = isShifting ? addDays(planting.harvestStart, shiftDays) : planting.harvestStart;
 
     // Calculate shifted harvest end, accounting for frost deadline extension
-    let shiftedHarvestEnd = isShifting ? addDays(planting.harvestEnd, shiftDays) : planting.harvestEnd;
-    if (isShifting && cultivar) {
-      // Recalculate harvest end based on cultivar settings and frost deadline
-      if (cultivar.harvestDurationDays != null) {
-        // Crop has explicit harvest duration - use it, but cap at frost deadline
-        const durationEnd = addDays(shiftedHarvestStart, cultivar.harvestDurationDays);
-        shiftedHarvestEnd = durationEnd > frostDeadline ? frostDeadline : durationEnd;
-      } else if (cultivar.harvestStyle === 'continuous') {
-        // Continuous harvest until frost
-        shiftedHarvestEnd = frostDeadline;
-      } else {
-        // Single harvest - shift with start, but don't exceed frost deadline
-        if (shiftedHarvestEnd > frostDeadline) {
-          shiftedHarvestEnd = frostDeadline;
-        }
-      }
-    }
+    const shiftedHarvestEnd = isShifting && cultivar
+      ? calculateHarvestEnd(shiftedHarvestStart, cultivar, frostDeadline)
+      : planting.harvestEnd;
 
     // Sow period
     const effectiveSowDate = isShifting

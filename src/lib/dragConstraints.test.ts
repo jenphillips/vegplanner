@@ -437,4 +437,116 @@ describe('calculateShiftBounds', () => {
       expect(result.minShift).toBe(17);
     });
   });
+
+  describe('maxShift (frost deadline constraint)', () => {
+    it('limits forward shift based on frost-sensitive deadline and maturity', () => {
+      // Cosmos: frost-sensitive, maturityDays=60
+      // Frost deadline: earliest frost (09-15) - 4 days = 2025-09-11
+      // Latest sow: 2025-09-11 - 60 days = 2025-07-13
+      // Current sow: 2025-06-08 → maxShift = Jul 13 - Jun 8 = 35 days
+      const planting = createPlanting({
+        cultivarId: cosmosCultivar.id,
+        method: 'direct',
+        sowDate: '2025-06-08',
+        harvestStart: '2025-08-08',
+        harvestEnd: '2025-09-15',
+      });
+
+      const result = calculateShiftBounds({
+        planting,
+        cultivar: cosmosCultivar,
+        frost: defaultFrostWindow,
+        climate: sussexClimate,
+        isTransplantMode: false,
+      });
+
+      expect(result.maxShift).toBe(35);
+    });
+
+    it('limits forward shift based on frost-tolerant deadline', () => {
+      // Beets: frost-tolerant, maturityDays=55
+      // Frost deadline: typical frost (10-01) + 21 days = 2025-10-22
+      // Latest sow: 2025-10-22 - 55 days = 2025-08-28
+      // Current sow: 2025-05-01 → maxShift = Aug 28 - May 1 = 119 days
+      const planting = createPlanting({
+        cultivarId: beetsCultivar.id,
+        method: 'direct',
+        sowDate: '2025-05-01',
+        harvestStart: '2025-06-25',
+        harvestEnd: '2025-07-15',
+      });
+
+      const result = calculateShiftBounds({
+        planting,
+        cultivar: beetsCultivar,
+        frost: defaultFrostWindow,
+        climate: sussexClimate,
+        isTransplantMode: false,
+      });
+
+      expect(result.maxShift).toBe(119);
+    });
+
+    it('returns 0 when planting is already at latest viable date', () => {
+      // Cosmos: latest sow = 2025-07-13 (see above)
+      // Current sow exactly at latest sow
+      const planting = createPlanting({
+        cultivarId: cosmosCultivar.id,
+        method: 'direct',
+        sowDate: '2025-07-13',
+        harvestStart: '2025-09-11',
+        harvestEnd: '2025-09-15',
+      });
+
+      const result = calculateShiftBounds({
+        planting,
+        cultivar: cosmosCultivar,
+        frost: defaultFrostWindow,
+        climate: sussexClimate,
+        isTransplantMode: false,
+      });
+
+      expect(result.maxShift).toBe(0);
+    });
+
+    it('frost-tolerant crops get more forward room than frost-sensitive', () => {
+      const sowDate = '2025-06-15';
+
+      const sensitivePlanting = createPlanting({
+        cultivarId: cosmosCultivar.id,
+        method: 'direct',
+        sowDate,
+        harvestStart: '2025-08-15',
+        harvestEnd: '2025-09-15',
+      });
+
+      const tolerantPlanting = createPlanting({
+        cultivarId: beetsCultivar.id,
+        method: 'direct',
+        sowDate,
+        harvestStart: '2025-08-09',
+        harvestEnd: '2025-08-16',
+      });
+
+      const sensitiveResult = calculateShiftBounds({
+        planting: sensitivePlanting,
+        cultivar: cosmosCultivar,
+        frost: defaultFrostWindow,
+        climate: sussexClimate,
+        isTransplantMode: false,
+      });
+
+      const tolerantResult = calculateShiftBounds({
+        planting: tolerantPlanting,
+        cultivar: beetsCultivar,
+        frost: defaultFrostWindow,
+        climate: sussexClimate,
+        isTransplantMode: false,
+      });
+
+      // Frost-tolerant gets a later deadline (Oct 22 vs Sep 11)
+      // so maxShift should be larger (even accounting for different maturityDays)
+      expect(tolerantResult.maxShift).toBeGreaterThan(sensitiveResult.maxShift);
+    });
+  });
 });

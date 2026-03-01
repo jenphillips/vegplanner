@@ -83,7 +83,9 @@ export type Cultivar = {
   harvestDurationDays?: number | null; // window length; for continuous, fallback to frost end
   frostSensitive?: boolean; // if true, continuous harvest ends at first fall frost
   // Temperature tolerance for succession planning
-  minGrowingTempC?: number | null; // Below this, don't plant (e.g., 5 for tomatoes)
+  minGrowingTempC?: number | null; // Below this, don't plant (e.g., 18 for squash seeds)
+  minGrowingTempTransplantC?: number | null; // Override for transplant method (e.g., 15 for squash transplants)
+  minEstablishedGrowthTempC?: number | null; // Lower threshold after plant is established (~3-4 weeks)
   maxGrowingTempC?: number | null; // Above this, skip succession (e.g., 24 for spinach)
   optimalTempMinC?: number | null; // Optimal growing range low
   optimalTempMaxC?: number | null; // Optimal growing range high

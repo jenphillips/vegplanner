@@ -329,21 +329,27 @@ describe('PlantingCard', () => {
     });
 
     it('shows notice when method switch is not viable', () => {
-      // Use a heat-sensitive cultivar with a planting that would extend into hot months
+      // Use a frost-sensitive cultivar with high cold threshold and long maturity.
+      // In the test climate, tavg only reaches 19°C in Jul-Aug. A 60-day maturity
+      // crop can't complete its growing period before temps drop, making direct sow
+      // genuinely non-viable (similar to squash in a cold climate).
       render(
         <PlantingCard
           planting={createPlanting({
             method: 'transplant',
-            sowDate: '2025-04-22',
-            transplantDate: '2025-05-13',
-            harvestStart: '2025-06-06',
-            harvestEnd: '2025-06-27',
+            sowDate: '2025-05-25',
+            transplantDate: '2025-06-15',
+            harvestStart: '2025-07-24',
+            harvestEnd: '2025-08-14',
           })}
           cultivar={createCultivar({
             sowMethod: 'either',
-            maxGrowingTempC: 21, // Low heat tolerance
-            maturityDays: 45,
+            frostSensitive: true,
+            minGrowingTempC: 18,
+            maxGrowingTempC: 32,
+            maturityDays: 60,
             harvestDurationDays: 21,
+            directAfterLsfDays: 14,
           })}
           frost={createFrostWindow()}
           climate={createClimate()}
@@ -352,7 +358,7 @@ describe('PlantingCard', () => {
         />
       );
 
-      // Switching transplant→direct pushes harvest into hot period
+      // Direct sow is genuinely non-viable — no 60-day window with tavg >= 19°C
       fireEvent.click(screen.getByTitle('Direct sow outdoors'));
       expect(screen.getByText(/Can't switch method/)).toBeTruthy();
     });
@@ -362,16 +368,19 @@ describe('PlantingCard', () => {
         <PlantingCard
           planting={createPlanting({
             method: 'transplant',
-            sowDate: '2025-04-22',
-            transplantDate: '2025-05-13',
-            harvestStart: '2025-06-06',
-            harvestEnd: '2025-06-27',
+            sowDate: '2025-05-25',
+            transplantDate: '2025-06-15',
+            harvestStart: '2025-07-24',
+            harvestEnd: '2025-08-14',
           })}
           cultivar={createCultivar({
             sowMethod: 'either',
-            maxGrowingTempC: 21,
-            maturityDays: 45,
+            frostSensitive: true,
+            minGrowingTempC: 18,
+            maxGrowingTempC: 32,
+            maturityDays: 60,
             harvestDurationDays: 21,
+            directAfterLsfDays: 14,
           })}
           frost={createFrostWindow()}
           climate={createClimate()}
@@ -393,16 +402,19 @@ describe('PlantingCard', () => {
         <PlantingCard
           planting={createPlanting({
             method: 'transplant',
-            sowDate: '2025-04-22',
-            transplantDate: '2025-05-13',
-            harvestStart: '2025-06-06',
-            harvestEnd: '2025-06-27',
+            sowDate: '2025-05-25',
+            transplantDate: '2025-06-15',
+            harvestStart: '2025-07-24',
+            harvestEnd: '2025-08-14',
           })}
           cultivar={createCultivar({
             sowMethod: 'either',
-            maxGrowingTempC: 21,
-            maturityDays: 45,
+            frostSensitive: true,
+            minGrowingTempC: 18,
+            maxGrowingTempC: 32,
+            maturityDays: 60,
             harvestDurationDays: 21,
+            directAfterLsfDays: 14,
           })}
           frost={createFrostWindow()}
           climate={createClimate()}

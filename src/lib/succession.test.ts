@@ -7,6 +7,9 @@ import {
   createPlantingFromWindow,
   getNextSuccessionNumber,
   renumberPlantingsForCrop,
+  calculateFrostDeadline,
+  calculateHarvestEnd,
+  FROST_BUFFER_DAYS,
   type PlantingWindow,
 } from './succession';
 import type { Cultivar, Climate, Planting } from './types';
@@ -1476,6 +1479,125 @@ describe('isGrowingPeriodViable', () => {
       expect(result.viable).toBe(true);
     });
   });
+
+  describe('phased temperature check (established growth)', () => {
+    // Squash-like cultivar: germination needs 15°C, established growth at 10°C
+    const squashCultivar: Cultivar = {
+      id: 'squash-test',
+      crop: 'Squash (Summer)',
+      variety: 'Test Zucchini',
+      germDaysMin: 4,
+      germDaysMax: 8,
+      maturityDays: 50,
+      maturityBasis: 'from_sow',
+      sowMethod: 'direct',
+      directAfterLsfDays: 14,
+      frostSensitive: true,
+      minGrowingTempC: 15,
+      minEstablishedGrowthTempC: 10,
+      harvestDurationDays: 42,
+      harvestStyle: 'continuous',
+    };
+
+    it('uses lower threshold after establishment phase', () => {
+      // Direct sow June 15, establishment = germDaysMax(8) + 14 = 22 days
+      // Establishment phase: June 15 - July 7 (needs tavg >= 16°C with margin)
+      // June 15 tavg ≈ 17°C -> passes
+      // Established phase: July 8 onwards (needs tavg >= 11°C with margin)
+      // Sept tavg = 14°C -> passes with established threshold
+      const result = isGrowingPeriodViable(
+        '2025-06-15',
+        '2025-09-10',
+        squashCultivar,
+        sussexClimate,
+        {
+          method: 'direct',
+          establishmentDays: 22,
+          minEstablishedGrowthTempC: 10,
+        }
+      );
+      expect(result.viable).toBe(true);
+    });
+
+    it('fails without phased check when late-season temps drop below germination threshold', () => {
+      // Same period but without established growth temp — should fail
+      // because September tavg (~14°C) < 15+1=16°C effective min
+      const result = isGrowingPeriodViable(
+        '2025-06-15',
+        '2025-09-10',
+        squashCultivar,
+        sussexClimate,
+        { method: 'direct' }
+      );
+      expect(result.viable).toBe(false);
+      expect(result.reason).toContain('Too cold');
+    });
+
+    it('still enforces establishment threshold during early phase', () => {
+      // Start in May when tavg is only 12°C - below 15+1=16°C establishment threshold
+      const result = isGrowingPeriodViable(
+        '2025-05-01',
+        '2025-07-15',
+        squashCultivar,
+        sussexClimate,
+        {
+          method: 'direct',
+          establishmentDays: 22,
+          minEstablishedGrowthTempC: 10,
+        }
+      );
+      expect(result.viable).toBe(false);
+      expect(result.reason).toContain('Too cold');
+    });
+
+    it('falls back to establishment threshold when minEstablishedGrowthTempC not provided', () => {
+      // Without the established growth temp, behavior is unchanged
+      const cultivarWithoutEstablished: Cultivar = {
+        ...squashCultivar,
+        id: 'squash-no-established',
+        minEstablishedGrowthTempC: undefined,
+      };
+
+      // Period extending into September where tavg drops below 16°C
+      const withoutResult = isGrowingPeriodViable(
+        '2025-06-15',
+        '2025-09-10',
+        cultivarWithoutEstablished,
+        sussexClimate,
+        { method: 'direct' }
+      );
+      expect(withoutResult.viable).toBe(false);
+    });
+
+    it('uses shorter establishment period for transplants', () => {
+      const transplantSquash: Cultivar = {
+        ...squashCultivar,
+        id: 'squash-transplant-test',
+        sowMethod: 'transplant',
+        indoorLeadWeeksMin: 2,
+        indoorLeadWeeksMax: 3,
+        transplantAfterLsfDays: 14,
+        minGrowingTempTransplantC: 12,
+      };
+
+      // Transplant June 15, establishment = 14 days (transplant method)
+      // Establishment phase: June 15 - June 29 (needs tavg >= 13°C with margin for transplant threshold)
+      // June 15-29 tavg ≈ 17-18°C -> passes
+      // Established phase: June 30 onwards (needs tavg >= 11°C with margin)
+      const result = isGrowingPeriodViable(
+        '2025-06-15',
+        '2025-09-10',
+        transplantSquash,
+        sussexClimate,
+        {
+          method: 'transplant',
+          establishmentDays: 14,
+          minEstablishedGrowthTempC: 10,
+        }
+      );
+      expect(result.viable).toBe(true);
+    });
+  });
 });
 
 // ============================================
@@ -1712,6 +1834,212 @@ describe('calculateAvailableWindowsAfter', () => {
         const latestHarvestEnd = result[result.length - 1].harvestEnd;
         expect(latestHarvestEnd >= '2025-10-01').toBe(true);
       }
+    });
+  });
+});
+
+// ============================================
+// Shared Utility Tests: FROST_BUFFER_DAYS
+// ============================================
+
+describe('FROST_BUFFER_DAYS', () => {
+  it('equals 4', () => {
+    expect(FROST_BUFFER_DAYS).toBe(4);
+  });
+});
+
+// ============================================
+// Shared Utility Tests: calculateFrostDeadline
+// ============================================
+
+describe('calculateFrostDeadline', () => {
+  describe('frost-sensitive crops', () => {
+    it('uses earliest probable frost minus buffer when climate data is provided', () => {
+      // Climate earliest fall frost: 09-15, buffer: 4 days
+      // Deadline = 2025-09-15 - 4 = 2025-09-11
+      const result = calculateFrostDeadline(
+        { frostSensitive: true },
+        defaultFrostWindow,
+        sussexClimate
+      );
+      expect(result).toBe('2025-09-11');
+    });
+
+    it('falls back to frostWindow date minus buffer without climate', () => {
+      // frostWindow.firstFallFrost = 2025-10-01, buffer: 4 days
+      // Deadline = 2025-10-01 - 4 = 2025-09-27
+      const result = calculateFrostDeadline(
+        { frostSensitive: true },
+        defaultFrostWindow
+      );
+      expect(result).toBe('2025-09-27');
+    });
+
+    it('falls back to frostWindow date when climate has no earliest frost', () => {
+      const climateNoEarliest: Climate = {
+        ...sussexClimate,
+        firstFallFrost: {
+          ...sussexClimate.firstFallFrost!,
+          earliest: undefined as unknown as string,
+        },
+      };
+      const result = calculateFrostDeadline(
+        { frostSensitive: true },
+        defaultFrostWindow,
+        climateNoEarliest
+      );
+      // Falls back to frostWindow date: 2025-10-01 - 4 = 2025-09-27
+      expect(result).toBe('2025-09-27');
+    });
+  });
+
+  describe('frost-tolerant crops', () => {
+    it('uses typical frost plus 21 days when climate data is provided', () => {
+      // Climate typical fall frost: 10-01
+      // Deadline = 2025-10-01 + 21 = 2025-10-22
+      const result = calculateFrostDeadline(
+        { frostSensitive: false },
+        defaultFrostWindow,
+        sussexClimate
+      );
+      expect(result).toBe('2025-10-22');
+    });
+
+    it('falls back to frostWindow date plus 21 days without climate', () => {
+      // frostWindow.firstFallFrost = 2025-10-01
+      // Deadline = 2025-10-01 + 21 = 2025-10-22
+      const result = calculateFrostDeadline(
+        { frostSensitive: false },
+        defaultFrostWindow
+      );
+      expect(result).toBe('2025-10-22');
+    });
+  });
+
+  describe('different frost windows', () => {
+    it('adjusts deadline based on frost window year', () => {
+      const earlyFrostWindow = createFrostWindow('2025-05-15', '2025-09-15');
+      const result = calculateFrostDeadline(
+        { frostSensitive: true },
+        earlyFrostWindow,
+        sussexClimate
+      );
+      // Climate earliest frost 09-15 in the same year, minus 4 days
+      expect(result).toBe('2025-09-11');
+    });
+
+    it('produces later deadline for frost-tolerant vs frost-sensitive', () => {
+      const tolerant = calculateFrostDeadline(
+        { frostSensitive: false },
+        defaultFrostWindow,
+        sussexClimate
+      );
+      const sensitive = calculateFrostDeadline(
+        { frostSensitive: true },
+        defaultFrostWindow,
+        sussexClimate
+      );
+      expect(tolerant > sensitive).toBe(true);
+    });
+  });
+});
+
+// ============================================
+// Shared Utility Tests: calculateHarvestEnd
+// ============================================
+
+describe('calculateHarvestEnd', () => {
+  const frostDeadline = '2025-09-11'; // Typical frost-sensitive deadline
+
+  describe('explicit harvestDurationDays', () => {
+    it('returns harvestStart + duration when within frost deadline', () => {
+      // harvestStart + 21 days = 2025-07-22, well before Sept 11
+      const result = calculateHarvestEnd(
+        '2025-07-01',
+        { harvestDurationDays: 21, harvestStyle: 'continuous' as const },
+        frostDeadline
+      );
+      expect(result).toBe('2025-07-22');
+    });
+
+    it('caps at frost deadline when duration exceeds it', () => {
+      // harvestStart + 60 days = 2025-10-09, past Sept 11
+      const result = calculateHarvestEnd(
+        '2025-08-10',
+        { harvestDurationDays: 60, harvestStyle: 'continuous' as const },
+        frostDeadline
+      );
+      expect(result).toBe(frostDeadline);
+    });
+
+    it('returns frost deadline when duration ends exactly on deadline', () => {
+      // harvestStart + 21 = 2025-09-11 = deadline exactly
+      const result = calculateHarvestEnd(
+        '2025-08-21',
+        { harvestDurationDays: 21, harvestStyle: 'continuous' as const },
+        frostDeadline
+      );
+      expect(result).toBe(frostDeadline);
+    });
+  });
+
+  describe('null harvestDurationDays with continuous harvest', () => {
+    it('returns frost deadline (harvest until frost)', () => {
+      const result = calculateHarvestEnd(
+        '2025-07-21',
+        { harvestDurationDays: null, harvestStyle: 'continuous' as const },
+        frostDeadline
+      );
+      expect(result).toBe(frostDeadline);
+    });
+  });
+
+  describe('no harvestDurationDays with single harvest', () => {
+    it('uses default 7-day duration for single harvest', () => {
+      const result = calculateHarvestEnd(
+        '2025-07-01',
+        { harvestDurationDays: undefined, harvestStyle: 'single' as const },
+        frostDeadline
+      );
+      // Default single duration = 7 days
+      expect(result).toBe('2025-07-08');
+    });
+  });
+
+  describe('undefined harvestDurationDays with continuous harvest', () => {
+    it('returns frost deadline (same as null — harvest until frost)', () => {
+      // undefined and null both pass the `!= null` check the same way,
+      // so continuous harvest without a duration always runs until frost
+      const result = calculateHarvestEnd(
+        '2025-07-01',
+        { harvestDurationDays: undefined, harvestStyle: 'continuous' as const },
+        frostDeadline
+      );
+      expect(result).toBe(frostDeadline);
+    });
+  });
+
+  describe('frost deadline interaction', () => {
+    it('different deadlines change the cap', () => {
+      const lateFrostDeadline = '2025-10-22'; // frost-tolerant deadline
+      const result = calculateHarvestEnd(
+        '2025-10-01',
+        { harvestDurationDays: 30, harvestStyle: 'continuous' as const },
+        lateFrostDeadline
+      );
+      // 10-01 + 30 = 10-31 > 10-22, so capped
+      expect(result).toBe(lateFrostDeadline);
+    });
+
+    it('frost-tolerant deadline allows longer harvest', () => {
+      const lateFrostDeadline = '2025-10-22';
+      const result = calculateHarvestEnd(
+        '2025-10-01',
+        { harvestDurationDays: 14, harvestStyle: 'continuous' as const },
+        lateFrostDeadline
+      );
+      // 10-01 + 14 = 10-15, before 10-22 deadline
+      expect(result).toBe('2025-10-15');
     });
   });
 });

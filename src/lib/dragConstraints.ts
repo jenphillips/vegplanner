@@ -1,5 +1,6 @@
 import type { Cultivar, Climate, FrostWindow, Planting } from './types';
 import { addDays } from './dateUtils';
+import { calculateFrostDeadline } from './succession';
 
 export type ShiftBounds = {
   minShift: number; // Maximum days earlier (negative means can't go earlier)
@@ -91,20 +92,8 @@ export function calculateShiftBounds(input: ShiftBoundsInput): ShiftBounds {
 
   // === Calculate maxShiftLater ===
 
-  const FROST_BUFFER_DAYS = 4;
-  let frostDeadline: Date;
-
-  if (cultivar?.frostSensitive) {
-    const earliestFrost = climate?.firstFallFrost?.earliest
-      ? `${year}-${climate.firstFallFrost.earliest}`
-      : frost.firstFallFrost;
-    frostDeadline = new Date(`${addDays(earliestFrost, -FROST_BUFFER_DAYS)}T00:00:00Z`);
-  } else {
-    const typicalFrost = climate?.firstFallFrost?.typical
-      ? `${year}-${climate.firstFallFrost.typical}`
-      : frost.firstFallFrost;
-    frostDeadline = new Date(`${addDays(typicalFrost, 21)}T00:00:00Z`);
-  }
+  const frostDeadlineStr = calculateFrostDeadline(cultivar ?? { frostSensitive: false }, frost, climate);
+  const frostDeadline = new Date(`${frostDeadlineStr}T00:00:00Z`);
 
   const maturityDays = cultivar?.maturityDays ?? 60;
   const latestSowDate = new Date(
