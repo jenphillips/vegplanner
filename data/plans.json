@@ -295,5 +295,95 @@
     "successionOffsetsDays": [
       0
     ]
+  },
+  {
+    "id": "plan-baseline-scallion",
+    "cultivarId": "baseline-scallion",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-cantaloupe",
+    "cultivarId": "baseline-cantaloupe",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-watermelon",
+    "cultivarId": "baseline-watermelon",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-bean-scarlet-runner",
+    "cultivarId": "bean-scarlet-runner",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-callaloo",
+    "cultivarId": "baseline-callaloo",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-basil",
+    "cultivarId": "baseline-basil",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-lemongrass",
+    "cultivarId": "baseline-lemongrass",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-oregano",
+    "cultivarId": "baseline-oregano",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-shiso",
+    "cultivarId": "baseline-shiso",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-stevia",
+    "cultivarId": "baseline-stevia",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
   }
 ]

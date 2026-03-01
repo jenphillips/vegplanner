@@ -96,8 +96,8 @@
     "lengthCm": 30,
     "sunExposure": "full",
     "id": "e19fe887-fd76-4974-9ae0-1ba8c41c092a",
-    "positionX": 185,
-    "positionY": -125
+    "positionX": 140,
+    "positionY": -195
   },
   {
     "name": "Deck pot 2",
@@ -106,8 +106,8 @@
     "lengthCm": 30,
     "sunExposure": "full",
     "id": "2628ba69-7f1c-42fa-a97c-ebda08fff750",
-    "positionX": 225,
-    "positionY": -125
+    "positionX": 260,
+    "positionY": -195
   },
   {
     "name": "Deck pot 3",
@@ -116,8 +116,8 @@
     "lengthCm": 30,
     "sunExposure": "full",
     "id": "f9d01e7d-4daf-4f31-9828-a7d2d15bf0ae",
-    "positionX": 265,
-    "positionY": -125
+    "positionX": 380,
+    "positionY": -195
   },
   {
     "name": "Deck pot 4",
@@ -126,18 +126,8 @@
     "lengthCm": 30,
     "sunExposure": "full",
     "id": "cd53958c-d6ca-4794-b3fb-55c97b8945de",
-    "positionX": 305,
-    "positionY": -125
-  },
-  {
-    "name": "Deck pot 5",
-    "shape": "container",
-    "widthCm": 30,
-    "lengthCm": 30,
-    "sunExposure": "full",
-    "id": "bcb1b421-485e-4d92-b1a0-5cbba65d5f33",
-    "positionX": 345,
-    "positionY": -125
+    "positionX": 140,
+    "positionY": -120
   },
   {
     "name": "Deck pot 6",
@@ -145,19 +135,9 @@
     "widthCm": 30,
     "lengthCm": 30,
     "sunExposure": "full",
-    "id": "a45285c6-4db2-4afa-a7f3-c2179d5f5227",
-    "positionX": 385,
-    "positionY": -125
-  },
-  {
-    "name": "Deck pot 7",
-    "shape": "container",
-    "widthCm": 30,
-    "lengthCm": 30,
-    "sunExposure": "full",
-    "id": "be2d8fd1-e9ff-44b5-bb3d-4d387b023093",
-    "positionX": 425,
-    "positionY": -125
+    "id": "bcb1b421-485e-4d92-b1a0-5cbba65d5f33",
+    "positionX": 380,
+    "positionY": -120
   },
   {
     "name": "Garage Bed 3",
@@ -180,13 +160,53 @@
     "positionY": -140
   },
   {
-    "name": "Deck pot 7 (copy)",
+    "name": "Deck planter sm 1",
+    "shape": "bed",
+    "widthCm": 81,
+    "lengthCm": 25,
+    "sunExposure": "full",
+    "id": "c67bc02e-9f1f-45e1-a2dc-3e2be3c19acb",
+    "positionX": 175,
+    "positionY": -195
+  },
+  {
+    "name": "Deck planter sm 2",
+    "shape": "bed",
+    "widthCm": 81,
+    "lengthCm": 25,
+    "sunExposure": "full",
+    "positionX": 295,
+    "positionY": -195,
+    "id": "08c9e4ff-a772-41b1-9d9c-87dd60e57deb"
+  },
+  {
+    "name": "Deck planter sm 3",
+    "shape": "bed",
+    "widthCm": 81,
+    "lengthCm": 25,
+    "sunExposure": "full",
+    "positionX": 175,
+    "positionY": -120,
+    "id": "f529ee09-5c22-4cb7-ab14-5ae96c8c4ca0"
+  },
+  {
+    "name": "Deck planter sm 4",
+    "shape": "bed",
+    "widthCm": 81,
+    "lengthCm": 25,
+    "sunExposure": "full",
+    "positionX": 295,
+    "positionY": -120,
+    "id": "c212ce87-f22e-432a-a06a-9fbe9c1291b0"
+  },
+  {
+    "name": "Deck pot 5",
     "shape": "container",
     "widthCm": 30,
     "lengthCm": 30,
     "sunExposure": "full",
-    "positionX": 465,
-    "positionY": -125,
-    "id": "7bd3a3d1-5c85-4539-a240-ccb1a0a50370"
+    "positionX": 260,
+    "positionY": -120,
+    "id": "3e295255-0634-477a-8499-4d0d68200d68"
   }
 ]
