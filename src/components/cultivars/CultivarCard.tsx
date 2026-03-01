@@ -74,6 +74,7 @@ export function CultivarCard({
   const [quantity, setQuantity] = useState<number | null>(4);
   const [selectedPlantingId, setSelectedPlantingId] = useState<string | null>(null);
   const [showEstimator, setShowEstimator] = useState(false);
+  const [successionNotice, setSuccessionNotice] = useState<string | null>(null);
 
   const handleApplyEstimate = (estimatedQuantity: number) => {
     setQuantity(estimatedQuantity);
@@ -137,8 +138,11 @@ export function CultivarCard({
     }
 
     if (nextWindow) {
+      setSuccessionNotice(null);
       const planting = createPlantingFromWindow(nextWindow, cultivar, quantity ?? undefined);
       onAddPlanting(planting);
+    } else {
+      setSuccessionNotice('No viable planting window found — all remaining dates are outside the temperature range for this crop.');
     }
   };
 
@@ -394,6 +398,19 @@ export function CultivarCard({
                 </>
               )}
             </div>
+
+            {successionNotice && (
+              <div className={styles.successionNotice}>
+                {successionNotice}
+                <button
+                  onClick={() => setSuccessionNotice(null)}
+                  className={styles.dismissButton}
+                  aria-label="Dismiss"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             {/* Inline quantity estimator */}
             {showEstimator && (
