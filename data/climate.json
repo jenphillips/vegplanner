@@ -2,7 +2,7 @@
   "frostWindow": {
     "id": "default-frost",
     "lastSpringFrost": "2025-06-01",
-    "firstFallFrost": "2025-10-05"
+    "firstFallFrost": "2025-09-22"
   },
   "climate": {
     "location": "Sussex, NB",
@@ -24,23 +24,23 @@
       "12": { "tavg_c": -4,  "tmin_c": -8,  "tmax_c": 0,   "soil_avg_c": 1,   "gdd_base5": 1810 }
     },
     "lastSpringFrost": {
-      "earliest": "04-19",
-      "typical": "05-06",
-      "latest": "05-24",
-      "probability10": "04-22",
-      "probability50": "05-06",
-      "probability90": "05-20"
+      "earliest": "05-15",
+      "typical": "05-28",
+      "latest": "06-12",
+      "probability10": "05-15",
+      "probability50": "05-28",
+      "probability90": "06-12"
     },
     "firstFallFrost": {
-      "earliest": "09-26",
-      "typical": "10-11",
-      "latest": "10-26",
-      "probability10": "09-28",
-      "probability50": "10-11",
-      "probability90": "10-23"
+      "earliest": "09-04",
+      "typical": "09-17",
+      "latest": "10-02",
+      "probability10": "09-04",
+      "probability50": "09-17",
+      "probability90": "10-02"
     },
-    "growingSeasonDays": 159,
+    "growingSeasonDays": 128,
     "annualGDD": 1810,
-    "notes": "Data derived from WeatherSpark and Environment Canada climate normals. Soil temperatures are estimates based on air temperature with ~2 week lag. GDD calculated with base 5°C, cumulative by month end. Growing season averages 159 days (May 6 - Oct 11). Zone 5a."
+    "notes": "Data derived from Environment Canada 1991-2020 Climate Normals, Sussex/Four Corners station. Soil temperatures are estimates based on air temperature with ~2 week lag. GDD calculated with base 5°C, cumulative by month end. Growing season averages 128 days (May 28 - Oct 2). Zone 5a."
   }
 }
