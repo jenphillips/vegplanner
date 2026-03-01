@@ -24,7 +24,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Heirloom beefsteak. Large pink fruit, exceptional flavor. Potato-leaf foliage. Needs staking. Prone to cracking."
+      "notes": "Heirloom beefsteak. Large pink fruit, exceptional flavor. Potato-leaf foliage. Needs staking. Prone to cracking.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-cherokee-purple",
@@ -49,7 +50,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Heirloom beefsteak. Dusky purple-brown fruit with rich, complex flavor. Excellent slicer."
+      "notes": "Heirloom beefsteak. Dusky purple-brown fruit with rich, complex flavor. Excellent slicer.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-sungold",
@@ -74,7 +76,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 45,
-      "notes": "Hybrid cherry. Orange fruit, intensely sweet. One of the most popular cherry tomatoes. Vigorous, prolific producer. Prone to cracking."
+      "notes": "Hybrid cherry. Orange fruit, intensely sweet. One of the most popular cherry tomatoes. Vigorous, prolific producer. Prone to cracking.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-early-girl",
@@ -99,7 +102,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Hybrid slicer. Very early, reliable producer of medium 4-6 oz fruit. Good disease resistance. Widely adapted."
+      "notes": "Hybrid slicer. Very early, reliable producer of medium 4-6 oz fruit. Good disease resistance. Widely adapted.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-roma",
@@ -124,7 +128,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 45,
-      "notes": "Determinate paste. Classic plum-shaped fruit for sauce and canning. Heavy concentrated set. Verticillium and Fusarium resistant."
+      "notes": "Determinate paste. Classic plum-shaped fruit for sauce and canning. Heavy concentrated set. Verticillium and Fusarium resistant.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-black-krim",
@@ -149,7 +154,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Heirloom beefsteak from Crimea. Dark reddish-brown fruit with smoky, salty-sweet flavor. Soft skin, best eaten fresh."
+      "notes": "Heirloom beefsteak from Crimea. Dark reddish-brown fruit with smoky, salty-sweet flavor. Soft skin, best eaten fresh.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-big-beef",
@@ -174,7 +180,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Hybrid beefsteak. AAS winner. Large 10-12 oz fruit with old-fashioned flavor. Strong disease resistance package."
+      "notes": "Hybrid beefsteak. AAS winner. Large 10-12 oz fruit with old-fashioned flavor. Strong disease resistance package.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-better-boy",
@@ -199,7 +206,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Hybrid slicer. Reliable, heavy-yielding 12-16 oz fruit. VFN resistant. One of the most widely grown home garden tomatoes."
+      "notes": "Hybrid slicer. Reliable, heavy-yielding 12-16 oz fruit. VFN resistant. One of the most widely grown home garden tomatoes.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-celebrity",
@@ -224,7 +232,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Hybrid determinate. AAS winner. Globe-shaped 7-8 oz fruit. Excellent disease resistance (VFFNTA). Good all-purpose tomato."
+      "notes": "Hybrid determinate. AAS winner. Globe-shaped 7-8 oz fruit. Excellent disease resistance (VFFNTA). Good all-purpose tomato.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-sweet-100",
@@ -249,7 +258,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 45,
-      "notes": "Hybrid cherry. Long trusses of very sweet red fruit. Extremely vigorous, can reach 10+ ft. Prolific producer."
+      "notes": "Hybrid cherry. Long trusses of very sweet red fruit. Extremely vigorous, can reach 10+ ft. Prolific producer.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-juliet",
@@ -274,7 +284,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 45,
-      "notes": "Hybrid grape. AAS winner. Elongated 1 oz fruit in clusters. Crack-resistant, good shelf life. Great for snacking and roasting."
+      "notes": "Hybrid grape. AAS winner. Elongated 1 oz fruit in clusters. Crack-resistant, good shelf life. Great for snacking and roasting.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-mortgage-lifter",
@@ -299,7 +310,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 75,
-      "notes": "Heirloom beefsteak. Very large 1-2 lb pink fruit, meaty with mild flavor. Bred in the 1930s in West Virginia."
+      "notes": "Heirloom beefsteak. Very large 1-2 lb pink fruit, meaty with mild flavor. Bred in the 1930s in West Virginia.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-green-zebra",
@@ -324,7 +336,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Green-and-yellow striped, 3-4 oz fruit. Tangy, zingy flavor. Ripe when yellow stripes deepen and fruit gives slightly."
+      "notes": "Green-and-yellow striped, 3-4 oz fruit. Tangy, zingy flavor. Ripe when yellow stripes deepen and fruit gives slightly.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-yellow-pear",
@@ -349,7 +362,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 45,
-      "notes": "Heirloom cherry. Pear-shaped yellow fruit, mild sweet flavor. Very vigorous, heavy producer. Popular since the 1800s."
+      "notes": "Heirloom cherry. Pear-shaped yellow fruit, mild sweet flavor. Very vigorous, heavy producer. Popular since the 1800s.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-black-cherry",
@@ -374,7 +388,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 45,
-      "notes": "Dark mahogany cherry, rich complex flavor. One of the best-tasting cherry tomatoes. Vigorous, tall plants."
+      "notes": "Dark mahogany cherry, rich complex flavor. One of the best-tasting cherry tomatoes. Vigorous, tall plants.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-amish-paste",
@@ -399,7 +414,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Heirloom paste. Large 8-12 oz oxheart-shaped fruit, meaty with few seeds. Excellent for sauce. Indeterminate, unlike most paste types."
+      "notes": "Heirloom paste. Large 8-12 oz oxheart-shaped fruit, meaty with few seeds. Excellent for sauce. Indeterminate, unlike most paste types.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-stupice",
@@ -424,7 +440,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 27,
       "spacingCm": 45,
-      "notes": "Czech heirloom. Very early, cold-tolerant. Small 2-3 oz red fruit with excellent flavor for an early variety. Potato-leaf foliage. Good for short seasons."
+      "notes": "Czech heirloom. Very early, cold-tolerant. Small 2-3 oz red fruit with excellent flavor for an early variety. Potato-leaf foliage. Good for short seasons.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-manitoba",
@@ -449,7 +466,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 27,
       "spacingCm": 45,
-      "notes": "Determinate, bred for Canadian prairies. Very early, compact plants. Medium 6 oz red fruit. Reliable in short, cool seasons."
+      "notes": "Determinate, bred for Canadian prairies. Very early, compact plants. Medium 6 oz red fruit. Reliable in short, cool seasons.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-beefsteak",
@@ -474,7 +492,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 75,
-      "notes": "Classic large red slicer, 1-2 lb fruit. Meaty, solid flesh. Needs strong support. Long season required."
+      "notes": "Classic large red slicer, 1-2 lb fruit. Meaty, solid flesh. Needs strong support. Long season required.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-costoluto-genovese",
@@ -499,7 +518,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Italian heirloom. Deeply ribbed, fluted fruit. Intensely flavored, acidic. Excellent for sauce and fresh eating."
+      "notes": "Italian heirloom. Deeply ribbed, fluted fruit. Intensely flavored, acidic. Excellent for sauce and fresh eating.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-gardeners-delight",
@@ -524,7 +544,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 45,
-      "notes": "Cherry/cocktail size. Sweet, well-balanced flavor. Reliable in cool climates. Long trusses of 6-12 fruit."
+      "notes": "Cherry/cocktail size. Sweet, well-balanced flavor. Reliable in cool climates. Long trusses of 6-12 fruit.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-tigerella",
@@ -549,7 +570,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Red with yellow-orange stripes, 2-4 oz fruit. Tangy flavor. Early and productive. Also sold as Mr. Stripey in some catalogs."
+      "notes": "Red with yellow-orange stripes, 2-4 oz fruit. Tangy flavor. Early and productive. Also sold as Mr. Stripey in some catalogs.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-oxheart",
@@ -574,7 +596,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Heirloom. Large heart-shaped pink fruit, 1 lb+. Dense, meaty flesh with few seeds. Good for slicing and sauce."
+      "notes": "Heirloom. Large heart-shaped pink fruit, 1 lb+. Dense, meaty flesh with few seeds. Good for slicing and sauce.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-rutgers",
@@ -599,7 +622,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Semi-determinate. Developed by Rutgers University in the 1930s. All-purpose red 6-8 oz fruit. Good for canning and fresh eating."
+      "notes": "Semi-determinate. Developed by Rutgers University in the 1930s. All-purpose red 6-8 oz fruit. Good for canning and fresh eating.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-tumbling-tom-red",
@@ -625,7 +649,8 @@
       "optimalTempMaxC": 27,
       "spacingCm": 30,
       "trailingHabit": true,
-      "notes": "Trailing determinate cherry. Compact, cascading habit for hanging baskets and containers. Sweet 1-inch red fruit."
+      "notes": "Trailing determinate cherry. Compact, cascading habit for hanging baskets and containers. Sweet 1-inch red fruit.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "pepper-california-wonder",
@@ -650,7 +675,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "The classic bell pepper. Large, blocky 4-lobed fruit. Green maturing to red. Thick walls, sweet flavor. Open-pollinated."
+      "notes": "The classic bell pepper. Large, blocky 4-lobed fruit. Green maturing to red. Thick walls, sweet flavor. Open-pollinated.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-king-arthur",
@@ -675,7 +701,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Hybrid bell. Extra-large, thick-walled fruit. Green to red. Early for a big bell. Good disease resistance."
+      "notes": "Hybrid bell. Extra-large, thick-walled fruit. Green to red. Early for a big bell. Good disease resistance.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-sweet-banana",
@@ -700,7 +727,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Long, tapered sweet pepper. Yellow maturing to orange-red. Mild, sweet flavor. Prolific. Good for frying and pickling."
+      "notes": "Long, tapered sweet pepper. Yellow maturing to orange-red. Mild, sweet flavor. Prolific. Good for frying and pickling.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-jimmy-nardello",
@@ -725,7 +753,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Italian heirloom frying pepper. Long, thin-walled red fruit. Intensely sweet when fried. Slow Food Ark of Taste."
+      "notes": "Italian heirloom frying pepper. Long, thin-walled red fruit. Intensely sweet when fried. Slow Food Ark of Taste.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-cubanelle",
@@ -750,7 +779,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Italian frying pepper. Light green to red, thin walls. Sweet, mild flavor. Prolific producer. Also called Italian frying pepper."
+      "notes": "Italian frying pepper. Light green to red, thin walls. Sweet, mild flavor. Prolific producer. Also called Italian frying pepper.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-padron",
@@ -775,7 +805,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Spanish tapas pepper. Pick small (2 inches) for mild; occasional hot one. Blistered in olive oil with sea salt. Very prolific."
+      "notes": "Spanish tapas pepper. Pick small (2 inches) for mild; occasional hot one. Blistered in olive oil with sea salt. Very prolific.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-purple-beauty",
@@ -800,7 +831,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Open-pollinated bell. Deep purple skin with green interior. Harvest at purple stage; turns red if left. Compact plants."
+      "notes": "Open-pollinated bell. Deep purple skin with green interior. Harvest at purple stage; turns red if left. Compact plants.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-cayenne-long-slim",
@@ -821,11 +853,12 @@
       "harvestDurationDays": null,
       "frostSensitive": true,
       "minGrowingTempC": 15,
-      "maxGrowingTempC": 38,
+      "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 32,
       "spacingCm": 45,
-      "notes": "Classic hot pepper, 30,000-50,000 SHU. Thin 5-6 inch fruit, green to red. Excellent for drying and powder. Prolific."
+      "notes": "Classic hot pepper, 30,000-50,000 SHU. Thin 5-6 inch fruit, green to red. Excellent for drying and powder. Prolific.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-serrano",
@@ -846,11 +879,12 @@
       "harvestDurationDays": null,
       "frostSensitive": true,
       "minGrowingTempC": 15,
-      "maxGrowingTempC": 38,
+      "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 32,
       "spacingCm": 45,
-      "notes": "Mexican hot pepper, 10,000-25,000 SHU. Small 2-3 inch fruit, meaty walls. Hotter than jalapeño. Used fresh in salsa and pico."
+      "notes": "Mexican hot pepper, 10,000-25,000 SHU. Small 2-3 inch fruit, meaty walls. Hotter than jalapeño. Used fresh in salsa and pico.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-habanero-orange",
@@ -871,11 +905,12 @@
       "harvestDurationDays": null,
       "frostSensitive": true,
       "minGrowingTempC": 18,
-      "maxGrowingTempC": 38,
+      "maxGrowingTempC": 35,
       "optimalTempMinC": 24,
       "optimalTempMaxC": 32,
       "spacingCm": 45,
-      "notes": "Very hot, 100,000-350,000 SHU. Lantern-shaped orange fruit with fruity, citrusy heat. Long season; start early. Needs consistent warmth."
+      "notes": "Very hot, 100,000-350,000 SHU. Lantern-shaped orange fruit with fruity, citrusy heat. Long season; start early. Needs consistent warmth.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-anaheim",
@@ -896,11 +931,12 @@
       "harvestDurationDays": null,
       "frostSensitive": true,
       "minGrowingTempC": 15,
-      "maxGrowingTempC": 38,
+      "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 32,
       "spacingCm": 45,
-      "notes": "Mild hot pepper, 500-2,500 SHU. Large 7-8 inch fruit. Good for roasting, stuffing, and green chiles. Also called New Mexico or Hatch."
+      "notes": "Mild hot pepper, 500-2,500 SHU. Large 7-8 inch fruit. Good for roasting, stuffing, and green chiles. Also called New Mexico or Hatch.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-poblano",
@@ -921,11 +957,12 @@
       "harvestDurationDays": null,
       "frostSensitive": true,
       "minGrowingTempC": 15,
-      "maxGrowingTempC": 38,
+      "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 32,
       "spacingCm": 45,
-      "notes": "Mild hot pepper, 1,000-2,000 SHU. Large, heart-shaped dark green fruit. Essential for chiles rellenos. Dried form is ancho."
+      "notes": "Mild hot pepper, 1,000-2,000 SHU. Large, heart-shaped dark green fruit. Essential for chiles rellenos. Dried form is ancho.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-hungarian-hot-wax",
@@ -946,11 +983,12 @@
       "harvestDurationDays": null,
       "frostSensitive": true,
       "minGrowingTempC": 15,
-      "maxGrowingTempC": 38,
+      "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 32,
       "spacingCm": 45,
-      "notes": "Medium hot, 5,000-10,000 SHU. Waxy 6-8 inch fruit, yellow to red. Early, productive. Good for pickling and frying."
+      "notes": "Medium hot, 5,000-10,000 SHU. Waxy 6-8 inch fruit, yellow to red. Early, productive. Good for pickling and frying.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-thai-hot",
@@ -971,11 +1009,12 @@
       "harvestDurationDays": null,
       "frostSensitive": true,
       "minGrowingTempC": 18,
-      "maxGrowingTempC": 38,
+      "maxGrowingTempC": 35,
       "optimalTempMinC": 24,
       "optimalTempMaxC": 32,
       "spacingCm": 30,
-      "notes": "Very hot, 50,000-100,000 SHU. Small upright 1-inch fruit in clusters. Extremely prolific. Compact plants, good for containers."
+      "notes": "Very hot, 50,000-100,000 SHU. Small upright 1-inch fruit in clusters. Extremely prolific. Compact plants, good for containers.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-lunchbox-mix",
@@ -1000,7 +1039,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Mini sweet peppers in red, orange, and yellow. Snack-size 3 inch fruit, very sweet. Prolific. Kids love them."
+      "notes": "Mini sweet peppers in red, orange, and yellow. Snack-size 3 inch fruit, very sweet. Prolific. Kids love them.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-jalapeno-early",
@@ -1025,7 +1065,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 38,
-      "notes": "Early-maturing jalapeño, 2,500-8,000 SHU. Compact plants, good for shorter seasons. Green to red. Open-pollinated."
+      "notes": "Early-maturing jalapeño, 2,500-8,000 SHU. Compact plants, good for shorter seasons. Green to red. Open-pollinated.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-shishito",
@@ -1050,7 +1091,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Japanese small pepper. Thin-walled, wrinkled 3-4 inch fruit. Mostly mild with occasional hot one. Blistered or grilled. Very prolific."
+      "notes": "Japanese small pepper. Thin-walled, wrinkled 3-4 inch fruit. Mostly mild with occasional hot one. Blistered or grilled. Very prolific.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-aps-sweet-cayenne",
@@ -1076,7 +1118,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "APS variety bred for cool climates. Long pods, green to orange to red. 0-500 SHU. Great for powder, salads, pickling."
+      "notes": "APS variety bred for cool climates. Long pods, green to orange to red. 0-500 SHU. Great for powder, salads, pickling.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-orange-glow",
@@ -1102,7 +1145,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "APS variety. Medium plants, very high yields. Slightly smaller than standard bells, tented shape. Green ripening to bright orange. Very sweet. 0-500 SHU."
+      "notes": "APS variety. Medium plants, very high yields. Slightly smaller than standard bells, tented shape. Green ripening to bright orange. Very sweet. 0-500 SHU.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "pepper-pepperoncini-orange",
@@ -1128,7 +1172,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 40,
-      "notes": "APS variety. Thin-walled pods, yellow to orange. 0-500 SHU. Can yield 100+ pods per plant. Dries well for powder. Sweet flavor."
+      "notes": "APS variety. Thin-walled pods, yellow to orange. 0-500 SHU. Can yield 100+ pods per plant. Dries well for powder. Sweet flavor.",
+      "minEstablishedGrowthTempC": 11
     },
     {
       "id": "eggplant-black-beauty",
@@ -1153,7 +1198,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 60,
-      "notes": "Classic large globe eggplant. Dark purple-black, glossy skin. Harvest at 4-6 in before skin dulls and seeds brown. Needs long warm season — start early indoors. 4-6 fruit per plant. Open-pollinated heirloom."
+      "notes": "Classic large globe eggplant. Dark purple-black, glossy skin. Harvest at 4-6 in before skin dulls and seeds brown. Needs long warm season — start early indoors. 4-6 fruit per plant. Open-pollinated heirloom.",
+      "minEstablishedGrowthTempC": 12
     },
     {
       "id": "eggplant-ichiban",
@@ -1178,7 +1224,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 60,
-      "notes": "Japanese slender eggplant, 10-12 in long. Thin skin, few seeds, tender flesh. Earlier and more prolific than globe types. Excellent for stir-fry and grilling. Hybrid."
+      "notes": "Japanese slender eggplant, 10-12 in long. Thin skin, few seeds, tender flesh. Earlier and more prolific than globe types. Excellent for stir-fry and grilling. Hybrid.",
+      "minEstablishedGrowthTempC": 12
     },
     {
       "id": "eggplant-little-fingers",
@@ -1203,7 +1250,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Asian heirloom mini eggplant. Clusters of slim 3-6 in dark purple fruit. Harvest when finger-sized for best tenderness. Very prolific, few seeds. Good for containers. Open-pollinated."
+      "notes": "Asian heirloom mini eggplant. Clusters of slim 3-6 in dark purple fruit. Harvest when finger-sized for best tenderness. Very prolific, few seeds. Good for containers. Open-pollinated.",
+      "minEstablishedGrowthTempC": 12
     },
     {
       "id": "eggplant-fairy-tale",
@@ -1228,7 +1276,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Most popular mini eggplant. Purple-and-white striped, 2-4 in fruit in clusters. Non-bitter, no peeling needed. Very prolific. Compact plants good for containers. AAS winner 2005. Hybrid."
+      "notes": "Most popular mini eggplant. Purple-and-white striped, 2-4 in fruit in clusters. Non-bitter, no peeling needed. Very prolific. Compact plants good for containers. AAS winner 2005. Hybrid.",
+      "minEstablishedGrowthTempC": 12
     },
     {
       "id": "eggplant-patio-baby",
@@ -1253,7 +1302,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 35,
-      "notes": "Ultra-compact mini eggplant (16-20 in). Glossy purple 2-3 in egg-shaped fruit. Earliest eggplant — 45 days from transplant. Bred specifically for containers and small spaces. Thornless. Very prolific. AAS winner 2014. Hybrid."
+      "notes": "Ultra-compact mini eggplant (16-20 in). Glossy purple 2-3 in egg-shaped fruit. Earliest eggplant — 45 days from transplant. Bred specifically for containers and small spaces. Thornless. Very prolific. AAS winner 2014. Hybrid.",
+      "minEstablishedGrowthTempC": 12
     },
     {
       "id": "tomatillo-toma-verde",
@@ -1278,7 +1328,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 60,
-      "notes": "Green tomatillo for salsa verde. 2-3 in fruit in papery husks. Harvest when husks split. Very prolific — plant at least 2 for cross-pollination. Sprawling plants, benefits from caging. Self-seeds readily."
+      "notes": "Green tomatillo for salsa verde. 2-3 in fruit in papery husks. Harvest when husks split. Very prolific — plant at least 2 for cross-pollination. Sprawling plants, benefits from caging. Self-seeds readily.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomatillo-purple",
@@ -1303,7 +1354,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 60,
-      "notes": "Purple-skinned tomatillo. Sweeter than green varieties, can be eaten raw. 1-2 in fruit. Turns purple when ripe inside the husk. Plant at least 2 for cross-pollination. Smaller fruit but sweeter flavor."
+      "notes": "Purple-skinned tomatillo. Sweeter than green varieties, can be eaten raw. 1-2 in fruit. Turns purple when ripe inside the husk. Plant at least 2 for cross-pollination. Smaller fruit but sweeter flavor.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "ground-cherry-aunt-mollys",
@@ -1328,7 +1380,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 60,
-      "notes": "Husk cherry (Physalis pruinosa). Marble-sized golden fruit in papery husks. Sweet, tropical flavor — pineapple meets tomato. Harvest when husks dry and fruit drops. Very prolific. Polish heirloom. Self-seeds in warm climates."
+      "notes": "Husk cherry (Physalis pruinosa). Marble-sized golden fruit in papery husks. Sweet, tropical flavor — pineapple meets tomato. Harvest when husks dry and fruit drops. Very prolific. Polish heirloom. Self-seeds in warm climates.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-san-marzano",
@@ -1353,7 +1406,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 60,
-      "notes": "Indeterminate paste tomato. Classic Italian variety for sauce and canning. Meaty with few seeds."
+      "notes": "Indeterminate paste tomato. Classic Italian variety for sauce and canning. Meaty with few seeds.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-sweet-million",
@@ -1378,7 +1432,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 45,
-      "notes": "Indeterminate cherry tomato. Prolific producer of sweet, crack-resistant fruit. Disease resistant."
+      "notes": "Indeterminate cherry tomato. Prolific producer of sweet, crack-resistant fruit. Disease resistant.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-cherry-falls",
@@ -1404,7 +1459,8 @@
       "optimalTempMaxC": 27,
       "spacingCm": 45,
       "trailingHabit": true,
-      "notes": "Trailing/tumbling cherry tomato. Determinate habit, ideal for hanging baskets or containers. Sweet red fruit."
+      "notes": "Trailing/tumbling cherry tomato. Determinate habit, ideal for hanging baskets or containers. Sweet red fruit.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-red-robin",
@@ -1429,7 +1485,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 25,
-      "notes": "Dwarf determinate, 6-12 inches tall. Tiny sweet red cherries. Ideal for windowsills, patio pots, and small containers. No staking needed. Open-pollinated."
+      "notes": "Dwarf determinate, 6-12 inches tall. Tiny sweet red cherries. Ideal for windowsills, patio pots, and small containers. No staking needed. Open-pollinated.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-yellow-robin",
@@ -1454,7 +1511,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 25,
-      "notes": "Dwarf determinate, 6-12 inches tall. Sweet yellow cherries. Same ultra-compact habit as Red Robin. Windowsill and patio pot size. Open-pollinated."
+      "notes": "Dwarf determinate, 6-12 inches tall. Sweet yellow cherries. Same ultra-compact habit as Red Robin. Windowsill and patio pot size. Open-pollinated.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "tomato-orange-robin",
@@ -1479,7 +1537,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "spacingCm": 25,
-      "notes": "Dwarf determinate, 6-12 inches tall. Orange cherries, mild sweet flavor. Ultra-compact Robin series. Good for windowsills and small containers. Open-pollinated."
+      "notes": "Dwarf determinate, 6-12 inches tall. Orange cherries, mild sweet flavor. Ultra-compact Robin series. Good for windowsills and small containers. Open-pollinated.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "beet-avalanche",
@@ -1867,7 +1926,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 26,
       "spacingCm": 10,
-      "notes": "Reliable early bush bean; do not plant in cold soil."
+      "notes": "Reliable early bush bean; do not plant in cold soil.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "bean-blue-lake-274",
@@ -1890,7 +1950,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 26,
       "spacingCm": 10,
-      "notes": "The standard for green beans. Round, straight 6-inch pods. Stringless. Heavy yields. Good fresh, frozen, or canned. Open-pollinated."
+      "notes": "The standard for green beans. Round, straight 6-inch pods. Stringless. Heavy yields. Good fresh, frozen, or canned. Open-pollinated.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "bean-contender",
@@ -1913,7 +1974,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 26,
       "spacingCm": 10,
-      "notes": "Extra-early bush bean. Round 6-inch pods, good cold tolerance for a bean. Stringless. Good choice for short seasons. Open-pollinated."
+      "notes": "Extra-early bush bean. Round 6-inch pods, good cold tolerance for a bean. Stringless. Good choice for short seasons. Open-pollinated.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "bean-tendergreen",
@@ -1936,7 +1998,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 26,
       "spacingCm": 10,
-      "notes": "Stringless, round dark green 5-inch pods. Reliable and productive. Good all-purpose bush bean. Open-pollinated."
+      "notes": "Stringless, round dark green 5-inch pods. Reliable and productive. Good all-purpose bush bean. Open-pollinated.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "bean-royal-burgundy",
@@ -1959,7 +2022,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 26,
       "spacingCm": 10,
-      "notes": "Purple-podded bush bean. Turns green when cooked. Easy to spot for picking. Good cold tolerance. Stringless. Open-pollinated."
+      "notes": "Purple-podded bush bean. Turns green when cooked. Easy to spot for picking. Good cold tolerance. Stringless. Open-pollinated.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "bean-dragon-tongue",
@@ -1982,7 +2046,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 26,
       "spacingCm": 10,
-      "notes": "Dutch heirloom wax bean. Cream pods with purple streaks. Can be used as snap or shelling bean. Distinctive appearance. Open-pollinated."
+      "notes": "Dutch heirloom wax bean. Cream pods with purple streaks. Can be used as snap or shelling bean. Distinctive appearance. Open-pollinated.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "bean-jade",
@@ -2005,7 +2070,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 26,
       "spacingCm": 10,
-      "notes": "Modern hybrid bush bean. Dark green, round 6-7 inch pods. Very productive and uniform. Good disease resistance."
+      "notes": "Modern hybrid bush bean. Dark green, round 6-7 inch pods. Very productive and uniform. Good disease resistance.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "bean-roma-ii",
@@ -2028,7 +2094,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 26,
       "spacingCm": 10,
-      "notes": "Flat Italian-type bush bean. Broad 5-inch pods, meaty texture. Great for sautéing and braising. Open-pollinated."
+      "notes": "Flat Italian-type bush bean. Broad 5-inch pods, meaty texture. Great for sautéing and braising. Open-pollinated.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "bean-kentucky-wonder",
@@ -2051,7 +2118,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 27,
       "spacingCm": 15,
-      "notes": "Classic heirloom pole bean. Slightly curved 8-9 inch pods. Rich, full bean flavor. Brown-seeded. Needs 6-8 ft trellis. Open-pollinated."
+      "notes": "Classic heirloom pole bean. Slightly curved 8-9 inch pods. Rich, full bean flavor. Brown-seeded. Needs 6-8 ft trellis. Open-pollinated.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "bean-blue-lake-pole",
@@ -2074,7 +2142,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 27,
       "spacingCm": 15,
-      "notes": "Pole version of the classic. Round, straight 6-inch stringless pods. Heavy producer over a long season. Needs 6-8 ft trellis. Open-pollinated."
+      "notes": "Pole version of the classic. Round, straight 6-inch stringless pods. Heavy producer over a long season. Needs 6-8 ft trellis. Open-pollinated.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "bean-scarlet-runner",
@@ -2092,12 +2161,13 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": 42,
       "frostSensitive": true,
-      "minGrowingTempC": 15,
+      "minGrowingTempC": 12,
       "maxGrowingTempC": 30,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 24,
       "spacingCm": 20,
-      "notes": "Ornamental and edible. Showy red flowers attract hummingbirds. Large flat pods best at 6 inches. Also grown as dried bean. Needs 8+ ft support. Open-pollinated."
+      "notes": "Ornamental and edible. Showy red flowers attract hummingbirds. Large flat pods best at 6 inches. Also grown as dried bean. Needs 8+ ft support. Open-pollinated.",
+      "minEstablishedGrowthTempC": 8
     },
     {
       "id": "lettuce-little-gem",
@@ -2363,7 +2433,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 30,
+      "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 24,
       "spacingCm": 25,
@@ -2390,7 +2460,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 30,
+      "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 24,
       "spacingCm": 25,
@@ -2673,7 +2743,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 24,
+      "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "spacingCm": 40,
@@ -2698,7 +2768,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 24,
+      "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "spacingCm": 40,
@@ -3223,7 +3293,8 @@
       "optimalTempMinC": 24,
       "optimalTempMaxC": 32,
       "spacingCm": 20,
-      "notes": "Tropical amaranth green (Amaranthus viridis/dubius). Spinach substitute that thrives in summer heat. Young leaves and tender stems are edible. Staple in Caribbean and West African cooking. Sow after soil is warm."
+      "notes": "Tropical amaranth green (Amaranthus viridis/dubius). Spinach substitute that thrives in summer heat. Young leaves and tender stems are edible. Staple in Caribbean and West African cooking. Sow after soil is warm.",
+      "minEstablishedGrowthTempC": 15
     },
     {
       "id": "carrot-tendersweet",
@@ -3242,7 +3313,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 30,
+      "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "spacingCm": 5,
@@ -3265,7 +3336,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 30,
+      "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "spacingCm": 5,
@@ -3288,7 +3359,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 30,
+      "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "spacingCm": 5,
@@ -3311,7 +3382,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 30,
+      "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "spacingCm": 5,
@@ -3334,7 +3405,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 30,
+      "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "spacingCm": 5,
@@ -3365,7 +3436,9 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Burpless slicing cucumber. Mild flavor, thin skin. Grows 8-10 inches. Needs warm soil to germinate."
+      "notes": "Burpless slicing cucumber. Mild flavor, thin skin. Grows 8-10 inches. Needs warm soil to germinate.",
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "cucumber-marketmore-76",
@@ -3392,7 +3465,9 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "The standard slicing cucumber. Dark green, 8-9 inches. Excellent disease resistance (scab, mosaic, mildew). Reliable and productive. Open-pollinated."
+      "notes": "The standard slicing cucumber. Dark green, 8-9 inches. Excellent disease resistance (scab, mosaic, mildew). Reliable and productive. Open-pollinated.",
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "cucumber-straight-eight",
@@ -3419,7 +3494,9 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "AAS winner heirloom slicer. Uniform, straight 8-inch dark green fruit. Good all-purpose cucumber. Vigorous vines. Open-pollinated."
+      "notes": "AAS winner heirloom slicer. Uniform, straight 8-inch dark green fruit. Good all-purpose cucumber. Vigorous vines. Open-pollinated.",
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "cucumber-suyo-long",
@@ -3446,7 +3523,9 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 45,
-      "notes": "Chinese burpless cucumber. Long, curved 12-15 inch fruit. Crisp, sweet, thin skin. Good heat tolerance. Trellis for straight fruit. Open-pollinated."
+      "notes": "Chinese burpless cucumber. Long, curved 12-15 inch fruit. Crisp, sweet, thin skin. Good heat tolerance. Trellis for straight fruit. Open-pollinated.",
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "cucumber-national-pickling",
@@ -3473,7 +3552,9 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 30,
-      "notes": "Classic pickling cucumber. Short, blocky 5-6 inch fruit. Pick at 2-4 inches for pickles. Heavy producer. Black-spined. Open-pollinated."
+      "notes": "Classic pickling cucumber. Short, blocky 5-6 inch fruit. Pick at 2-4 inches for pickles. Heavy producer. Black-spined. Open-pollinated.",
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "cucumber-boston-pickling",
@@ -3500,7 +3581,9 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 30,
-      "notes": "Heirloom pickling cucumber since 1880. Smooth, bright green 3-6 inch fruit. Crisp texture, good for dills and bread-and-butters. Vigorous. Open-pollinated."
+      "notes": "Heirloom pickling cucumber since 1880. Smooth, bright green 3-6 inch fruit. Crisp texture, good for dills and bread-and-butters. Vigorous. Open-pollinated.",
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "cucumber-calypso",
@@ -3527,7 +3610,9 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 30,
-      "notes": "Hybrid pickling cucumber. Uniform 3-4 inch fruit, concentrated set. Excellent disease resistance (anthracnose, angular leaf spot, scab, mosaic). Very productive."
+      "notes": "Hybrid pickling cucumber. Uniform 3-4 inch fruit, concentrated set. Excellent disease resistance (anthracnose, angular leaf spot, scab, mosaic). Very productive.",
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "cucumber-patio-snacker",
@@ -3554,7 +3639,9 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 30,
-      "notes": "Compact hybrid bred for containers. Short vines, 8-inch mini cucumbers. Snack-sized, thin skin. Good disease resistance. No trellis needed."
+      "notes": "Compact hybrid bred for containers. Short vines, 8-inch mini cucumbers. Snack-sized, thin skin. Good disease resistance. No trellis needed.",
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "cucamelon",
@@ -3608,7 +3695,9 @@
       "optimalTempMinC": 24,
       "optimalTempMaxC": 30,
       "spacingCm": 90,
-      "notes": "Icebox watermelon, 8-10 lb. Dark green rind, sweet red flesh. Compact vines for small gardens. One of the earliest watermelons — good for short seasons. 2-4 fruit per plant."
+      "notes": "Icebox watermelon, 8-10 lb. Dark green rind, sweet red flesh. Compact vines for small gardens. One of the earliest watermelons — good for short seasons. 2-4 fruit per plant.",
+      "minGrowingTempTransplantC": 16,
+      "minEstablishedGrowthTempC": 15
     },
     {
       "id": "watermelon-crimson-sweet",
@@ -3635,7 +3724,9 @@
       "optimalTempMinC": 24,
       "optimalTempMaxC": 30,
       "spacingCm": 120,
-      "notes": "Classic striped watermelon, 20-25 lb. Light green with dark green stripes. Very sweet, bright red flesh. Vigorous vines need lots of space. Disease resistant. 2-3 fruit per plant. Needs long warm season."
+      "notes": "Classic striped watermelon, 20-25 lb. Light green with dark green stripes. Very sweet, bright red flesh. Vigorous vines need lots of space. Disease resistant. 2-3 fruit per plant. Needs long warm season.",
+      "minGrowingTempTransplantC": 16,
+      "minEstablishedGrowthTempC": 15
     },
     {
       "id": "cantaloupe-hales-best-jumbo",
@@ -3662,7 +3753,9 @@
       "optimalTempMinC": 24,
       "optimalTempMaxC": 30,
       "spacingCm": 90,
-      "notes": "Classic muskmelon, 3-5 lb. Heavily netted rind, deep orange flesh. Very sweet and aromatic. Ripe when stem slips easily from fruit. Tolerates heat well. Open-pollinated heirloom. 3-5 fruit per plant."
+      "notes": "Classic muskmelon, 3-5 lb. Heavily netted rind, deep orange flesh. Very sweet and aromatic. Ripe when stem slips easily from fruit. Tolerates heat well. Open-pollinated heirloom. 3-5 fruit per plant.",
+      "minGrowingTempTransplantC": 15,
+      "minEstablishedGrowthTempC": 12
     },
     {
       "id": "cantaloupe-minnesota-midget",
@@ -3689,7 +3782,9 @@
       "optimalTempMinC": 24,
       "optimalTempMaxC": 30,
       "spacingCm": 60,
-      "notes": "Personal-sized muskmelon, 4 in diameter. Extra-sweet golden flesh. Earliest cantaloupe — bred at University of Minnesota for short seasons. Compact vines (3-4 ft). Perfect for northern gardens and containers."
+      "notes": "Personal-sized muskmelon, 4 in diameter. Extra-sweet golden flesh. Earliest cantaloupe — bred at University of Minnesota for short seasons. Compact vines (3-4 ft). Perfect for northern gardens and containers.",
+      "minGrowingTempTransplantC": 15,
+      "minEstablishedGrowthTempC": 12
     },
     {
       "id": "honeydew-honey-dew-green-flesh",
@@ -3714,7 +3809,9 @@
       "optimalTempMinC": 24,
       "optimalTempMaxC": 30,
       "spacingCm": 90,
-      "notes": "Smooth white rind, sweet pale green flesh. Needs long warm season (110 days). Ripe when blossom end gives slightly and skin turns creamy. Transplant only in northern gardens. 2-3 fruit per plant. Stores better than cantaloupe."
+      "notes": "Smooth white rind, sweet pale green flesh. Needs long warm season (110 days). Ripe when blossom end gives slightly and skin turns creamy. Transplant only in northern gardens. 2-3 fruit per plant. Stores better than cantaloupe.",
+      "minGrowingTempTransplantC": 15,
+      "minEstablishedGrowthTempC": 12
     },
     {
       "id": "squash-black-beauty",
@@ -3734,9 +3831,11 @@
       "indoorLeadWeeksMax": 3,
       "transplantAfterLsfDays": 7,
       "harvestStyle": "continuous",
-      "harvestDurationDays": 60,
+      "harvestDurationDays": 42,
       "frostSensitive": true,
-      "minGrowingTempC": 18,
+      "minGrowingTempC": 15,
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
@@ -3761,9 +3860,11 @@
       "indoorLeadWeeksMax": 3,
       "transplantAfterLsfDays": 7,
       "harvestStyle": "continuous",
-      "harvestDurationDays": 60,
+      "harvestDurationDays": 42,
       "frostSensitive": true,
-      "minGrowingTempC": 18,
+      "minGrowingTempC": 15,
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
@@ -3788,9 +3889,11 @@
       "indoorLeadWeeksMax": 3,
       "transplantAfterLsfDays": 7,
       "harvestStyle": "continuous",
-      "harvestDurationDays": 60,
+      "harvestDurationDays": 42,
       "frostSensitive": true,
-      "minGrowingTempC": 18,
+      "minGrowingTempC": 15,
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
@@ -3815,9 +3918,11 @@
       "indoorLeadWeeksMax": 3,
       "transplantAfterLsfDays": 7,
       "harvestStyle": "continuous",
-      "harvestDurationDays": 60,
+      "harvestDurationDays": 42,
       "frostSensitive": true,
-      "minGrowingTempC": 18,
+      "minGrowingTempC": 15,
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
@@ -3842,9 +3947,11 @@
       "indoorLeadWeeksMax": 3,
       "transplantAfterLsfDays": 7,
       "harvestStyle": "continuous",
-      "harvestDurationDays": 60,
+      "harvestDurationDays": 42,
       "frostSensitive": true,
-      "minGrowingTempC": 18,
+      "minGrowingTempC": 15,
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
@@ -3871,7 +3978,9 @@
       "harvestStyle": "single",
       "harvestDurationDays": 21,
       "frostSensitive": true,
-      "minGrowingTempC": 18,
+      "minGrowingTempC": 15,
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
@@ -3898,7 +4007,9 @@
       "harvestStyle": "single",
       "harvestDurationDays": 21,
       "frostSensitive": true,
-      "minGrowingTempC": 18,
+      "minGrowingTempC": 15,
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
@@ -3925,7 +4036,9 @@
       "harvestStyle": "single",
       "harvestDurationDays": 21,
       "frostSensitive": true,
-      "minGrowingTempC": 18,
+      "minGrowingTempC": 15,
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
@@ -3952,7 +4065,9 @@
       "harvestStyle": "single",
       "harvestDurationDays": 21,
       "frostSensitive": true,
-      "minGrowingTempC": 18,
+      "minGrowingTempC": 15,
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
@@ -3979,7 +4094,9 @@
       "harvestStyle": "single",
       "harvestDurationDays": 21,
       "frostSensitive": true,
-      "minGrowingTempC": 18,
+      "minGrowingTempC": 15,
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
@@ -4006,7 +4123,9 @@
       "harvestStyle": "single",
       "harvestDurationDays": 21,
       "frostSensitive": true,
-      "minGrowingTempC": 18,
+      "minGrowingTempC": 15,
+      "minGrowingTempTransplantC": 12,
+      "minEstablishedGrowthTempC": 10,
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
@@ -4032,7 +4151,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 30,
+      "maxGrowingTempC": 33,
       "optimalTempMinC": 13,
       "optimalTempMaxC": 24,
       "spacingCm": 12,
@@ -4132,7 +4251,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 30,
+      "maxGrowingTempC": 33,
       "optimalTempMinC": 13,
       "optimalTempMaxC": 24,
       "spacingCm": 12,
@@ -4157,7 +4276,7 @@
       "harvestDurationDays": 14,
       "frostSensitive": false,
       "minGrowingTempC": 4,
-      "maxGrowingTempC": 30,
+      "maxGrowingTempC": 33,
       "optimalTempMinC": 13,
       "optimalTempMaxC": 24,
       "spacingCm": 12,
@@ -4516,7 +4635,7 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": 42,
       "frostSensitive": false,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 4,
       "maxGrowingTempC": 30,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 24,
@@ -4542,7 +4661,7 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": 21,
       "frostSensitive": false,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 4,
       "maxGrowingTempC": 30,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 25,
@@ -4754,12 +4873,13 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": null,
       "frostSensitive": true,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 16,
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 30,
-      "notes": "Classic Italian large-leaf basil, the standard for pesto. Pinch flower buds to prolong leaf production. Blackens at the slightest frost."
+      "notes": "Classic Italian large-leaf basil, the standard for pesto. Pinch flower buds to prolong leaf production. Blackens at the slightest frost.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "basil-thai",
@@ -4781,12 +4901,13 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": null,
       "frostSensitive": true,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 16,
       "maxGrowingTempC": 38,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 32,
       "spacingCm": 30,
-      "notes": "Sturdy purple stems with a distinctive anise-licorice flavor. More heat-tolerant than Italian types and slower to bolt in hot weather."
+      "notes": "Sturdy purple stems with a distinctive anise-licorice flavor. More heat-tolerant than Italian types and slower to bolt in hot weather.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "basil-dark-opal",
@@ -4808,12 +4929,13 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": null,
       "frostSensitive": true,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 16,
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 30,
-      "notes": "AAS winner with deep purple foliage. Dual-purpose ornamental and culinary basil. Slightly slower to mature than green varieties; germination can be less uniform."
+      "notes": "AAS winner with deep purple foliage. Dual-purpose ornamental and culinary basil. Slightly slower to mature than green varieties; germination can be less uniform.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "basil-lemon",
@@ -4835,12 +4957,13 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": null,
       "frostSensitive": true,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 16,
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 25,
-      "notes": "Compact plant with bright citrus aroma and flavor. Excellent in teas, seafood, and desserts. Smaller leaves than Genovese."
+      "notes": "Compact plant with bright citrus aroma and flavor. Excellent in teas, seafood, and desserts. Smaller leaves than Genovese.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "basil-cinnamon",
@@ -4862,12 +4985,13 @@
       "harvestStyle": "continuous",
       "harvestDurationDays": null,
       "frostSensitive": true,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 16,
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "spacingCm": 30,
-      "notes": "Spicy-sweet cinnamon aroma with attractive purple stems and pink flower spikes. Good in fruit dishes, teas, and Asian cuisine."
+      "notes": "Spicy-sweet cinnamon aroma with attractive purple stems and pink flower spikes. Good in fruit dishes, teas, and Asian cuisine.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "cilantro-santo",
@@ -5592,7 +5716,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 30,
       "spacingCm": 30,
-      "notes": "Japanese herb (Perilla frutescens var. crispa) with complex basil-mint-cinnamon flavor, essential in sushi and Asian cuisine. Grows about 2 ft tall. Needs warm soil to germinate; sow after last frost."
+      "notes": "Japanese herb (Perilla frutescens var. crispa) with complex basil-mint-cinnamon flavor, essential in sushi and Asian cuisine. Grows about 2 ft tall. Needs warm soil to germinate; sow after last frost.",
+      "minEstablishedGrowthTempC": 7
     },
     {
       "id": "lemongrass-west-indian",
@@ -5619,7 +5744,8 @@
       "optimalTempMinC": 25,
       "optimalTempMaxC": 35,
       "spacingCm": 60,
-      "notes": "Tropical grass (Cymbopogon citratus) grown for its lemon-flavored stalk bases used in Thai and Vietnamese cooking. Grows 3-5 ft tall. Propagate by division; hardy only in Zone 9-11, grown as annual elsewhere."
+      "notes": "Tropical grass (Cymbopogon citratus) grown for its lemon-flavored stalk bases used in Thai and Vietnamese cooking. Grows 3-5 ft tall. Propagate by division; hardy only in Zone 9-11, grown as annual elsewhere.",
+      "minEstablishedGrowthTempC": 12
     },
     {
       "id": "stevia",
@@ -5642,6 +5768,7 @@
       "harvestDurationDays": 90,
       "frostSensitive": true,
       "minGrowingTempC": 10,
+      "minEstablishedGrowthTempC": 7,
       "maxGrowingTempC": 35,
       "optimalTempMinC": 20,
       "optimalTempMaxC": 30,
@@ -5892,12 +6019,13 @@
       "harvestStyle": "single",
       "harvestDurationDays": 7,
       "frostSensitive": true,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 16,
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 30,
       "spacingCm": 25,
-      "notes": "Bicolor (se) with white and yellow kernels. Sweet, tender, and popular with home gardeners. Plant in blocks of at least 4 rows for good pollination, not single rows."
+      "notes": "Bicolor (se) with white and yellow kernels. Sweet, tender, and popular with home gardeners. Plant in blocks of at least 4 rows for good pollination, not single rows.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "sweet-corn-golden-bantam",
@@ -5915,12 +6043,13 @@
       "harvestStyle": "single",
       "harvestDurationDays": 7,
       "frostSensitive": true,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 16,
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 30,
       "spacingCm": 25,
-      "notes": "Classic open-pollinated heirloom from 1902. Yellow kernels with old-fashioned corn flavor. Short stalks (5 ft), good for smaller gardens. Plant in blocks for pollination."
+      "notes": "Classic open-pollinated heirloom from 1902. Yellow kernels with old-fashioned corn flavor. Short stalks (5 ft), good for smaller gardens. Plant in blocks for pollination.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "sweet-corn-silver-queen",
@@ -5938,12 +6067,13 @@
       "harvestStyle": "single",
       "harvestDurationDays": 7,
       "frostSensitive": true,
-      "minGrowingTempC": 10,
+      "minGrowingTempC": 16,
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 30,
       "spacingCm": 25,
-      "notes": "White (su+) with large 8-9 inch ears. Considered by many the best-tasting white corn. Late season; needs a long growing season. Tall stalks (8 ft). Plant in blocks for pollination."
+      "notes": "White (su+) with large 8-9 inch ears. Considered by many the best-tasting white corn. Late season; needs a long growing season. Tall stalks (8 ft). Plant in blocks for pollination.",
+      "minEstablishedGrowthTempC": 10
     },
     {
       "id": "sweet-potato-beauregard",
@@ -5968,7 +6098,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 30,
       "spacingCm": 35,
-      "notes": "The most widely grown sweet potato in North America. Orange flesh, uniform shape, high yields. Grown from slips (rooted sprouts), not seed. Needs 100+ frost-free days and warm soil. Cure after harvest for best storage."
+      "notes": "The most widely grown sweet potato in North America. Orange flesh, uniform shape, high yields. Grown from slips (rooted sprouts), not seed. Needs 100+ frost-free days and warm soil. Cure after harvest for best storage.",
+      "minEstablishedGrowthTempC": 15
     },
     {
       "id": "sweet-potato-covington",
@@ -5993,7 +6124,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 30,
       "spacingCm": 35,
-      "notes": "Developed at NC State. Orange flesh with excellent sweetness and smooth texture. Good disease resistance. Produces uniform, compact roots. Grown from slips. Becoming the commercial standard."
+      "notes": "Developed at NC State. Orange flesh with excellent sweetness and smooth texture. Good disease resistance. Produces uniform, compact roots. Grown from slips. Becoming the commercial standard.",
+      "minEstablishedGrowthTempC": 15
     },
     {
       "id": "sweet-potato-georgia-jet",
@@ -6018,7 +6150,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 30,
       "spacingCm": 35,
-      "notes": "Red-skinned with orange flesh. One of the earliest sweet potatoes (90 days), making it viable in shorter-season northern gardens. Grown from slips. Moist, sweet flesh."
+      "notes": "Red-skinned with orange flesh. One of the earliest sweet potatoes (90 days), making it viable in shorter-season northern gardens. Grown from slips. Moist, sweet flesh.",
+      "minEstablishedGrowthTempC": 15
     },
     {
       "id": "collard-greens-georgia-southern",
