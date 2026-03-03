@@ -36,7 +36,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Cold-tolerant root vegetable. Can be sown 2-4 weeks before last frost. Harvest when roots are 1.5-3 inches. Greens are also edible. Typical maturity 50-65 days."
+      "notes": "Cold-tolerant root vegetable. Can be sown 2-4 weeks before last frost. Harvest when roots are 1.5-3 inches. Greens are also edible. Typical maturity 50-65 days.",
+      "spacingCm": 10
     },
     {
       "id": "baseline-bean-pole",
@@ -60,7 +61,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 27,
       "notes": "Requires trellising (6-10 ft). Longer harvest window than bush beans. Keep picked for continued production. Do not plant in cold soil. Typical maturity 60-90 days.",
-      "yieldCategory": "bean_pole"
+      "yieldCategory": "bean_pole",
+      "spacingCm": 15
     },
     {
       "id": "baseline-bean-bush",
@@ -84,7 +86,8 @@
       "maxGrowingTempC": 32,
       "optimalTempMinC": 18,
       "optimalTempMaxC": 27,
-      "notes": "Compact plants, no trellising needed. Concentrated harvest period makes them good for canning/freezing. Do not plant in cold soil. Typical maturity 50-60 days."
+      "notes": "Compact plants, no trellising needed. Concentrated harvest period makes them good for canning/freezing. Do not plant in cold soil. Typical maturity 50-60 days.",
+      "spacingCm": 15
     },
     {
       "id": "baseline-pea-shelling",
@@ -107,7 +110,8 @@
       "optimalTempMinC": 13,
       "optimalTempMaxC": 18,
       "notes": "Cool-season crop, frost tolerant to 20°F (-6°C). Shell for the peas inside. Plant 4-6 weeks before last frost. Stop producing when temps exceed 80°F (27°C). Typical maturity 60-70 days.",
-      "yieldCategory": "pea"
+      "yieldCategory": "pea",
+      "spacingCm": 8
     },
     {
       "id": "baseline-pea-snap",
@@ -130,7 +134,8 @@
       "optimalTempMinC": 13,
       "optimalTempMaxC": 18,
       "notes": "Edible pod with plump peas. Cool-season crop, frost tolerant. Plant 4-6 weeks before last frost. May need trellising (4-6 ft). Typical maturity 52-70 days.",
-      "yieldCategory": "pea"
+      "yieldCategory": "pea",
+      "spacingCm": 8
     },
     {
       "id": "baseline-pea-snow",
@@ -153,7 +158,8 @@
       "optimalTempMinC": 13,
       "optimalTempMaxC": 18,
       "notes": "Flat edible pod harvested before peas develop. Cool-season, frost tolerant. Plant 4-6 weeks before last frost. Typical maturity 55-65 days.",
-      "yieldCategory": "pea"
+      "yieldCategory": "pea",
+      "spacingCm": 8
     },
     {
       "id": "baseline-squash-winter",
@@ -182,7 +188,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "notes": "Long season crop (80-120 days). Needs warm soil (65°F/18°C). Harvest before frost, cure for storage. Includes butternut, acorn, delicata, spaghetti types.",
-      "yieldCategory": "squash_winter"
+      "yieldCategory": "squash_winter",
+      "spacingCm": 90
     },
     {
       "id": "baseline-squash-summer",
@@ -211,7 +218,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "notes": "Fast-maturing (35-55 days). Pick young and often for best flavor and continued production. Includes zucchini, yellow squash, patty pan types.",
-      "yieldCategory": "squash_summer"
+      "yieldCategory": "squash_summer",
+      "spacingCm": 60
     },
     {
       "id": "baseline-tomato-determinate",
@@ -237,7 +245,8 @@
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
-      "notes": "Bush habit, 3-4 ft tall. Concentrated harvest over 2-3 weeks. Good for canning, small spaces. Minimal pruning needed. Typical maturity 55-80 days from transplant."
+      "notes": "Bush habit, 3-4 ft tall. Concentrated harvest over 2-3 weeks. Good for canning, small spaces. Minimal pruning needed. Typical maturity 55-80 days from transplant.",
+      "spacingCm": 50
     },
     {
       "id": "baseline-tomato-indeterminate",
@@ -263,7 +272,8 @@
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
-      "notes": "Vining habit, 6-10+ ft tall. Continuous harvest until frost. Requires staking/caging and regular pruning. Typical maturity 70-100+ days from transplant."
+      "notes": "Vining habit, 6-10+ ft tall. Continuous harvest until frost. Requires staking/caging and regular pruning. Typical maturity 70-100+ days from transplant.",
+      "spacingCm": 60
     },
     {
       "id": "baseline-pepper-bell",
@@ -289,7 +299,8 @@
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
-      "notes": "Slow to germinate, needs warmth (75-90°F). Green to colored takes extra 2-3 weeks. Night temps below 55°F or above 75°F affect fruit set. Typical maturity 70-90 days from transplant."
+      "notes": "Slow to germinate, needs warmth (75-90°F). Green to colored takes extra 2-3 weeks. Night temps below 55°F or above 75°F affect fruit set. Typical maturity 70-90 days from transplant.",
+      "spacingCm": 45
     },
     {
       "id": "baseline-pepper-jalapeno",
@@ -315,7 +326,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "notes": "Pick green or wait for red (more heat). Keep picked for continuous production. Slow germination needs warmth (75-90°F). Typical maturity 65-85 days from transplant.",
-      "yieldCategory": "pepper_small"
+      "yieldCategory": "pepper_small",
+      "spacingCm": 40
     },
     {
       "id": "baseline-potato-early",
@@ -338,7 +350,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "notes": "Grown from seed potatoes. Plant 2 weeks before last frost when soil is 45°F (7°C). New potatoes can be harvested earlier. Early varieties: 60-80 days. Shorter storage life.",
-      "yieldCategory": "potato"
+      "yieldCategory": "potato",
+      "spacingCm": 30
     },
     {
       "id": "baseline-potato-midseason",
@@ -361,7 +374,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "notes": "Grown from seed potatoes. Good balance of yield and storage. Tuber formation slows above 80°F (27°C). Mid-season varieties: 80-100 days.",
-      "yieldCategory": "potato"
+      "yieldCategory": "potato",
+      "spacingCm": 30
     },
     {
       "id": "baseline-potato-late",
@@ -384,7 +398,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "notes": "Grown from seed potatoes. Best storage potatoes, keep 2-3 months. Late varieties: 110-135 days. Harvest when vines yellow. Cure before storage.",
-      "yieldCategory": "potato"
+      "yieldCategory": "potato",
+      "spacingCm": 30
     },
     {
       "id": "baseline-onion-bulb",
@@ -409,7 +424,8 @@
       "optimalTempMinC": 13,
       "optimalTempMaxC": 24,
       "notes": "Long-day varieties for northern gardens. Start indoors 10-12 weeks before transplant. Bulbing triggered by day length. Cure for 2 weeks before storage. Typical maturity 90-120 days from transplant.",
-      "yieldCategory": "allium_bulb"
+      "yieldCategory": "allium_bulb",
+      "spacingCm": 13
     },
     {
       "id": "baseline-shallot",
@@ -432,7 +448,8 @@
       "optimalTempMinC": 13,
       "optimalTempMaxC": 24,
       "notes": "Often grown from sets (bulbs) rather than seed. Plant early spring or fall. Forms clusters of bulbs. Harvest when tops fall over. Cure before storage. Typical maturity 90-120 days.",
-      "yieldCategory": "allium_bulb"
+      "yieldCategory": "allium_bulb",
+      "spacingCm": 15
     },
     {
       "id": "baseline-scallion",
@@ -458,7 +475,36 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 13,
       "optimalTempMaxC": 24,
+      "spacingCm": 8,
       "notes": "Also called green onions or bunching onions. Cool-season, frost tolerant. Can succession plant spring through fall. Harvest at any size. Typical maturity 60-90 days.",
+      "yieldCategory": "allium_green"
+    },
+    {
+      "id": "baseline-scallion-parade",
+      "crop": "Scallion",
+      "variety": "Parade",
+      "family": "Amaryllidaceae",
+      "plantType": "vegetable",
+      "germDaysMin": 5,
+      "germDaysMax": 14,
+      "maturityDays": 60,
+      "maturityBasis": "from_sow",
+      "sowMethod": "either",
+      "preferredMethod": "direct",
+      "indoorLeadWeeksMin": 6,
+      "indoorLeadWeeksMax": 8,
+      "directAfterLsfDays": -28,
+      "transplantAfterLsfDays": -21,
+      "fallBufferDays": 0,
+      "harvestStyle": "continuous",
+      "harvestDurationDays": 30,
+      "frostSensitive": false,
+      "minGrowingTempC": 4,
+      "maxGrowingTempC": 27,
+      "optimalTempMinC": 13,
+      "optimalTempMaxC": 24,
+      "spacingCm": 5,
+      "notes": "Japanese bunching onion. Slender, upright, non-bulbing. Excellent for containers at tight spacing. Very cold-hardy, can overwinter in Zone 5+. Baby harvest in 30 days, full size in 60 days.",
       "yieldCategory": "allium_green"
     },
     {
@@ -486,7 +532,8 @@
       "maxGrowingTempC": 21,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 18,
-      "notes": "Very cold-hardy, tolerates frost. Bolts quickly in heat (above 75°F/24°C) and long days. Best as spring/fall crop. Seeds won't germinate above 85°F (29°C). Typical maturity 37-50 days."
+      "notes": "Very cold-hardy, tolerates frost. Bolts quickly in heat (above 75°F/24°C) and long days. Best as spring/fall crop. Seeds won't germinate above 85°F (29°C). Typical maturity 37-50 days.",
+      "spacingCm": 12
     },
     {
       "id": "baseline-lettuce-loose-leaf",
@@ -513,7 +560,8 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 20,
-      "notes": "Fastest lettuce type. Cut-and-come-again harvest. Seeds need light, don't bury deep. Bolts in heat; shade cloth helps. Baby greens in 25-40 days. Typical full maturity 40-50 days."
+      "notes": "Fastest lettuce type. Cut-and-come-again harvest. Seeds need light, don't bury deep. Bolts in heat; shade cloth helps. Baby greens in 25-40 days. Typical full maturity 40-50 days.",
+      "spacingCm": 20
     },
     {
       "id": "baseline-lettuce-romaine",
@@ -540,7 +588,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "notes": "Upright heads, more heat tolerant than other head types. Seeds need light. Can harvest outer leaves or whole head. Typical maturity 55-75 days.",
-      "yieldCategory": "greens_head"
+      "yieldCategory": "greens_head",
+      "spacingCm": 25
     },
     {
       "id": "baseline-lettuce-butterhead",
@@ -567,7 +616,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 20,
       "notes": "Soft, tender heads (Bibb, Boston types). Seeds need light. Less bolt-resistant than romaine. Typical maturity 50-65 days.",
-      "yieldCategory": "greens_head"
+      "yieldCategory": "greens_head",
+      "spacingCm": 25
     },
     {
       "id": "baseline-cucumber-slicing",
@@ -596,7 +646,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "notes": "Warm-season crop, very frost sensitive. Direct sow when soil is 70°F (21°C). Pick regularly for continued production. Plants can produce for 6-10 weeks under good conditions. Trellising improves quality. Typical maturity 55-70 days.",
-      "yieldCategory": "cucumber"
+      "yieldCategory": "cucumber",
+      "spacingCm": 38
     },
     {
       "id": "baseline-cucumber-pickling",
@@ -625,7 +676,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "notes": "Smaller fruits harvested young. Pick every 1-2 days at peak. Heavy producers but may exhaust faster than slicers. Plants typically produce for 4-6 weeks. Typical maturity 50-60 days.",
-      "yieldCategory": "cucumber"
+      "yieldCategory": "cucumber",
+      "spacingCm": 30
     },
     {
       "id": "baseline-gai-lan",
@@ -652,7 +704,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "notes": "Also called Chinese broccoli or kai lan. Harvest stalks with leaves and flower buds before flowers open. Side shoots develop after main harvest. Cool-weather crop, relatively cold-hardy for fall/winter harvests. Typical maturity 50-70 days.",
-      "yieldCategory": "brassica_leafy"
+      "yieldCategory": "brassica_leafy",
+      "spacingCm": 20
     },
     {
       "id": "baseline-turnip",
@@ -675,7 +728,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "notes": "Fast-growing root vegetable. Greens also edible and nutritious. Sow short rows every 2-3 weeks for continuous harvest. Sweetens with light frost. Typical maturity 40-60 days.",
-      "yieldCategory": "root_large"
+      "yieldCategory": "root_large",
+      "spacingCm": 10
     },
     {
       "id": "baseline-broccoli-sprouting",
@@ -700,7 +754,8 @@
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
       "notes": "Produces many small florets rather than one large head. Keep picked for continued production. Cool-season crop, temps below 45°F may cause bolting. Some varieties are biennial (overwintering). Typical maturity 55-80 days from transplant.",
-      "yieldCategory": "brassica_leafy"
+      "yieldCategory": "brassica_leafy",
+      "spacingCm": 45
     },
     {
       "id": "baseline-broccolini",
@@ -725,7 +780,8 @@
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
       "notes": "Hybrid of broccoli and gai lan. Tender asparagus-like stems with small florets. Sweet, mild flavor. Less cold-hardy than sprouting broccoli. Typical maturity 50-70 days from transplant.",
-      "yieldCategory": "brassica_leafy"
+      "yieldCategory": "brassica_leafy",
+      "spacingCm": 30
     },
     {
       "id": "baseline-arugula",
@@ -748,7 +804,8 @@
       "optimalTempMinC": 10,
       "optimalTempMaxC": 18,
       "notes": "Fast-growing peppery salad green. Baby greens ready in 21 days. Bolts quickly in heat; best as spring/fall crop. Sow every 3 weeks for continuous harvest. Very cold-hardy with protection. Typical maturity 30-40 days.",
-      "yieldCategory": "greens_leaf"
+      "yieldCategory": "greens_leaf",
+      "spacingCm": 10
     },
     {
       "id": "baseline-arugula-wild",
@@ -771,7 +828,8 @@
       "optimalTempMinC": 10,
       "optimalTempMaxC": 24,
       "notes": "Perennial, does not bolt in hot weather like regular arugula. Narrower leaves, more intense flavor. Can harvest all summer. Slower to establish but longer productive life. Typical maturity 45-55 days.",
-      "yieldCategory": "greens_leaf"
+      "yieldCategory": "greens_leaf",
+      "spacingCm": 15
     },
     {
       "id": "baseline-bok-choy",
@@ -798,7 +856,8 @@
       "optimalTempMinC": 13,
       "optimalTempMaxC": 21,
       "notes": "Also called pac choi. Cool-season, grows quickly then bolts. Sow short rows every 2-3 weeks. Harvest before flower buds appear. Does not regrow after cutting. Tolerates light frost. Typical maturity 40-60 days.",
-      "yieldCategory": "greens_head"
+      "yieldCategory": "greens_head",
+      "spacingCm": 25
     },
     {
       "id": "baseline-bok-choy-baby",
@@ -825,7 +884,8 @@
       "optimalTempMinC": 13,
       "optimalTempMaxC": 21,
       "notes": "Compact mini varieties (Toy Choi, etc.). Good for containers. Same culture as full-size but harvested earlier. Typical maturity 25-35 days.",
-      "yieldCategory": "greens_baby"
+      "yieldCategory": "greens_baby",
+      "spacingCm": 15
     },
     {
       "id": "baseline-mustard-greens",
@@ -848,7 +908,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "notes": "Spicy, nutritious greens. Bolts in heat like spinach. Sow every 3 weeks spring/fall. Young leaves are milder. Excellent for microgreens. Tolerates light frost. Typical maturity 40-50 days.",
-      "yieldCategory": "greens_cooking"
+      "yieldCategory": "greens_cooking",
+      "spacingCm": 15
     },
     {
       "id": "baseline-carrot",
@@ -871,7 +932,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
-      "notes": "Slow, erratic germination - keep soil moist. Sow shallowly (1/4 inch). Does not transplant. Loose, stone-free soil essential. Sweetens after frost. Baby carrots in 50 days. Typical maturity 60-80 days."
+      "notes": "Slow, erratic germination - keep soil moist. Sow shallowly (1/4 inch). Does not transplant. Loose, stone-free soil essential. Sweetens after frost. Baby carrots in 50 days. Typical maturity 60-80 days.",
+      "spacingCm": 5
     },
     {
       "id": "baseline-leek",
@@ -896,7 +958,8 @@
       "optimalTempMinC": 13,
       "optimalTempMaxC": 21,
       "notes": "Slow-growing allium. Transplant when pencil-thick (20cm tall). Hill soil or mulch to blanch white stems. Very cold-hardy, can overwinter in mild climates. Harvest at any size. Typical maturity 90-120 days from transplant.",
-      "yieldCategory": "allium_green"
+      "yieldCategory": "allium_green",
+      "spacingCm": 15
     },
     {
       "id": "baseline-leek-overwintering",
@@ -921,7 +984,8 @@
       "optimalTempMinC": 13,
       "optimalTempMaxC": 21,
       "notes": "Hardy to Zone 7. Start indoors March-June, transplant for overwintering. Harvest late winter to early spring when little else is available. Mulch heavily in cold climates. Typical maturity 150-200 days.",
-      "yieldCategory": "allium_green"
+      "yieldCategory": "allium_green",
+      "spacingCm": 15
     },
     {
       "id": "baseline-broccoli",
@@ -946,7 +1010,8 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
-      "notes": "Cool-season crop, tolerates light frosts. Harvest main head when tight; side shoots follow for 3-4 weeks. Head formation stalls above 75°F (24°C). Typical maturity 55-75 days from transplant."
+      "notes": "Cool-season crop, tolerates light frosts. Harvest main head when tight; side shoots follow for 3-4 weeks. Head formation stalls above 75°F (24°C). Typical maturity 55-75 days from transplant.",
+      "spacingCm": 45
     },
     {
       "id": "baseline-brussels-sprouts",
@@ -971,7 +1036,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 18,
-      "notes": "Long-season crop, best grown for fall harvest. Sprouts mature bottom to top over 4-6 weeks. Frost improves flavor; tolerates 20°F (-7°C). Best when temps stay below 75°F (24°C). Typical maturity 80-110 days from transplant."
+      "notes": "Long-season crop, best grown for fall harvest. Sprouts mature bottom to top over 4-6 weeks. Frost improves flavor; tolerates 20°F (-7°C). Best when temps stay below 75°F (24°C). Typical maturity 80-110 days from transplant.",
+      "spacingCm": 60
     },
     {
       "id": "baseline-cabbage",
@@ -998,7 +1064,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
-      "notes": "Very frost-tolerant, transplant 3 weeks before last frost. Harvest when head is firm; don't leave too long or heads split. Early varieties 60-70 days, storage types 80-100 days from transplant."
+      "notes": "Very frost-tolerant, transplant 3 weeks before last frost. Harvest when head is firm; don't leave too long or heads split. Early varieties 60-70 days, storage types 80-100 days from transplant.",
+      "spacingCm": 45
     },
     {
       "id": "baseline-cauliflower",
@@ -1023,7 +1090,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
-      "notes": "Most temperature-sensitive brassica. Tolerates light frost but not hard freezes. Heat above 80°F (27°C) causes poor curd formation. Blanch white varieties by tying leaves over the curd. Typical maturity 50-80 days from transplant."
+      "notes": "Most temperature-sensitive brassica. Tolerates light frost but not hard freezes. Heat above 80°F (27°C) causes poor curd formation. Blanch white varieties by tying leaves over the curd. Typical maturity 50-80 days from transplant.",
+      "spacingCm": 45
     },
     {
       "id": "baseline-kale",
@@ -1050,7 +1118,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
-      "notes": "Extremely cold-hardy, tolerates 20°F (-7°C). Flavor sweetens after frost. Harvest outer leaves continuously; plant produces for months. Among the hardiest garden vegetables. Typical maturity 50-65 days from transplant."
+      "notes": "Extremely cold-hardy, tolerates 20°F (-7°C). Flavor sweetens after frost. Harvest outer leaves continuously; plant produces for months. Among the hardiest garden vegetables. Typical maturity 50-65 days from transplant.",
+      "spacingCm": 45
     },
     {
       "id": "baseline-kohlrabi",
@@ -1077,7 +1146,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
-      "notes": "Fast-growing brassica. Harvest when bulb is 2-3 inches diameter; larger bulbs become woody. Tolerates light frost. Good for succession planting spring and fall. Typical maturity 38-60 days."
+      "notes": "Fast-growing brassica. Harvest when bulb is 2-3 inches diameter; larger bulbs become woody. Tolerates light frost. Good for succession planting spring and fall. Typical maturity 38-60 days.",
+      "spacingCm": 15
     },
     {
       "id": "baseline-romanesco",
@@ -1102,7 +1172,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
-      "notes": "Fractal-patterned relative of cauliflower. Needs consistent cool temperatures for good head formation. Less cold-hardy than cabbage; transplant after last frost. Does not produce side shoots after harvest. Typical maturity 75-100 days from transplant."
+      "notes": "Fractal-patterned relative of cauliflower. Needs consistent cool temperatures for good head formation. Less cold-hardy than cabbage; transplant after last frost. Does not produce side shoots after harvest. Typical maturity 75-100 days from transplant.",
+      "spacingCm": 50
     },
     {
       "id": "baseline-eggplant",
@@ -1128,7 +1199,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 30,
       "notes": "Heat-loving crop, needs warm soil (70°F/21°C). Slow to start — begin indoors 8-10 weeks early. Fruits best when night temps stay above 60°F (16°C). Pick fruits glossy; dull skin = overripe. Typical maturity 60-80 days from transplant.",
-      "yieldCategory": "eggplant"
+      "yieldCategory": "eggplant",
+      "spacingCm": 60
     },
     {
       "id": "baseline-hot-pepper",
@@ -1154,7 +1226,8 @@
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 30,
-      "notes": "Includes cayenne, habanero, serrano, Thai types. Hotter varieties need longer season. Slow germination needs warmth (80-90°F). Stress (dry/hot) increases heat. Typical maturity 60-90 days from transplant."
+      "notes": "Includes cayenne, habanero, serrano, Thai types. Hotter varieties need longer season. Slow germination needs warmth (80-90°F). Stress (dry/hot) increases heat. Typical maturity 60-90 days from transplant.",
+      "spacingCm": 40
     },
     {
       "id": "baseline-sweet-pepper",
@@ -1180,7 +1253,8 @@
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
-      "notes": "Non-bell sweet peppers: banana, shishito, pimiento, etc. Similar culture to bell peppers but often slightly faster to mature. Pick regularly for continued production. Typical maturity 60-80 days from transplant."
+      "notes": "Non-bell sweet peppers: banana, shishito, pimiento, etc. Similar culture to bell peppers but often slightly faster to mature. Pick regularly for continued production. Typical maturity 60-80 days from transplant.",
+      "spacingCm": 45
     },
     {
       "id": "baseline-tomatillo",
@@ -1206,7 +1280,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "notes": "Harvest when husk splits and fruit fills it. Needs 2+ plants for cross-pollination. Very productive once established. Sprawling plants, may need support. Self-seeds readily. Typical maturity 60-80 days from transplant.",
-      "yieldCategory": "tomato_determinate"
+      "yieldCategory": "tomato_determinate",
+      "spacingCm": 60
     },
     {
       "id": "baseline-ground-cherry",
@@ -1232,7 +1307,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 27,
       "notes": "Harvest when husked fruits drop to ground and turn golden. Sweet, tropical flavor. Sprawling plants 2-3 ft tall. Self-seeds prolifically. Related to tomatillo but sweeter. Typical maturity 65-75 days from transplant.",
-      "yieldCategory": "tomato_cherry"
+      "yieldCategory": "tomato_cherry",
+      "spacingCm": 60
     },
     {
       "id": "baseline-acorn-squash",
@@ -1261,7 +1337,8 @@
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
-      "notes": "Compact winter squash, shorter season than butternut. Harvest when skin is dark green and hard. Shorter storage life (2-3 months) than other winter squash. Typical maturity 75-100 days."
+      "notes": "Compact winter squash, shorter season than butternut. Harvest when skin is dark green and hard. Shorter storage life (2-3 months) than other winter squash. Typical maturity 75-100 days.",
+      "spacingCm": 90
     },
     {
       "id": "baseline-spaghetti-squash",
@@ -1290,7 +1367,8 @@
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
-      "notes": "Harvest when skin turns golden yellow and is hard. Stores 2-3 months. Vigorous vines need space (6-8 ft spread). Flesh separates into spaghetti-like strands when cooked. Typical maturity 90-110 days."
+      "notes": "Harvest when skin turns golden yellow and is hard. Stores 2-3 months. Vigorous vines need space (6-8 ft spread). Flesh separates into spaghetti-like strands when cooked. Typical maturity 90-110 days.",
+      "spacingCm": 90
     },
     {
       "id": "baseline-pumpkin",
@@ -1319,7 +1397,8 @@
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
-      "notes": "Harvest when skin is hard, stem is dry, and color is deep. Cure in sun 7-10 days for storage. Long vines need space (10-20 ft). Pie types 90-100 days; jack-o'-lantern types 100-120 days."
+      "notes": "Harvest when skin is hard, stem is dry, and color is deep. Cure in sun 7-10 days for storage. Long vines need space (10-20 ft). Pie types 90-100 days; jack-o'-lantern types 100-120 days.",
+      "spacingCm": 120
     },
     {
       "id": "baseline-cantaloupe",
@@ -1348,7 +1427,8 @@
       "optimalTempMinC": 24,
       "optimalTempMaxC": 30,
       "notes": "Also called muskmelon. Harvest when stem slips easily from fruit ('full slip'). Needs warm soil (70°F/21°C) and long hot season. Short-season varieties available for northern gardens. Typical maturity 75-95 days.",
-      "yieldCategory": "melon"
+      "yieldCategory": "melon",
+      "spacingCm": 90
     },
     {
       "id": "baseline-honeydew",
@@ -1377,7 +1457,8 @@
       "optimalTempMinC": 24,
       "optimalTempMaxC": 30,
       "notes": "Longer season than cantaloupe. Does not slip from vine — harvest when blossom end yields to gentle pressure and skin turns creamy. Needs warm, sunny conditions. Typical maturity 90-110 days.",
-      "yieldCategory": "melon"
+      "yieldCategory": "melon",
+      "spacingCm": 90
     },
     {
       "id": "baseline-watermelon",
@@ -1406,7 +1487,8 @@
       "optimalTempMinC": 24,
       "optimalTempMaxC": 32,
       "notes": "Needs warm soil (70°F/21°C) and long hot season. Ripe when tendril nearest fruit dries, belly spot turns yellow, and hollow sound when tapped. Icebox types (70-80 days) for short seasons; full-size 85-100 days.",
-      "yieldCategory": "melon"
+      "yieldCategory": "melon",
+      "spacingCm": 90
     },
     {
       "id": "baseline-cucamelon",
@@ -1433,7 +1515,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "notes": "Also called Mexican sour gherkin. Grape-sized fruits with cucumber-citrus flavor. Vigorous vines, benefits from trellising. Very productive once established. Pick at grape size; larger fruits become seedy. Typical maturity 60-75 days.",
-      "yieldCategory": "cucumber"
+      "yieldCategory": "cucumber",
+      "spacingCm": 30
     },
     {
       "id": "baseline-radish",
@@ -1456,7 +1539,8 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 18,
-      "notes": "Fastest garden vegetable, 20-30 days. Sow every 1-2 weeks for continuous harvest. Bolts and turns pithy in heat. Best as spring/fall crop. Don't transplant. Typical maturity 22-30 days."
+      "notes": "Fastest garden vegetable, 20-30 days. Sow every 1-2 weeks for continuous harvest. Bolts and turns pithy in heat. Best as spring/fall crop. Don't transplant. Typical maturity 22-30 days.",
+      "spacingCm": 5
     },
     {
       "id": "baseline-radish-winter",
@@ -1479,7 +1563,8 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 18,
-      "notes": "Includes daikon and watermelon radish. Much larger roots than spring radishes, needs 50-70 days. Best sown mid-to-late summer for fall harvest. Stores well in root cellar. Typical maturity 50-70 days."
+      "notes": "Includes daikon and watermelon radish. Much larger roots than spring radishes, needs 50-70 days. Best sown mid-to-late summer for fall harvest. Stores well in root cellar. Typical maturity 50-70 days.",
+      "spacingCm": 15
     },
     {
       "id": "baseline-rutabaga",
@@ -1502,7 +1587,8 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 18,
-      "notes": "Cross between turnip and cabbage. Larger and slower than turnips (80-100 days). Best sown mid-summer for fall harvest. Flavor sweetens after frost. Excellent storage root. Typical maturity 85-100 days."
+      "notes": "Cross between turnip and cabbage. Larger and slower than turnips (80-100 days). Best sown mid-summer for fall harvest. Flavor sweetens after frost. Excellent storage root. Typical maturity 85-100 days.",
+      "spacingCm": 20
     },
     {
       "id": "baseline-parsnip",
@@ -1525,7 +1611,8 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 18,
-      "notes": "Very slow, erratic germination — use fresh seed only. Deep, loose soil essential for long roots. Flavor sweetens dramatically after hard frost. Can overwinter in ground with mulch. Typical maturity 95-120 days."
+      "notes": "Very slow, erratic germination — use fresh seed only. Deep, loose soil essential for long roots. Flavor sweetens dramatically after hard frost. Can overwinter in ground with mulch. Typical maturity 95-120 days.",
+      "spacingCm": 10
     },
     {
       "id": "baseline-garlic-hardneck",
@@ -1548,7 +1635,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 13,
       "optimalTempMaxC": 24,
-      "notes": "Plant cloves in fall, 6-8 weeks before ground freezes. Needs cold vernalization. Harvest when lower leaves brown (mid-summer). Cut scapes in spring for bigger bulbs. Stronger flavor, fewer but larger cloves than softneck. 4-6 month storage. Typical maturity ~240 days (Oct to Jul)."
+      "notes": "Plant cloves in fall, 6-8 weeks before ground freezes. Needs cold vernalization. Harvest when lower leaves brown (mid-summer). Cut scapes in spring for bigger bulbs. Stronger flavor, fewer but larger cloves than softneck. 4-6 month storage. Typical maturity ~240 days (Oct to Jul).",
+      "spacingCm": 15
     },
     {
       "id": "baseline-garlic-softneck",
@@ -1571,7 +1659,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 13,
       "optimalTempMaxC": 24,
-      "notes": "Plant cloves in fall or early spring. More cloves per bulb than hardneck; milder flavor. Better storage life (6-9 months). Flexible stems allow braiding. Less cold-hardy than hardneck; better for mild climates. Typical maturity ~240 days fall-planted."
+      "notes": "Plant cloves in fall or early spring. More cloves per bulb than hardneck; milder flavor. Better storage life (6-9 months). Flexible stems allow braiding. Less cold-hardy than hardneck; better for mild climates. Typical maturity ~240 days fall-planted.",
+      "spacingCm": 15
     },
     {
       "id": "baseline-fennel-bulbing",
@@ -1598,7 +1687,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "notes": "Also called Florence fennel or finocchio. Harvest when bulb is 3-4 inches across. Bolts readily in heat or if transplanted; best as fall crop. Hill soil around bulb to blanch. Does not transplant well — direct sow preferred. Typical maturity 60-80 days.",
-      "yieldCategory": "root_large"
+      "yieldCategory": "root_large",
+      "spacingCm": 25
     },
     {
       "id": "baseline-sweet-potato",
@@ -1624,7 +1714,8 @@
       "optimalTempMinC": 24,
       "optimalTempMaxC": 30,
       "notes": "Grown from slips (rooted sprouts), not seed. Needs warm soil (65°F/18°C). Long, hot growing season required. Harvest before frost; cure at 85°F/80% humidity for 10 days, then store cool. Short-season varieties available. Typical maturity 90-120 days from transplant.",
-      "yieldCategory": "potato"
+      "yieldCategory": "potato",
+      "spacingCm": 30
     },
     {
       "id": "baseline-swiss-chard",
@@ -1651,7 +1742,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 24,
-      "notes": "Heat-tolerant relative of beet (same species). Cut outer stalks at base; inner leaves continue growing. One of the longest-producing greens — spring through fall. Tolerates light frost. Colorful stems (Bright Lights). Typical maturity 50-60 days."
+      "notes": "Heat-tolerant relative of beet (same species). Cut outer stalks at base; inner leaves continue growing. One of the longest-producing greens — spring through fall. Tolerates light frost. Colorful stems (Bright Lights). Typical maturity 50-60 days.",
+      "spacingCm": 30
     },
     {
       "id": "baseline-collard-greens",
@@ -1678,7 +1770,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 21,
-      "notes": "Among the most cold-hardy brassicas, tolerates 20°F (-7°C). Flavor sweetens after frost. Harvest lower leaves continuously. More heat-tolerant than kale — good summer green in moderate climates. Typical maturity 55-75 days."
+      "notes": "Among the most cold-hardy brassicas, tolerates 20°F (-7°C). Flavor sweetens after frost. Harvest lower leaves continuously. More heat-tolerant than kale — good summer green in moderate climates. Typical maturity 55-75 days.",
+      "spacingCm": 45
     },
     {
       "id": "baseline-mizuna",
@@ -1701,7 +1794,8 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 18,
-      "notes": "Japanese mustard green with mild, peppery flavor. Fast growing; baby leaves in 21 days. More bolt-resistant than most Asian greens. Cut-and-come-again harvest. Cold-hardy with protection. Typical maturity 35-45 days."
+      "notes": "Japanese mustard green with mild, peppery flavor. Fast growing; baby leaves in 21 days. More bolt-resistant than most Asian greens. Cut-and-come-again harvest. Cold-hardy with protection. Typical maturity 35-45 days.",
+      "spacingCm": 15
     },
     {
       "id": "baseline-mache",
@@ -1724,7 +1818,8 @@
       "maxGrowingTempC": 18,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 15,
-      "notes": "Also called corn salad or lamb's lettuce. Extremely cold-hardy, one of the best winter greens. Mild, nutty flavor. Sow late summer for fall/winter harvest, or very early spring. Bolts quickly in warmth. Typical maturity 40-60 days."
+      "notes": "Also called corn salad or lamb's lettuce. Extremely cold-hardy, one of the best winter greens. Mild, nutty flavor. Sow late summer for fall/winter harvest, or very early spring. Bolts quickly in warmth. Typical maturity 40-60 days.",
+      "spacingCm": 10
     },
     {
       "id": "baseline-miners-lettuce",
@@ -1747,7 +1842,8 @@
       "maxGrowingTempC": 18,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 15,
-      "notes": "Native North American green (Claytonia perfoliata). Mild, succulent flavor. Thrives in cool shade — ideal for spring/fall understory planting. Self-seeds readily. Goes dormant in heat. Typical maturity 35-45 days."
+      "notes": "Native North American green (Claytonia perfoliata). Mild, succulent flavor. Thrives in cool shade — ideal for spring/fall understory planting. Self-seeds readily. Goes dormant in heat. Typical maturity 35-45 days.",
+      "spacingCm": 10
     },
     {
       "id": "baseline-nz-spinach",
@@ -1774,7 +1870,8 @@
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
-      "notes": "Not true spinach — a heat-loving substitute that thrives when spinach bolts. Soak seeds 24 hours before sowing (hard seed coat). Spreading ground-cover habit. Pick shoot tips for continued production. Typical maturity 50-65 days."
+      "notes": "Not true spinach — a heat-loving substitute that thrives when spinach bolts. Soak seeds 24 hours before sowing (hard seed coat). Spreading ground-cover habit. Pick shoot tips for continued production. Typical maturity 50-65 days.",
+      "spacingCm": 30
     },
     {
       "id": "baseline-lettuce-batavian",
@@ -1801,7 +1898,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Also called summer crisp or French crisp. More heat-tolerant and bolt-resistant than butterhead. Crunchy texture between romaine and iceberg. Seeds need light. Typical maturity 50-60 days."
+      "notes": "Also called summer crisp or French crisp. More heat-tolerant and bolt-resistant than butterhead. Crunchy texture between romaine and iceberg. Seeds need light. Typical maturity 50-60 days.",
+      "spacingCm": 25
     },
     {
       "id": "baseline-callaloo",
@@ -1825,7 +1923,8 @@
       "maxGrowingTempC": 35,
       "optimalTempMinC": 24,
       "optimalTempMaxC": 30,
-      "notes": "Tropical amaranth green, staple in Caribbean cooking. Thrives in heat when most greens bolt. Direct sow after last frost. Pick young leaves continuously. Nutritious, spinach-like flavor. Typical maturity 40-60 days."
+      "notes": "Tropical amaranth green, staple in Caribbean cooking. Thrives in heat when most greens bolt. Direct sow after last frost. Pick young leaves continuously. Nutritious, spinach-like flavor. Typical maturity 40-60 days.",
+      "spacingCm": 20
     },
     {
       "id": "baseline-sorrel",
@@ -1852,7 +1951,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Perennial herb with tangy, lemony flavor. Hardy to zone 3. Cut flower stalks to prolong leaf production. Harvest outer leaves continuously. One of the earliest spring greens. Typical maturity 50-70 days from seed, harvest year 1."
+      "notes": "Perennial herb with tangy, lemony flavor. Hardy to zone 3. Cut flower stalks to prolong leaf production. Harvest outer leaves continuously. One of the earliest spring greens. Typical maturity 50-70 days from seed, harvest year 1.",
+      "spacingCm": 30
     },
     {
       "id": "baseline-celery",
@@ -1877,7 +1977,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "notes": "Demanding crop — needs consistent moisture, rich soil, and cool temps. Start indoors very early (10-12 weeks before transplant). Blanch stalks by hilling soil or wrapping. Bolt in temps above 80°F (27°C). Typical maturity 80-100 days from transplant.",
-      "yieldCategory": "celery"
+      "yieldCategory": "celery",
+      "spacingCm": 25
     },
     {
       "id": "baseline-celeriac",
@@ -1902,7 +2003,8 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Also called celery root. Knobby root with celery flavor, excellent in soups. Very long season — start indoors 10-12 weeks early. Needs consistent moisture. Harvest when root is 3-4 inches. Tolerates light frost; stores well. Typical maturity 100-120 days from transplant."
+      "notes": "Also called celery root. Knobby root with celery flavor, excellent in soups. Very long season — start indoors 10-12 weeks early. Needs consistent moisture. Harvest when root is 3-4 inches. Tolerates light frost; stores well. Typical maturity 100-120 days from transplant.",
+      "spacingCm": 30
     },
     {
       "id": "baseline-sweet-corn",
@@ -1926,7 +2028,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 29,
       "notes": "Plant in blocks (min 4x4) for wind pollination, not single rows. Needs warm soil (65°F/18°C). Harvest when silks brown and kernels exude milky juice. Sugar converts to starch quickly — eat soon after picking. Typical maturity 60-95 days.",
-      "yieldCategory": "corn"
+      "yieldCategory": "corn",
+      "spacingCm": 30
     },
     {
       "id": "baseline-runner-bean",
@@ -1950,7 +2053,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 16,
       "optimalTempMaxC": 24,
-      "notes": "Vigorous climber (8-12 ft) with ornamental flowers. Prefers cooler temps than common beans — flowers drop above 85°F (29°C). Pick young pods regularly; older pods become stringy. Perennial in mild climates. Typical maturity 55-70 days."
+      "notes": "Vigorous climber (8-12 ft) with ornamental flowers. Prefers cooler temps than common beans — flowers drop above 85°F (29°C). Pick young pods regularly; older pods become stringy. Perennial in mild climates. Typical maturity 55-70 days.",
+      "spacingCm": 15
     },
     {
       "id": "baseline-okra",
@@ -1977,7 +2081,8 @@
       "optimalTempMinC": 24,
       "optimalTempMaxC": 32,
       "notes": "Heat-loving crop — thrives where others struggle. Soak seeds overnight for faster germination. Harvest pods at 2-3 inches; larger pods become tough and fibrous. Plants grow 3-6 ft tall. Typical maturity 50-65 days.",
-      "yieldCategory": "okra"
+      "yieldCategory": "okra",
+      "spacingCm": 40
     },
     {
       "id": "baseline-good-king-henry",
@@ -2004,7 +2109,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Ancient perennial potherb, hardy to zone 3. Slow to establish from seed — light harvest year 1, full harvest year 2+. Young shoots used like asparagus, leaves like spinach. Low maintenance once established. Typical maturity 80-100 days first year."
+      "notes": "Ancient perennial potherb, hardy to zone 3. Slow to establish from seed — light harvest year 1, full harvest year 2+. Young shoots used like asparagus, leaves like spinach. Low maintenance once established. Typical maturity 80-100 days first year.",
+      "spacingCm": 30
     },
     {
       "id": "baseline-basil",
@@ -2032,7 +2138,8 @@
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
-      "notes": "Tender annual herb, blackens below 40°F (4°C). Pinch flowers to prolong leaf production. Harvest by cutting stems above a leaf node for bushier growth. Genovese is the classic culinary type. Typical maturity 50-70 days."
+      "notes": "Tender annual herb, blackens below 40°F (4°C). Pinch flowers to prolong leaf production. Harvest by cutting stems above a leaf node for bushier growth. Genovese is the classic culinary type. Typical maturity 50-70 days.",
+      "spacingCm": 25
     },
     {
       "id": "baseline-cilantro",
@@ -2055,7 +2162,8 @@
       "maxGrowingTempC": 24,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 18,
-      "notes": "Bolts very quickly in heat — best spring/fall. Sow every 2-3 weeks for continuous harvest. Slow-bolt varieties (Calypso, Santo) extend production. Let some plants flower for coriander seed. Does not transplant well. Typical maturity 40-55 days for leaf."
+      "notes": "Bolts very quickly in heat — best spring/fall. Sow every 2-3 weeks for continuous harvest. Slow-bolt varieties (Calypso, Santo) extend production. Let some plants flower for coriander seed. Does not transplant well. Typical maturity 40-55 days for leaf.",
+      "spacingCm": 8
     },
     {
       "id": "baseline-dill",
@@ -2078,7 +2186,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Fast-growing herb, bolts in heat. Sow every 3 weeks for continuous leaf harvest. Fernleaf types are compact and slower to bolt. Flower heads used for pickling. Self-seeds freely. Does not transplant well (taproot). Typical maturity 40-55 days for leaf."
+      "notes": "Fast-growing herb, bolts in heat. Sow every 3 weeks for continuous leaf harvest. Fernleaf types are compact and slower to bolt. Flower heads used for pickling. Self-seeds freely. Does not transplant well (taproot). Typical maturity 40-55 days for leaf.",
+      "spacingCm": 25
     },
     {
       "id": "baseline-parsley",
@@ -2105,7 +2214,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Very slow germination (2-4 weeks). Soak seeds overnight. Biennial — produces leaves year 1, flowers year 2. Cut outer stems at base for continuous harvest. Cold-hardy with protection. Italian flat-leaf and curly are main types. Typical maturity 70-90 days."
+      "notes": "Very slow germination (2-4 weeks). Soak seeds overnight. Biennial — produces leaves year 1, flowers year 2. Cut outer stems at base for continuous harvest. Cold-hardy with protection. Italian flat-leaf and curly are main types. Typical maturity 70-90 days.",
+      "spacingCm": 20
     },
     {
       "id": "baseline-chives",
@@ -2132,7 +2242,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Hardy perennial herb, zone 3. Cut leaves to 2 inches above soil; regrows quickly. Divide clumps every 3-4 years. Purple flowers are edible. Easy to grow, pest-resistant. Typical maturity 60-90 days from seed; faster from divisions."
+      "notes": "Hardy perennial herb, zone 3. Cut leaves to 2 inches above soil; regrows quickly. Divide clumps every 3-4 years. Purple flowers are edible. Easy to grow, pest-resistant. Typical maturity 60-90 days from seed; faster from divisions.",
+      "spacingCm": 15
     },
     {
       "id": "baseline-oregano",
@@ -2159,7 +2270,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 18,
       "optimalTempMaxC": 24,
-      "notes": "Hardy perennial herb, zone 4-5. Harvest just before flowers open for strongest flavor. Cut stems to 2 inches; regrows vigorously. Dries well. Greek oregano has best culinary flavor. Spreads — can become invasive. Typical maturity 70-90 days from seed."
+      "notes": "Hardy perennial herb, zone 4-5. Harvest just before flowers open for strongest flavor. Cut stems to 2 inches; regrows vigorously. Dries well. Greek oregano has best culinary flavor. Spreads — can become invasive. Typical maturity 70-90 days from seed.",
+      "spacingCm": 30
     },
     {
       "id": "baseline-thyme",
@@ -2184,7 +2296,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 18,
       "optimalTempMaxC": 24,
-      "notes": "Hardy perennial herb, zone 4-5. Very slow from seed — transplants or divisions preferred. Needs well-drained soil; dies in wet winter conditions. Woody subshrub, prune lightly in spring. Harvest sprigs anytime. Typical maturity 85-95 days from seed."
+      "notes": "Hardy perennial herb, zone 4-5. Very slow from seed — transplants or divisions preferred. Needs well-drained soil; dies in wet winter conditions. Woody subshrub, prune lightly in spring. Harvest sprigs anytime. Typical maturity 85-95 days from seed.",
+      "spacingCm": 30
     },
     {
       "id": "baseline-sage",
@@ -2211,7 +2324,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Hardy perennial herb, zone 4-5. Woody shrub, replace every 3-5 years as plants get leggy. Needs well-drained soil. Don't cut into old wood. Harvest lightly first year. Dries and freezes well. Typical maturity 75-90 days from seed."
+      "notes": "Hardy perennial herb, zone 4-5. Woody shrub, replace every 3-5 years as plants get leggy. Needs well-drained soil. Don't cut into old wood. Harvest lightly first year. Dries and freezes well. Typical maturity 75-90 days from seed.",
+      "spacingCm": 45
     },
     {
       "id": "baseline-rosemary",
@@ -2236,7 +2350,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 18,
       "optimalTempMaxC": 24,
-      "notes": "Tender perennial, hardy to zone 7-8. Bring indoors in cold climates. Very slow from seed (low germination); cuttings are easier. Needs excellent drainage. Woody shrub, prune regularly. Can harvest sprigs year-round in mild climates. Typical maturity 80-100 days from seed."
+      "notes": "Tender perennial, hardy to zone 7-8. Bring indoors in cold climates. Very slow from seed (low germination); cuttings are easier. Needs excellent drainage. Woody shrub, prune regularly. Can harvest sprigs year-round in mild climates. Typical maturity 80-100 days from seed.",
+      "spacingCm": 60
     },
     {
       "id": "baseline-mint",
@@ -2263,7 +2378,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Very hardy perennial, zone 3-4. Extremely invasive — grow in containers or with root barriers. Divisions/cuttings grow faster than seed. Cut frequently for bushier growth. Many types: spearmint, peppermint, chocolate, etc. Typical maturity 80-95 days from seed."
+      "notes": "Very hardy perennial, zone 3-4. Extremely invasive — grow in containers or with root barriers. Divisions/cuttings grow faster than seed. Cut frequently for bushier growth. Many types: spearmint, peppermint, chocolate, etc. Typical maturity 80-95 days from seed.",
+      "spacingCm": 40
     },
     {
       "id": "baseline-tarragon",
@@ -2288,7 +2404,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "French tarragon (superior flavor) must be grown from divisions — it does not produce viable seed. Russian tarragon grows from seed but has inferior flavor. Hardy perennial, zone 4-5. Divide every 3-4 years. Typical maturity 60-90 days from division."
+      "notes": "French tarragon (superior flavor) must be grown from divisions — it does not produce viable seed. Russian tarragon grows from seed but has inferior flavor. Hardy perennial, zone 4-5. Divide every 3-4 years. Typical maturity 60-90 days from division.",
+      "spacingCm": 45
     },
     {
       "id": "baseline-sweet-marjoram",
@@ -2315,7 +2432,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 18,
       "optimalTempMaxC": 24,
-      "notes": "Tender perennial, grown as annual in cold climates. Sweeter and more delicate than oregano (close relative). Harvest before flowering for best flavor. Dries well. Typical maturity 55-70 days."
+      "notes": "Tender perennial, grown as annual in cold climates. Sweeter and more delicate than oregano (close relative). Harvest before flowering for best flavor. Dries well. Typical maturity 55-70 days.",
+      "spacingCm": 25
     },
     {
       "id": "baseline-summer-savory",
@@ -2338,7 +2456,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 18,
       "optimalTempMaxC": 24,
-      "notes": "Annual herb, more delicate flavor than winter savory. Traditional 'bean herb' — classic pairing with green beans. Harvest before flowering. Easy to grow from direct sow after last frost. Typical maturity 55-65 days."
+      "notes": "Annual herb, more delicate flavor than winter savory. Traditional 'bean herb' — classic pairing with green beans. Harvest before flowering. Easy to grow from direct sow after last frost. Typical maturity 55-65 days.",
+      "spacingCm": 25
     },
     {
       "id": "baseline-winter-savory",
@@ -2365,7 +2484,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Hardy perennial, zone 5-6. Stronger, more peppery than summer savory. Woody subshrub, prune in spring. Slow from seed. Drought tolerant once established. Evergreen in mild climates. Typical maturity 75-90 days from seed."
+      "notes": "Hardy perennial, zone 5-6. Stronger, more peppery than summer savory. Woody subshrub, prune in spring. Slow from seed. Drought tolerant once established. Evergreen in mild climates. Typical maturity 75-90 days from seed.",
+      "spacingCm": 30
     },
     {
       "id": "baseline-lemon-balm",
@@ -2392,7 +2512,8 @@
       "maxGrowingTempC": 30,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Hardy perennial, zone 4. Lemon-scented leaves for tea and cooking. Very easy to grow; self-seeds aggressively. Cut back hard in midsummer for fresh regrowth. Related to mint, similarly invasive. Best flavor before flowering. Typical maturity 60-80 days."
+      "notes": "Hardy perennial, zone 4. Lemon-scented leaves for tea and cooking. Very easy to grow; self-seeds aggressively. Cut back hard in midsummer for fresh regrowth. Related to mint, similarly invasive. Best flavor before flowering. Typical maturity 60-80 days.",
+      "spacingCm": 30
     },
     {
       "id": "baseline-chamomile",
@@ -2419,7 +2540,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "German chamomile (annual) is the common tea herb. Tiny seeds need light to germinate — surface sow. Harvest flower heads when petals fold back. Self-seeds freely. Drought tolerant. Roman chamomile is a perennial ground cover. Typical maturity 55-65 days."
+      "notes": "German chamomile (annual) is the common tea herb. Tiny seeds need light to germinate — surface sow. Harvest flower heads when petals fold back. Self-seeds freely. Drought tolerant. Roman chamomile is a perennial ground cover. Typical maturity 55-65 days.",
+      "spacingCm": 20
     },
     {
       "id": "baseline-chervil",
@@ -2442,7 +2564,8 @@
       "maxGrowingTempC": 21,
       "optimalTempMinC": 10,
       "optimalTempMaxC": 16,
-      "notes": "Cool-season herb with delicate anise-parsley flavor. French cuisine staple (fines herbes). Bolts very quickly in heat — grow in partial shade, spring/fall only. Does not transplant or dry well. Use fresh. Typical maturity 45-60 days."
+      "notes": "Cool-season herb with delicate anise-parsley flavor. French cuisine staple (fines herbes). Bolts very quickly in heat — grow in partial shade, spring/fall only. Does not transplant or dry well. Use fresh. Typical maturity 45-60 days.",
+      "spacingCm": 15
     },
     {
       "id": "baseline-shiso",
@@ -2470,7 +2593,8 @@
       "maxGrowingTempC": 32,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
-      "notes": "Also called perilla or Japanese basil. Green and purple-leaf varieties. Seeds need light and cold stratification (refrigerate 1 week). Used in Japanese, Korean, Vietnamese cuisine. Self-seeds readily. Typical maturity 55-70 days."
+      "notes": "Also called perilla or Japanese basil. Green and purple-leaf varieties. Seeds need light and cold stratification (refrigerate 1 week). Used in Japanese, Korean, Vietnamese cuisine. Self-seeds readily. Typical maturity 55-70 days.",
+      "spacingCm": 30
     },
     {
       "id": "baseline-lemongrass",
@@ -2496,7 +2620,8 @@
       "maxGrowingTempC": 35,
       "optimalTempMinC": 24,
       "optimalTempMaxC": 30,
-      "notes": "Tropical grass, grow as annual in cold climates. Easiest to start from store-bought stalks rooted in water. Large clumps (3-5 ft). Harvest outer stalks when 1/2 inch thick. Bring indoors before frost. Typical maturity 90-120 days from transplant."
+      "notes": "Tropical grass, grow as annual in cold climates. Easiest to start from store-bought stalks rooted in water. Large clumps (3-5 ft). Harvest outer stalks when 1/2 inch thick. Bring indoors before frost. Typical maturity 90-120 days from transplant.",
+      "spacingCm": 60
     },
     {
       "id": "baseline-stevia",
@@ -2522,7 +2647,8 @@
       "maxGrowingTempC": 35,
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
-      "notes": "Natural sweetener herb. Poor seed germination; buy transplants. Tender perennial (zone 9+), grow as annual. Harvest leaves before flowering for highest sweetness. Pinch flowers. Needs well-drained soil. Typical maturity 80-100 days from transplant."
+      "notes": "Natural sweetener herb. Poor seed germination; buy transplants. Tender perennial (zone 9+), grow as annual. Harvest leaves before flowering for highest sweetness. Pinch flowers. Needs well-drained soil. Typical maturity 80-100 days from transplant.",
+      "spacingCm": 30
     },
     {
       "id": "baseline-lovage",
@@ -2549,7 +2675,8 @@
       "maxGrowingTempC": 27,
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
-      "notes": "Very large perennial herb (3-6 ft tall), zone 3-4. Intense celery flavor — use sparingly. Harvest young leaves and hollow stems. Dies back in winter, returns spring. One plant is enough for most gardens. Typical maturity 80-100 days from seed."
+      "notes": "Very large perennial herb (3-6 ft tall), zone 3-4. Intense celery flavor — use sparingly. Harvest young leaves and hollow stems. Dies back in winter, returns spring. One plant is enough for most gardens. Typical maturity 80-100 days from seed.",
+      "spacingCm": 60
     },
     {
       "id": "baseline-horseradish",
@@ -2572,7 +2699,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 21,
       "notes": "Grown from root cuttings, not seed. Plant 4-6 weeks before last frost. Extremely vigorous perennial, zone 3 — can become invasive. Dig roots in fall after frost. Pungency is strongest when freshly grated. Leave some root in ground for next year. Typical maturity 140-160 days.",
-      "yieldCategory": "root_large"
+      "yieldCategory": "root_large",
+      "spacingCm": 45
     },
     {
       "id": "baseline-asparagus",
@@ -2599,7 +2727,8 @@
       "optimalTempMinC": 16,
       "optimalTempMaxC": 24,
       "notes": "Long-lived perennial (15-30 years), zone 3. Usually planted from 1-year crowns. Do NOT harvest year 1; light harvest year 2; full harvest year 3+. Harvest spears when 6-8 inches tall for 6-8 weeks in spring. All-male hybrids are most productive.",
-      "yieldCategory": "asparagus"
+      "yieldCategory": "asparagus",
+      "spacingCm": 45
     },
     {
       "id": "baseline-rhubarb",
@@ -2626,7 +2755,8 @@
       "optimalTempMinC": 10,
       "optimalTempMaxC": 21,
       "notes": "Very hardy perennial, zone 2-3. Usually planted from divisions/crowns. Do not harvest year 1. Harvest stalks by pulling and twisting (don't cut). LEAVES ARE TOXIC (oxalic acid) — eat stalks only. Needs winter chill; struggles in hot climates. Pull seed stalks. Produces for 10-15 years.",
-      "yieldCategory": "rhubarb"
+      "yieldCategory": "rhubarb",
+      "spacingCm": 90
     },
     {
       "id": "baseline-strawberry",
@@ -2651,7 +2781,8 @@
       "optimalTempMinC": 15,
       "optimalTempMaxC": 24,
       "notes": "Usually planted as bare-root crowns, not from seed. June-bearing: one large crop in early summer. Day-neutral: smaller fruit all season. Remove flowers year 1 (June-bearing) for bigger year 2 crop. Mulch with straw. Hardy perennial, zone 3-4. Renovate beds every 3-4 years.",
-      "yieldCategory": "strawberry"
+      "yieldCategory": "strawberry",
+      "spacingCm": 30
     },
     {
       "id": "baseline-zinnia",
@@ -2678,7 +2809,8 @@
       "optimalTempMinC": 21,
       "optimalTempMaxC": 27,
       "notes": "Heat-loving annual flower. Cut-and-come-again — more you cut, more blooms. Direct sow is preferred; transplants can be finicky. Excellent cut flower. Susceptible to powdery mildew; space for air flow. Typical first bloom 55-70 days from sow.",
-      "yieldCategory": "flower"
+      "yieldCategory": "flower",
+      "spacingCm": 25
     },
     {
       "id": "baseline-cosmos",
@@ -2705,7 +2837,8 @@
       "optimalTempMinC": 18,
       "optimalTempMaxC": 27,
       "notes": "Easy annual flower, blooms until frost. Thrives in poor soil — rich soil produces more foliage, fewer flowers. Tall varieties (4-6 ft) may need staking. Deadhead for continuous bloom. Self-seeds. Attracts pollinators. Typical first bloom 55-65 days from sow.",
-      "yieldCategory": "flower"
+      "yieldCategory": "flower",
+      "spacingCm": 30
     }
   ]
 }
