@@ -1,1 +1,97 @@
-[]
+[
+  {
+    "cultivarId": "beet-avalanche",
+    "label": "Beet - Avalanche #1",
+    "quantity": 4,
+    "sowDate": "2025-04-10",
+    "transplantDate": "2025-05-08",
+    "harvestStart": "2025-06-04",
+    "harvestEnd": "2025-06-11",
+    "method": "transplant",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "fe966adc-7065-44a7-a91b-9dea61a59903",
+    "createdAt": "2026-03-02T23:32:34.470Z"
+  },
+  {
+    "cultivarId": "beet-avalanche",
+    "label": "Beet - Avalanche #2",
+    "quantity": 4,
+    "sowDate": "2025-05-01",
+    "harvestStart": "2025-06-25",
+    "harvestEnd": "2025-07-02",
+    "method": "transplant",
+    "status": "planned",
+    "successionNumber": 2,
+    "id": "d840decd-9050-425f-a37a-3edc0618383e",
+    "createdAt": "2026-03-02T23:22:36.779Z",
+    "transplantDate": "2025-05-29"
+  },
+  {
+    "cultivarId": "spinach-seaside",
+    "label": "Spinach - Seaside #1",
+    "quantity": 4,
+    "sowDate": "2025-03-18",
+    "transplantDate": "2025-04-08",
+    "harvestStart": "2025-04-27",
+    "harvestEnd": "2025-05-18",
+    "method": "transplant",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "6893018b-e287-430f-a3d3-cf2ed87afe3a",
+    "createdAt": "2026-03-03T00:05:02.502Z"
+  },
+  {
+    "cultivarId": "spinach-seaside",
+    "label": "Spinach - Seaside #2",
+    "quantity": 4,
+    "sowDate": "2025-04-08",
+    "harvestStart": "2025-05-18",
+    "harvestEnd": "2025-06-08",
+    "method": "direct",
+    "status": "planned",
+    "successionNumber": 2,
+    "id": "bd8bcd02-0516-4a44-8303-5e7338d9520c",
+    "createdAt": "2026-03-03T00:05:12.211Z"
+  },
+  {
+    "cultivarId": "spinach-seaside",
+    "label": "Spinach - Seaside #3",
+    "quantity": 4,
+    "sowDate": "2025-08-19",
+    "transplantDate": "2025-09-09",
+    "harvestStart": "2025-09-28",
+    "harvestEnd": "2025-10-19",
+    "method": "transplant",
+    "status": "planned",
+    "successionNumber": 3,
+    "id": "db9fc7d2-d600-47ef-9d88-1c76ca41bebc",
+    "createdAt": "2026-03-03T00:05:13.715Z"
+  },
+  {
+    "cultivarId": "spinach-seaside",
+    "label": "Spinach - Seaside #4",
+    "quantity": 4,
+    "sowDate": "2025-09-09",
+    "harvestStart": "2025-10-19",
+    "harvestEnd": "2025-11-09",
+    "method": "direct",
+    "status": "planned",
+    "successionNumber": 4,
+    "id": "3af75ff5-4bce-42fe-8606-55bbd73403aa",
+    "createdAt": "2026-03-03T00:05:15.262Z"
+  },
+  {
+    "cultivarId": "spinach-seaside",
+    "label": "Spinach - Seaside #5",
+    "quantity": 4,
+    "sowDate": "2025-09-30",
+    "harvestStart": "2025-11-09",
+    "harvestEnd": "2025-11-25",
+    "method": "direct",
+    "status": "planned",
+    "successionNumber": 5,
+    "id": "874b0acb-4688-4f04-980d-a5bd5275ab72",
+    "createdAt": "2026-03-03T00:05:23.743Z"
+  }
+]
