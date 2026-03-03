@@ -50,11 +50,23 @@ Each cultivar can define temperature tolerances:
 
 | Field | Purpose | Example |
 |-------|---------|---------|
-| `minGrowingTempC` | Too cold below this | 10°C for tomatoes |
+| `minGrowingTempC` | Too cold for germination/establishment | 16°C for squash |
+| `minEstablishedGrowthTempC` | Too cold for established plants (lower than germination) | 10°C for squash |
 | `maxGrowingTempC` | Bolts/fails above this | 24°C for spinach |
 | `frostSensitive` | Dies at frost | true for tomatoes |
 
 The algorithm checks day-by-day interpolated temperatures against these thresholds with a 1°C safety margin applied (e.g., effective max = `maxGrowingTempC - 1`, effective min = `minGrowingTempC + 1`). Future: the margin will be replaced by a user-configurable conservatism level that interpolates between `optimalTemp` and `min/maxGrowingTemp` ranges.
+
+#### Phased Temperature Check
+For warm-season crops, `minGrowingTempC` represents the germination/establishment threshold — the minimum soil or air temp needed for seeds to germinate or transplants to establish. Once established (~3-4 weeks after outdoor planting), many crops can continue growing at significantly lower temperatures (e.g., squash germinates at 15°C but grows productively down to 10°C).
+
+When `minEstablishedGrowthTempC` is set, the cold check uses two phases:
+1. **Establishment phase** — first N days after outdoor planting: uses `minGrowingTempC`
+   - Direct sow: `germDaysMax + 14` days (germination + seedling establishment)
+   - Transplant: 14 days (root establishment)
+2. **Established growth phase** — remaining days through harvest: uses `minEstablishedGrowthTempC`
+
+Cool-season crops (brassicas, leafy greens, root vegetables) generally don't need this — their `minGrowingTempC` is already close to their growth-cessation temperature.
 
 ### Harvest Styles
 
@@ -82,7 +94,9 @@ Earliest Sow Date:
 
 Latest Sow Date:
 ├── Frost-sensitive: earliest fall frost - buffer - maturity days
-└── Frost-tolerant: typical fall frost + 21 days - maturity days
+└── Frost-tolerant: frost deadline - maturity days
+    ├── Default: typical fall frost + 21 days
+    └── With minGrowingTempC: extended until soil drops below threshold (see below)
 ```
 
 ### Step 2: Generate First Window
@@ -106,20 +120,24 @@ Harvest end:
 
 ### Step 3: Check Temperature Viability
 
-For each potential window, check if the growing period is viable. The function iterates through each calendar month the period spans (not sampling every 30 days), ensuring no month is skipped:
+For each potential window, check if the growing period is viable. The function iterates day-by-day through the growing period using interpolated climate data:
 
 ```
 Outdoor start = transplantDate (if transplant) or sowDate (if direct)
 Check period  = outdoor start through harvestStart
 
-For each calendar month in that period:
-├── Heat check: Is avgHigh > maxGrowingTempC - margin?
+For each day in that period:
+├── Heat check: Is tmax_c > maxGrowingTempC - margin?
 │   └── If yes: NOT VIABLE (too hot)
-├── Cold check (frost-tolerant): Is soil_avg_c < minGrowingTempC?
+├── Cold check (frost-tolerant): Is soil_avg_c < coldThreshold + margin?
 │   └── Fallback: if soil_avg_c unavailable, uses tavg_c - 2°C
 │   └── If yes: NOT VIABLE (soil too cold)
-└── Cold check (frost-sensitive): Is avgTemp < minGrowingTempC?
+└── Cold check (frost-sensitive): Is tavg_c < coldThreshold + margin?
     └── If yes: NOT VIABLE (too cold)
+
+Cold threshold varies by growth phase (when minEstablishedGrowthTempC is set):
+├── Establishment phase (first ~3-4 weeks): uses minGrowingTempC
+└── Established growth phase (remaining): uses minEstablishedGrowthTempC
 ```
 
 **Important**: Heat is checked through `harvestStart`, not `harvestEnd`. Mature plants tolerate more heat than actively growing ones.
@@ -211,7 +229,13 @@ Find all remaining viable succession windows after a given date. Windows are cha
 Check if a date range is temperature-viable for a cultivar. Returns `{ viable: boolean; reason?: string }`. Used internally by the succession algorithm and useful for drag-to-reschedule validation.
 
 Options:
-- `checkHeatOnly: true` - Skip cold check (useful when only heat tolerance matters)
+- `checkHeatOnly: true` — Skip cold check (useful when only heat tolerance matters)
+- `method: SowMethod` — Determines which min temp to use (`minGrowingTempTransplantC` for transplant)
+- `establishmentDays: number` — Days for establishment phase (affects phased temp check)
+- `minEstablishedGrowthTempC: number` — Lower cold threshold after establishment
+
+### `calculateFrostDeadline(cultivar, frostWindow, climate?)`
+Calculate the latest date a crop can continue growing in fall. For frost-sensitive crops, returns `earliestFallFrost - 4 days`. For frost-tolerant crops, returns `typicalFallFrost + 21 days` as a baseline, extended further when `minGrowingTempC` is set and soil temps remain above the threshold.
 
 ### `renumberPlantingsForCrop(allPlantings, cropName, cultivarId, variety?)`
 Renumber succession numbers to match chronological sow date order. Called automatically when plantings are added or dates change.
@@ -256,22 +280,34 @@ Monthly averages are linearly interpolated to estimate daily values. Each monthl
 
 ### Frost Handling
 - Frost-sensitive crops: must finish harvest before earliest probable frost (minus 4-day buffer)
-- Frost-tolerant crops: can extend harvest ~3 weeks past typical frost date
+- Frost-tolerant crops: deadline depends on cold tolerance (see below)
+
+### Temperature-Aware Frost Deadlines
+
+For frost-tolerant crops, `calculateFrostDeadline()` determines the latest date growth can continue:
+
+- **Default (no `minGrowingTempC`):** typical fall frost + 21 days (the legacy behavior)
+- **With `minGrowingTempC`:** scans day-by-day past frost+21 until interpolated soil temperature drops below `minGrowingTempC + 1°C margin`. This allows cold-hardy crops to have later deadlines based on actual temperature data:
+  - Spinach (4°C min) → deadline ~Nov 15 in Sussex NB (soil stays above 5°C)
+  - Kale (4°C min) → similar extension
+  - Crops with higher cold thresholds (7°C+) get shorter extensions
+
+This means cold-hardy crops can have fall succession windows that weren't previously possible, because the latest sow date is pushed later.
 
 ### Season Extension with Frost Protection
 
 **Spring (supported):** Set `transplantAfterLsfDays` or `directAfterLsfDays` to a negative number to start earlier than the last spring frost. For example, `transplantAfterLsfDays: -14` means "transplant 2 weeks before last frost," representing use of row covers, cold frames, or cloches. For frost-tolerant crops, the algorithm takes the earlier of the frost-based start and the climate-derived season start (when soil/air temp meets `minGrowingTempC`), so negative frost offsets are effective when the temperature threshold is already met.
 
-**Fall (not yet supported per-cultivar):** The fall deadline is currently hardcoded: frost-sensitive crops end at `earliestFallFrost - 4 days`, frost-tolerant crops end at `typicalFallFrost + 21 days`. There is no per-cultivar field to extend the fall season for crops grown under protection. Possible future approaches:
-- A `fallFrostExtensionDays` cultivar field to push the fall deadline later for protected plantings
-- Adjusting `firstFallFrost` dates in the climate data to represent protected conditions (affects all crops globally)
+**Fall (not yet supported per-cultivar):** Frost-sensitive crops end at `earliestFallFrost - 4 days` with no per-cultivar extension. Possible future approaches:
+- A `fallFrostExtensionDays` cultivar field for crops grown under protection
+- Adjusting `firstFallFrost` dates in the climate data (affects all crops globally)
 
 ## Detailed Examples
 
 ### Example 1: Spinach (heat-sensitive, frost-tolerant, direct sow)
 
 **Cultivar data:**
-- `maxGrowingTempC: 21`
+- `minGrowingTempC: 4`, `maxGrowingTempC: 21`
 - `frostSensitive: false`
 - `directAfterLsfDays: -28`
 - `maturityDays: 40`, `harvestDurationDays: 21`
@@ -283,23 +319,27 @@ Monthly averages are linearly interpolated to estimate daily values. Each monthl
 - Sept avg high: 19°C
 
 **Calculation:**
-- Heat limit: tmax > 21°C (crosses ~mid-June with interpolation)
-- Earliest sow: ~April 8 (interpolated soil reaches 4°C between Mar 15 and Apr 15)
-- Latest sow: ~Sept 12 (can grow past frost)
+- Heat limit: tmax > 20°C (21 - 1°C margin), crosses ~mid-June with interpolation
+- Earliest sow: ~April 8 (interpolated soil reaches 5°C between Mar 15 and Apr 15)
+- Frost deadline: ~Nov 15 (soil stays above 5°C until then — temperature-aware extension)
+- Latest sow: ~Oct 6 (Nov 15 - 40 day maturity)
 
 **Spring window (sow ~April 8):**
 - Outdoor: April 8
 - Harvest start: May 18 (April 8 + 40 days)
-- Interpolated tmax through this period stays < 19°C → OK ✓
+- Interpolated tmax through this period stays < 20°C → OK ✓
 - Harvest end: June 8 (May 18 + 21 days)
 
 **Summer gap:**
-- With interpolation, tmax exceeds 19°C around May 31
-- Continue skipping day by day through September
-- Interpolated tmax drops to 19.0°C at Sep 15, but latest sow is Sep 12
-- Heat clears too late for fall plantings at this location
+- With interpolation, tmax exceeds 20°C around May 31
+- Continue skipping day by day through summer
+- Heat clears ~Sep 9 when tmax drops below 20°C
 
-**Result:** Spring plantings only (starting ~April 8). No fall window because interpolated heat clears 3 days after the latest sow deadline.
+**Fall windows (sow ~Sep 9 onward):**
+- Heat has cleared and latest sow is Oct 6, giving ~4 weeks of viable sowing
+- Fall successions resume with harvest extending into November
+
+**Result:** Spring plantings, a summer heat gap (~June through early September), then fall plantings. The temperature-aware frost deadline extends the season well past the old frost+21 cutoff, making fall sowing viable for cold-hardy crops.
 
 ---
 
@@ -468,7 +508,9 @@ skippedPeriods: [
 | Field | Type | Description |
 |-------|------|-------------|
 | `frostSensitive` | boolean | Whether crop is killed by frost |
-| `minGrowingTempC` | number | Minimum temperature for growth (cold check) |
+| `minGrowingTempC` | number | Minimum temperature for germination/establishment (cold check) |
+| `minGrowingTempTransplantC` | number | Override min temp for transplant method |
+| `minEstablishedGrowthTempC` | number | Lower cold threshold after establishment (~3-4 weeks) |
 | `maxGrowingTempC` | number | Maximum temperature before bolting/stress (compared directly against tmax_c) |
 | `harvestDurationDays` | number \| null | Fixed harvest window, or null for "until frost" |
 | `harvestStyle` | 'single' \| 'continuous' | Affects default duration if not specified |
