@@ -119,9 +119,9 @@ describe('drag-related edge cases', () => {
         []
       );
 
-      // All harvest ends should be at or before frost deadline (Sept 11)
+      // All harvest ends should be at or before frost deadline (typical frost Oct 1)
       result.forEach((w) => {
-        expect(w.harvestEnd <= '2025-09-11').toBe(true);
+        expect(w.harvestEnd <= '2025-10-01').toBe(true);
       });
     });
 
@@ -505,7 +505,7 @@ describe('planting shift calculations', () => {
         quantity: 10,
         sowDate: '2025-07-10',
         harvestStart: '2025-08-29',
-        harvestEnd: '2025-09-11', // Already at frost deadline
+        harvestEnd: '2025-10-01', // Already at frost deadline
         method: 'direct',
         status: 'planned',
         successionNumber: 1,
@@ -517,8 +517,8 @@ describe('planting shift calculations', () => {
       const newHarvestStart = addDays(planting.harvestStart, shiftDays);
       let newHarvestEnd = addDays(planting.harvestEnd, shiftDays);
 
-      // Frost deadline for frost-sensitive: Sept 15 - 4 days = Sept 11
-      const frostDeadline = '2025-09-11';
+      // Frost deadline for frost-sensitive: typical frost Oct 1
+      const frostDeadline = '2025-10-01';
 
       // Cap at frost deadline
       if (newHarvestEnd > frostDeadline) {
@@ -526,7 +526,7 @@ describe('planting shift calculations', () => {
       }
 
       expect(newHarvestStart).toBe('2025-09-05');
-      expect(newHarvestEnd).toBe('2025-09-11'); // Capped at frost deadline
+      expect(newHarvestEnd).toBe('2025-10-01'); // Capped at frost deadline
     });
 
     it('recalculates harvest end with duration when shifting', () => {

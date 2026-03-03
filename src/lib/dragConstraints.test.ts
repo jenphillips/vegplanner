@@ -441,9 +441,9 @@ describe('calculateShiftBounds', () => {
   describe('maxShift (frost deadline constraint)', () => {
     it('limits forward shift based on frost-sensitive deadline and maturity', () => {
       // Cosmos: frost-sensitive, maturityDays=60
-      // Frost deadline: earliest frost (09-15) - 4 days = 2025-09-11
-      // Latest sow: 2025-09-11 - 60 days = 2025-07-13
-      // Current sow: 2025-06-08 → maxShift = Jul 13 - Jun 8 = 35 days
+      // Frost deadline: typical frost (10-01)
+      // Latest sow: 2025-10-01 - 60 days = 2025-08-02
+      // Current sow: 2025-06-08 → maxShift = Aug 2 - Jun 8 = 55 days
       const planting = createPlanting({
         cultivarId: cosmosCultivar.id,
         method: 'direct',
@@ -460,7 +460,7 @@ describe('calculateShiftBounds', () => {
         isTransplantMode: false,
       });
 
-      expect(result.maxShift).toBe(35);
+      expect(result.maxShift).toBe(55);
     });
 
     it('limits forward shift based on frost-tolerant deadline', () => {
@@ -488,14 +488,14 @@ describe('calculateShiftBounds', () => {
     });
 
     it('returns 0 when planting is already at latest viable date', () => {
-      // Cosmos: latest sow = 2025-07-13 (see above)
+      // Cosmos: latest sow = 2025-08-02 (see above)
       // Current sow exactly at latest sow
       const planting = createPlanting({
         cultivarId: cosmosCultivar.id,
         method: 'direct',
-        sowDate: '2025-07-13',
-        harvestStart: '2025-09-11',
-        harvestEnd: '2025-09-15',
+        sowDate: '2025-08-02',
+        harvestStart: '2025-10-01',
+        harvestEnd: '2025-10-15',
       });
 
       const result = calculateShiftBounds({

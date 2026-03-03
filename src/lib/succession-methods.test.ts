@@ -294,9 +294,9 @@ describe('recalculatePlantingForMethodChange', () => {
         sussexClimate
       ));
 
-      // Should be capped at frost deadline (Sept 15 - 4 days = Sept 11)
+      // Should be capped at frost deadline (typical frost Oct 1)
       expect(updates.harvestEnd).toBeDefined();
-      expect(updates.harvestEnd! <= '2025-09-11').toBe(true);
+      expect(updates.harvestEnd! <= '2025-10-01').toBe(true);
     });
   });
 
@@ -722,7 +722,7 @@ describe('direct → transplant temperature check skip', () => {
       sowDate: '2025-06-01',
       transplantDate: '2025-06-22',
       harvestStart: '2025-08-21',
-      harvestEnd: '2025-09-11',
+      harvestEnd: '2025-10-01',
       method: 'transplant',
       status: 'planned',
       successionNumber: 1,

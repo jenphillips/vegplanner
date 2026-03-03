@@ -9,7 +9,6 @@ import {
   renumberPlantingsForCrop,
   calculateFrostDeadline,
   calculateHarvestEnd,
-  FROST_BUFFER_DAYS,
   type PlantingWindow,
 } from './succession';
 import type { Cultivar, Climate, Planting } from './types';
@@ -136,9 +135,9 @@ describe('calculateSuccessionWindows', () => {
       );
 
       const lastWindow = result.windows[result.windows.length - 1];
-      // Frost-sensitive crops must finish before earliest frost - 4 days buffer
-      // Earliest frost: Sept 15, so deadline is Sept 11
-      expect(lastWindow.harvestEnd <= '2025-09-11').toBe(true);
+      // Frost-sensitive crops must finish before typical (p50) frost date
+      // Typical frost: Oct 1
+      expect(lastWindow.harvestEnd <= '2025-10-01').toBe(true);
     });
   });
 
@@ -204,8 +203,8 @@ describe('calculateSuccessionWindows', () => {
         sussexClimate
       );
 
-      // Frost-sensitive: earliest frost Sept 15 - 4 day buffer = Sept 11
-      expect(result.windows[0].harvestEnd).toBe('2025-09-11');
+      // Frost-sensitive: typical frost Oct 1
+      expect(result.windows[0].harvestEnd).toBe('2025-10-01');
     });
   });
 
@@ -389,8 +388,8 @@ describe('Example 2: Bush Beans (frost-sensitive, heat-tolerant)', () => {
 
   it('ends harvest before frost deadline', () => {
     const lastWindow = result.windows[result.windows.length - 1];
-    // Frost deadline: Sept 15 - 4 days = Sept 11
-    expect(lastWindow.harvestEnd <= '2025-09-11').toBe(true);
+    // Frost deadline: typical frost Oct 1
+    expect(lastWindow.harvestEnd <= '2025-10-01').toBe(true);
   });
 });
 
@@ -424,8 +423,8 @@ describe('Example 3: Tomato Sungold (transplant, harvest until frost)', () => {
     expect(result.windows[0].harvestStart).toBe('2025-07-21');
   });
 
-  it('ends harvest at frost deadline (Sept 11)', () => {
-    expect(result.windows[0].harvestEnd).toBe('2025-09-11');
+  it('ends harvest at frost deadline (Oct 1)', () => {
+    expect(result.windows[0].harvestEnd).toBe('2025-10-01');
   });
 });
 
@@ -1825,9 +1824,9 @@ describe('calculateAvailableWindowsAfter', () => {
         []
       );
 
-      // Frost deadline for frost-sensitive: earliest frost (Sept 15) - 4 days = Sept 11
+      // Frost deadline for frost-sensitive: typical frost Oct 1
       result.forEach((w) => {
-        expect(w.harvestEnd <= '2025-09-11').toBe(true);
+        expect(w.harvestEnd <= '2025-10-01').toBe(true);
       });
     });
 
@@ -1850,57 +1849,45 @@ describe('calculateAvailableWindowsAfter', () => {
 });
 
 // ============================================
-// Shared Utility Tests: FROST_BUFFER_DAYS
-// ============================================
-
-describe('FROST_BUFFER_DAYS', () => {
-  it('equals 4', () => {
-    expect(FROST_BUFFER_DAYS).toBe(4);
-  });
-});
-
-// ============================================
 // Shared Utility Tests: calculateFrostDeadline
 // ============================================
 
 describe('calculateFrostDeadline', () => {
   describe('frost-sensitive crops', () => {
-    it('uses earliest probable frost minus buffer when climate data is provided', () => {
-      // Climate earliest fall frost: 09-15, buffer: 4 days
-      // Deadline = 2025-09-15 - 4 = 2025-09-11
+    it('uses typical (p50) frost date when climate data is provided', () => {
+      // Climate typical fall frost: 10-01
       const result = calculateFrostDeadline(
         { frostSensitive: true },
         defaultFrostWindow,
         sussexClimate
       );
-      expect(result).toBe('2025-09-11');
+      expect(result).toBe('2025-10-01');
     });
 
-    it('falls back to frostWindow date minus buffer without climate', () => {
-      // frostWindow.firstFallFrost = 2025-10-01, buffer: 4 days
-      // Deadline = 2025-10-01 - 4 = 2025-09-27
+    it('falls back to frostWindow date without climate', () => {
+      // frostWindow.firstFallFrost = 2025-10-01
       const result = calculateFrostDeadline(
         { frostSensitive: true },
         defaultFrostWindow
       );
-      expect(result).toBe('2025-09-27');
+      expect(result).toBe('2025-10-01');
     });
 
-    it('falls back to frostWindow date when climate has no earliest frost', () => {
-      const climateNoEarliest: Climate = {
+    it('falls back to frostWindow date when climate has no typical frost', () => {
+      const climateNoTypical: Climate = {
         ...sussexClimate,
         firstFallFrost: {
           ...sussexClimate.firstFallFrost!,
-          earliest: undefined as unknown as string,
+          typical: undefined as unknown as string,
         },
       };
       const result = calculateFrostDeadline(
         { frostSensitive: true },
         defaultFrostWindow,
-        climateNoEarliest
+        climateNoTypical
       );
-      // Falls back to frostWindow date: 2025-10-01 - 4 = 2025-09-27
-      expect(result).toBe('2025-09-27');
+      // Falls back to frostWindow date: 2025-10-01
+      expect(result).toBe('2025-10-01');
     });
   });
 
@@ -1997,8 +1984,8 @@ describe('calculateFrostDeadline', () => {
         earlyFrostWindow,
         sussexClimate
       );
-      // Climate earliest frost 09-15 in the same year, minus 4 days
-      expect(result).toBe('2025-09-11');
+      // Climate typical frost 10-01
+      expect(result).toBe('2025-10-01');
     });
 
     it('produces later deadline for frost-tolerant vs frost-sensitive', () => {
@@ -2022,7 +2009,7 @@ describe('calculateFrostDeadline', () => {
 // ============================================
 
 describe('calculateHarvestEnd', () => {
-  const frostDeadline = '2025-09-11'; // Typical frost-sensitive deadline
+  const frostDeadline = '2025-10-01'; // Typical frost-sensitive deadline
 
   describe('explicit harvestDurationDays', () => {
     it('returns harvestStart + duration when within frost deadline', () => {
@@ -2046,9 +2033,9 @@ describe('calculateHarvestEnd', () => {
     });
 
     it('returns frost deadline when duration ends exactly on deadline', () => {
-      // harvestStart + 21 = 2025-09-11 = deadline exactly
+      // harvestStart + 21 = 2025-10-01 = deadline exactly
       const result = calculateHarvestEnd(
-        '2025-08-21',
+        '2025-09-10',
         { harvestDurationDays: 21, harvestStyle: 'continuous' as const },
         frostDeadline
       );

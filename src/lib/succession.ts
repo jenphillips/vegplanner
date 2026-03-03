@@ -59,13 +59,13 @@ function getEstablishmentDays(cultivar: Cultivar, method?: SowMethod): number {
   return (cultivar.germDaysMax ?? 10) + 14;
 }
 
-// Buffer before earliest probable frost for frost-sensitive crops (days)
-export const FROST_BUFFER_DAYS = 4;
-
 /**
  * Calculate the frost deadline for a crop based on frost sensitivity and climate data.
- * Frost-sensitive crops: earliest probable frost minus buffer.
- * Frost-tolerant crops: typical frost plus 21 days.
+ * Frost-sensitive crops: typical (p50) first fall frost date.
+ *   Using p50 rather than earliest frost because the day-by-day temperature
+ *   viability check already rejects windows where temps are too cold to grow.
+ *   An additional buffer on top of a conservative frost date was double-guarding.
+ * Frost-tolerant crops: typical frost plus 21 days (extended by soil temp check).
  */
 export function calculateFrostDeadline(
   cultivar: Pick<Cultivar, 'frostSensitive' | 'minGrowingTempC'>,
@@ -74,10 +74,10 @@ export function calculateFrostDeadline(
 ): string {
   const year = new Date(`${frostWindow.firstFallFrost}T00:00:00Z`).getUTCFullYear();
   if (cultivar.frostSensitive) {
-    const earliestFrost = climate?.firstFallFrost?.earliest
-      ? `${year}-${climate.firstFallFrost.earliest}`
+    const typicalFrost = climate?.firstFallFrost?.typical
+      ? `${year}-${climate.firstFallFrost.typical}`
       : frostWindow.firstFallFrost;
-    return addDays(earliestFrost, -FROST_BUFFER_DAYS);
+    return typicalFrost;
   } else {
     const typicalFrost = climate?.firstFallFrost?.typical
       ? `${year}-${climate.firstFallFrost.typical}`
