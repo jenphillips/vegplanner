@@ -298,11 +298,34 @@
   margin-left: auto;
 }
 
+.cardFooter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border, #e5e5de);
+}
+
 .notes {
   margin: 0;
   font-size: 13px;
   color: var(--muted, #5f6653);
   font-style: italic;
-  padding-top: 8px;
-  border-top: 1px dashed var(--border, #e5e5de);
+  flex: 1;
+}
+
+.removeFromPlanButton {
+  margin-left: auto;
+  padding: 4px;
+  background: none;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.15s ease;
+  line-height: 1;
+}
+
+.removeFromPlanButton:hover {
+  opacity: 0.8;
 }

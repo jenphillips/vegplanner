@@ -47,6 +47,16 @@ export function usePlacements() {
     [data]
   );
 
+  const deleteAllForPlantings = useCallback(
+    async (plantingIds: Set<string>) => {
+      const remaining = data.filter((p) => !plantingIds.has(p.plantingId));
+      if (remaining.length < data.length) {
+        await save(remaining);
+      }
+    },
+    [data, save]
+  );
+
   const bulkUpdatePlacements = useCallback(
     async (updates: PlantingPlacement[]) => {
       const updatedIds = new Set(updates.map((u) => u.id));
@@ -66,6 +76,7 @@ export function usePlacements() {
     getPlacementsForBed,
     getPlacementForPlanting,
     getPlacementsForPlanting,
+    deleteAllForPlantings,
     bulkUpdatePlacements,
   };
 }

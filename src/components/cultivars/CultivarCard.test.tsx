@@ -328,6 +328,115 @@ describe('CultivarCard', () => {
   });
 
   // ============================================
+  // Remove from plan
+  // ============================================
+
+  describe('remove from plan', () => {
+    it('does not render remove button when onRemoveFromPlan is not provided', () => {
+      render(
+        <CultivarCard cultivar={createCultivar()} {...defaultProps()} forceExpanded={true} />
+      );
+      expect(screen.queryByLabelText('Remove from plan')).toBeNull();
+    });
+
+    it('renders trash icon button when onRemoveFromPlan is provided', () => {
+      const props = defaultProps();
+      render(
+        <CultivarCard
+          cultivar={createCultivar()}
+          {...props}
+          onRemoveFromPlan={vi.fn()}
+          forceExpanded={true}
+        />
+      );
+      expect(screen.getByLabelText('Remove from plan')).toBeTruthy();
+    });
+
+    it('does not render remove button when card is collapsed', () => {
+      render(
+        <CultivarCard
+          cultivar={createCultivar()}
+          {...defaultProps()}
+          onRemoveFromPlan={vi.fn()}
+        />
+      );
+      expect(screen.queryByLabelText('Remove from plan')).toBeNull();
+    });
+
+    it('calls onRemoveFromPlan when confirmed', () => {
+      const onRemove = vi.fn();
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      const props = defaultProps();
+      render(
+        <CultivarCard
+          cultivar={createCultivar()}
+          {...props}
+          onRemoveFromPlan={onRemove}
+          forceExpanded={true}
+        />
+      );
+      fireEvent.click(screen.getByLabelText('Remove from plan'));
+      expect(onRemove).toHaveBeenCalledWith('spinach-1');
+    });
+
+    it('does not call onRemoveFromPlan when cancelled', () => {
+      const onRemove = vi.fn();
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+      const props = defaultProps();
+      render(
+        <CultivarCard
+          cultivar={createCultivar()}
+          {...props}
+          onRemoveFromPlan={onRemove}
+          forceExpanded={true}
+        />
+      );
+      fireEvent.click(screen.getByLabelText('Remove from plan'));
+      expect(onRemove).not.toHaveBeenCalled();
+    });
+
+    it('confirm message mentions planting count when plantings exist', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      const props = defaultProps();
+      props.plantings = [
+        createPlanting(),
+        createPlanting({ id: 'planting-2', successionNumber: 2 }),
+      ];
+      render(
+        <CultivarCard
+          cultivar={createCultivar()}
+          {...props}
+          onRemoveFromPlan={vi.fn()}
+          forceExpanded={true}
+        />
+      );
+      fireEvent.click(screen.getByLabelText('Remove from plan'));
+      expect(confirmSpy).toHaveBeenCalledWith(
+        expect.stringContaining('2 plantings')
+      );
+    });
+
+    it('confirm message does not mention plantings when none exist', () => {
+      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+      const props = defaultProps();
+      render(
+        <CultivarCard
+          cultivar={createCultivar()}
+          {...props}
+          onRemoveFromPlan={vi.fn()}
+          forceExpanded={true}
+        />
+      );
+      fireEvent.click(screen.getByLabelText('Remove from plan'));
+      expect(confirmSpy).toHaveBeenCalledWith(
+        expect.not.stringContaining('planting')
+      );
+    });
+  });
+
+  // ============================================
   // Diagnostic warning
   // ============================================
 

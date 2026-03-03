@@ -75,7 +75,7 @@ export default function Home() {
     toggleTaskComplete,
   } = useTasks(plantings, data.cultivars);
 
-  const { placements } = usePlacements();
+  const { placements, deleteAllForPlantings } = usePlacements();
   const { beds } = useGardenBeds();
 
   // Build maps for placement info on planting cards
@@ -170,9 +170,17 @@ export default function Home() {
   };
 
   const handleRemoveFromPlan = async (cultivarId: string) => {
-    // Delete all plantings for this cultivar first, then remove the plan
-    await deleteAllForCultivar(cultivarId);
-    await removePlan(cultivarId);
+    // Delete placements, plantings, then the plan record
+    try {
+      const plantingIds = new Set(
+        plantings.filter((p) => p.cultivarId === cultivarId).map((p) => p.id)
+      );
+      await deleteAllForPlantings(plantingIds);
+      await deleteAllForCultivar(cultivarId);
+      await removePlan(cultivarId);
+    } catch (error) {
+      console.error('Failed to fully remove plan:', error);
+    }
   };
 
   return (
@@ -268,6 +276,7 @@ export default function Home() {
                     onAddMultiplePlantings={handleAddMultiplePlantings}
                     onUpdatePlanting={handleUpdatePlanting}
                     onDeletePlanting={handleDeletePlanting}
+                    onRemoveFromPlan={handleRemoveFromPlan}
                     forceExpanded={expandAll}
                     placedQuantityMap={placedQuantityMap}
                     placementDetailsMap={placementDetailsMap}
@@ -310,6 +319,7 @@ export default function Home() {
                     onAddMultiplePlantings={handleAddMultiplePlantings}
                     onUpdatePlanting={handleUpdatePlanting}
                     onDeletePlanting={handleDeletePlanting}
+                    onRemoveFromPlan={handleRemoveFromPlan}
                     forceExpanded={expandAll}
                     placedQuantityMap={placedQuantityMap}
                     placementDetailsMap={placementDetailsMap}
@@ -351,6 +361,7 @@ export default function Home() {
                     onAddMultiplePlantings={handleAddMultiplePlantings}
                     onUpdatePlanting={handleUpdatePlanting}
                     onDeletePlanting={handleDeletePlanting}
+                    onRemoveFromPlan={handleRemoveFromPlan}
                     forceExpanded={expandAll}
                     placedQuantityMap={placedQuantityMap}
                     placementDetailsMap={placementDetailsMap}

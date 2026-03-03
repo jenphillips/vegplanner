@@ -29,6 +29,7 @@ type CultivarCardProps = {
   onAddMultiplePlantings: (plantings: Omit<Planting, 'id' | 'createdAt'>[]) => void;
   onUpdatePlanting: (id: string, updates: Partial<Planting>) => void;
   onDeletePlanting: (id: string) => void;
+  onRemoveFromPlan?: (cultivarId: string) => void;
   forceExpanded?: boolean;
   placedQuantityMap?: Map<string, number>;
   placementDetailsMap?: Map<string, PlacementDetail[]>;
@@ -43,6 +44,7 @@ export function CultivarCard({
   onAddMultiplePlantings,
   onUpdatePlanting,
   onDeletePlanting,
+  onRemoveFromPlan,
   forceExpanded,
   placedQuantityMap,
   placementDetailsMap,
@@ -411,9 +413,31 @@ export function CultivarCard({
           </div>
           )}
 
-          {/* Cultivar details */}
-          {cultivar.notes && (
-            <p className={styles.notes}>{cultivar.notes}</p>
+          {/* Footer: notes + remove button */}
+          {(cultivar.notes || onRemoveFromPlan) && (
+            <div className={styles.cardFooter}>
+              {cultivar.notes && (
+                <p className={styles.notes}>{cultivar.notes}</p>
+              )}
+              {onRemoveFromPlan && (
+                <button
+                  className={styles.removeFromPlanButton}
+                  title="Remove from plan"
+                  aria-label="Remove from plan"
+                  onClick={() => {
+                    const plantingCount = cultivarPlantings.length;
+                    const message = plantingCount > 0
+                      ? `Remove ${cultivar.crop} — ${cultivar.variety} from your plan? This will also delete ${plantingCount} planting${plantingCount !== 1 ? 's' : ''}.`
+                      : `Remove ${cultivar.crop} — ${cultivar.variety} from your plan?`;
+                    if (window.confirm(message)) {
+                      onRemoveFromPlan(cultivar.id);
+                    }
+                  }}
+                >
+                  🗑
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}

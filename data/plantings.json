@@ -93,5 +93,18 @@
     "successionNumber": 5,
     "id": "874b0acb-4688-4f04-980d-a5bd5275ab72",
     "createdAt": "2026-03-03T00:05:23.743Z"
+  },
+  {
+    "cultivarId": "strawberry-cavendish",
+    "label": "Strawberry - Cavendish #1",
+    "quantity": 4,
+    "sowDate": "2025-07-06",
+    "harvestStart": "2025-07-06",
+    "harvestEnd": "2025-07-27",
+    "method": "direct",
+    "status": "planned",
+    "successionNumber": 1,
+    "id": "6be2e6ac-a38c-479b-a6f4-9f38c30e0b98",
+    "createdAt": "2026-03-03T00:20:55.916Z"
   }
 ]

@@ -301,6 +301,74 @@ describe('usePlacements', () => {
     });
   });
 
+  describe('deleteAllForPlantings', () => {
+    it('removes all placements matching the given planting IDs', async () => {
+      const placements = [
+        createPlacement({ id: 'p1', plantingId: 'planting-1' }),
+        createPlacement({ id: 'p2', plantingId: 'planting-2' }),
+        createPlacement({ id: 'p3', plantingId: 'planting-1' }),
+        createPlacement({ id: 'p4', plantingId: 'planting-3' }),
+      ];
+      setupMockWithData(placements);
+
+      const { result } = renderHook(() => usePlacements());
+
+      await waitFor(() => {
+        expect(result.current.placements).toHaveLength(4);
+      });
+
+      await act(async () => {
+        await result.current.deleteAllForPlantings(new Set(['planting-1', 'planting-3']));
+      });
+
+      const lastCall = mockFetch.mock.calls[mockFetch.mock.calls.length - 1];
+      const savedData = JSON.parse(lastCall[1].body) as PlantingPlacement[];
+
+      expect(savedData).toHaveLength(1);
+      expect(savedData[0].id).toBe('p2');
+    });
+
+    it('does not save when no placements match', async () => {
+      const placements = [
+        createPlacement({ id: 'p1', plantingId: 'planting-1' }),
+      ];
+      setupMockWithData(placements);
+
+      const { result } = renderHook(() => usePlacements());
+
+      await waitFor(() => {
+        expect(result.current.placements).toHaveLength(1);
+      });
+
+      const fetchCallCount = mockFetch.mock.calls.length;
+
+      await act(async () => {
+        await result.current.deleteAllForPlantings(new Set(['no-match']));
+      });
+
+      // No additional fetch call should have been made
+      expect(mockFetch.mock.calls.length).toBe(fetchCallCount);
+    });
+
+    it('handles empty planting ID set', async () => {
+      setupMockWithData([createPlacement({ id: 'p1' })]);
+
+      const { result } = renderHook(() => usePlacements());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      const fetchCallCount = mockFetch.mock.calls.length;
+
+      await act(async () => {
+        await result.current.deleteAllForPlantings(new Set());
+      });
+
+      expect(mockFetch.mock.calls.length).toBe(fetchCallCount);
+    });
+  });
+
   describe('bulkUpdatePlacements', () => {
     it('updates multiple placements at once', async () => {
       const placements = [
