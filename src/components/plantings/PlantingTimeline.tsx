@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import type { Planting, FrostWindow, Climate, Cultivar, SowMethod } from '@/lib/types';
 import { isGrowingPeriodViable, calculateFrostDeadline, calculateHarvestEnd } from '@/lib/succession';
-import { addDays, daysBetween, buildDailyClimateTable } from '@/lib/dateUtils';
+import { addDays, daysBetween } from '@/lib/dateUtils';
 import { calculateShiftBounds } from '@/lib/dragConstraints';
 import styles from './PlantingTimeline.module.css';
 
@@ -81,13 +81,6 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     });
   }, [canDragDirectSow, canDragTransplantShift, frost, climate, cultivar, planting, previousHarvestEnd]);
 
-  // Pre-compute climate lookup table for O(1) temperature checks in the shift loop
-  const climateTable = useMemo(() => {
-    if (!climate || !frost) return undefined;
-    const year = new Date(`${frost.lastSpringFrost}T00:00:00Z`).getUTCFullYear();
-    return { table: buildDailyClimateTable(climate, year), year };
-  }, [climate, frost]);
-
   // Calculate temperature-aware shift bounds for direct sow AND transplant "either" crops
   // This finds ALL viable ranges (e.g., spring and fall windows for heat-sensitive crops)
   // to allow "jumping" over hot periods when dragging
@@ -102,7 +95,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     const isShiftViable = (shiftDays: number): boolean => {
       const shiftedStart = addDays(outdoorStart, shiftDays);
       const shiftedHarvestStart = addDays(planting.harvestStart, shiftDays);
-      const result = isGrowingPeriodViable(shiftedStart, shiftedHarvestStart, cultivar, climate, { climateTable, method: planting.method as SowMethod });
+      const result = isGrowingPeriodViable(shiftedStart, shiftedHarvestStart, cultivar, climate, { method: planting.method as SowMethod });
       return result.viable;
     };
 
@@ -136,7 +129,7 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
       ranges,
       currentViable,
     };
-  }, [canDragDirectSow, canDragTransplantShift, climate, cultivar, shiftBounds, planting.transplantDate, planting.sowDate, planting.harvestStart, planting.method, climateTable]);
+  }, [canDragDirectSow, canDragTransplantShift, climate, cultivar, shiftBounds, planting.transplantDate, planting.sowDate, planting.harvestStart, planting.method]);
 
   // Track previous shift value to detect drag direction for range jumping
   const prevShiftRef = useRef<number>(0);

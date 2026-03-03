@@ -244,11 +244,13 @@ describe('temperature viability', () => {
       // Should have skipped periods during summer
       expect(result.skippedPeriods.length).toBeGreaterThan(0);
 
-      // Should have spring windows (fall windows may not exist if heat clears
-      // after the latest sow deadline)
+      // Should have both spring and fall windows (cold-hardy crops get
+      // temperature-aware frost deadlines that extend past summer heat gap)
       const sowDates = result.windows.map((w) => w.sowDate);
       const hasSpring = sowDates.some((d) => d.startsWith('2025-04'));
+      const hasFall = sowDates.some((d) => d >= '2025-09-01');
       expect(hasSpring).toBe(true);
+      expect(hasFall).toBe(true);
     });
 
     it('includes reason in skipped periods', () => {
@@ -340,13 +342,24 @@ describe('Example 1: Spinach (heat-sensitive, frost-tolerant)', () => {
     expect(heatGap).toBeDefined();
   });
 
-  it('heat gap extends to end of season when heat clears after sow deadline', () => {
-    // With interpolation, tmax drops to 19°C at Sep 15, but latestSowDate is Sep 12
-    // (Oct 22 frost deadline - 40 day maturity). Heat clears 3 days too late for fall sowing.
-    // The skipped period should extend to the end of the viable window.
+  it('heat gap ends before season end when cold-hardy crop can still grow in fall', () => {
+    // Spinach minGrowingTempC=4 → frost deadline extends to Nov 15 (soil above 5°C).
+    // latestSowDate = Nov 15 - 40 = Oct 6. Heat clears ~Sep 9, well before Oct 6.
+    // So the heat gap should close and fall windows should follow.
     const heatGap = result.skippedPeriods.find((p) => /Too hot/i.test(p.reason));
     expect(heatGap).toBeDefined();
-    expect(heatGap!.endDate >= '2025-09-01').toBe(true);
+    // Heat gap ends around Sep 8 (the day before tmax drops below 20°C)
+    expect(heatGap!.endDate >= '2025-08-01').toBe(true);
+    expect(heatGap!.endDate <= '2025-09-15').toBe(true);
+  });
+
+  it('produces fall succession windows after summer heat gap', () => {
+    // With temperature-aware frost deadline, spinach can be sown in fall
+    const fallWindows = result.windows.filter((w) => w.sowDate >= '2025-09-01');
+    expect(fallWindows.length).toBeGreaterThan(0);
+    // Fall sow should be in September (after heat clears)
+    expect(fallWindows[0].sowDate >= '2025-09-01').toBe(true);
+    expect(fallWindows[0].sowDate <= '2025-09-15').toBe(true);
   });
 });
 
@@ -645,13 +658,11 @@ describe('calculateNextSuccession', () => {
       [springPlanting]
     );
 
-    // Should skip summer and find fall window
-    if (result) {
-      // The sow date should be in fall, skipping summer heat
-      expect(
-        result.sowDate >= '2025-08-01' || result.sowDate <= '2025-05-15'
-      ).toBe(true);
-    }
+    // Should skip summer and find fall window (cold-hardy crops get
+    // extended frost deadlines, so fall sowing is viable)
+    expect(result).not.toBeNull();
+    expect(result!.sowDate >= '2025-08-01').toBe(true);
+    expect(result!.sowDate <= '2025-10-01').toBe(true);
   });
 
   it('returns null when season is over', () => {
@@ -1894,7 +1905,8 @@ describe('calculateFrostDeadline', () => {
   });
 
   describe('frost-tolerant crops', () => {
-    it('uses typical frost plus 21 days when climate data is provided', () => {
+    it('uses frost+21 fallback when no minGrowingTempC is set', () => {
+      // No minGrowingTempC → can't do temperature-aware calculation
       // Climate typical fall frost: 10-01
       // Deadline = 2025-10-01 + 21 = 2025-10-22
       const result = calculateFrostDeadline(
@@ -1914,6 +1926,67 @@ describe('calculateFrostDeadline', () => {
       );
       expect(result).toBe('2025-10-22');
     });
+
+    it('extends deadline past frost+21 for cold-hardy crops based on soil temp', () => {
+      // Spinach: minGrowingTempC=4, effectiveMin=5 (4 + 1°C margin)
+      // Frost+21 = Oct 22. Soil stays above 5°C until Nov 15 (interpolated).
+      // Nov 16 soil = 4.87°C < 5 → deadline = Nov 15
+      const result = calculateFrostDeadline(
+        { frostSensitive: false, minGrowingTempC: 4 },
+        defaultFrostWindow,
+        sussexClimate
+      );
+      expect(result).toBe('2025-11-15');
+    });
+
+    it('extends further for very cold-hardy crops', () => {
+      // minGrowingTempC=2, effectiveMin=3
+      // Soil stays above 3°C until Nov 30 (interpolated between Nov 15=5°C and Dec 15=1°C)
+      // Dec 1 soil = 2.87°C < 3 → deadline = Nov 30
+      const result = calculateFrostDeadline(
+        { frostSensitive: false, minGrowingTempC: 2 },
+        defaultFrostWindow,
+        sussexClimate
+      );
+      expect(result).toBe('2025-11-30');
+    });
+
+    it('gives shorter extension for crops with higher cold threshold', () => {
+      // minGrowingTempC=7, effectiveMin=8
+      // Soil drops below 8°C on Oct 28 (interpolated between Oct 15=10°C and Nov 15=5°C)
+      // → deadline = Oct 27
+      const result = calculateFrostDeadline(
+        { frostSensitive: false, minGrowingTempC: 7 },
+        defaultFrostWindow,
+        sussexClimate
+      );
+      expect(result).toBe('2025-10-27');
+    });
+
+    it('does not extend when soil already below threshold at frost+21', () => {
+      // minGrowingTempC=10, effectiveMin=11
+      // Oct 23 soil = 8.71°C, already below 11 → no extension, stays at frost+21
+      const result = calculateFrostDeadline(
+        { frostSensitive: false, minGrowingTempC: 10 },
+        defaultFrostWindow,
+        sussexClimate
+      );
+      expect(result).toBe('2025-10-22');
+    });
+
+    it('colder-hardy crops get later deadlines than warmer ones', () => {
+      const veryHardy = calculateFrostDeadline(
+        { frostSensitive: false, minGrowingTempC: 2 },
+        defaultFrostWindow,
+        sussexClimate
+      );
+      const moderate = calculateFrostDeadline(
+        { frostSensitive: false, minGrowingTempC: 7 },
+        defaultFrostWindow,
+        sussexClimate
+      );
+      expect(veryHardy > moderate).toBe(true);
+    });
   });
 
   describe('different frost windows', () => {
@@ -1930,7 +2003,7 @@ describe('calculateFrostDeadline', () => {
 
     it('produces later deadline for frost-tolerant vs frost-sensitive', () => {
       const tolerant = calculateFrostDeadline(
-        { frostSensitive: false },
+        { frostSensitive: false, minGrowingTempC: 4 },
         defaultFrostWindow,
         sussexClimate
       );

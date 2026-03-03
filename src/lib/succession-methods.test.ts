@@ -5,8 +5,6 @@ import {
   clearConstraintsCache,
   isGrowingPeriodViable,
 } from './succession';
-import { buildDailyClimateTable } from './dateUtils';
-import type { ClimateTable } from './dateUtils';
 import type { Cultivar, Climate, Planting } from './types';
 import {
   sussexClimate,
@@ -474,39 +472,11 @@ describe('getOutdoorGrowingConstraints', () => {
 });
 
 // ============================================
-// isGrowingPeriodViable with climateTable
+// isGrowingPeriodViable with checkHeatOnly
 // ============================================
 
-describe('isGrowingPeriodViable with climateTable', () => {
-  it('produces identical results with and without climateTable', () => {
-    const ct: ClimateTable = {
-      table: buildDailyClimateTable(sussexClimate, 2025),
-      year: 2025,
-    };
-
-    // Test across several cultivar/date combinations
-    const cases = [
-      { cultivar: spinachCultivar, start: '2025-05-01', end: '2025-05-30' },
-      { cultivar: spinachCultivar, start: '2025-06-01', end: '2025-07-15' },
-      { cultivar: bushBeansCultivar, start: '2025-04-01', end: '2025-04-30' },
-      { cultivar: bushBeansCultivar, start: '2025-06-15', end: '2025-08-15' },
-      { cultivar: lettuceCultivar, start: '2025-05-01', end: '2025-06-14' },
-    ];
-
-    for (const { cultivar, start, end } of cases) {
-      const without = isGrowingPeriodViable(start, end, cultivar, sussexClimate);
-      const withTable = isGrowingPeriodViable(start, end, cultivar, sussexClimate, { climateTable: ct });
-      expect(withTable.viable).toBe(without.viable);
-      expect(withTable.reason).toBe(without.reason);
-    }
-  });
-
-  it('works with checkHeatOnly and climateTable combined', () => {
-    const ct: ClimateTable = {
-      table: buildDailyClimateTable(sussexClimate, 2025),
-      year: 2025,
-    };
-
+describe('isGrowingPeriodViable with checkHeatOnly', () => {
+  it('passes cold periods when checkHeatOnly is true', () => {
     const warmCrop: Cultivar = {
       ...bushBeansCultivar,
       id: 'warm-test',
@@ -519,7 +489,7 @@ describe('isGrowingPeriodViable with climateTable', () => {
       '2025-04-30',
       warmCrop,
       sussexClimate,
-      { checkHeatOnly: true, climateTable: ct }
+      { checkHeatOnly: true }
     );
     expect(result.viable).toBe(true);
   });

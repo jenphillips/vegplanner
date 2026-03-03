@@ -10,7 +10,6 @@ import {
   getOutdoorGrowingConstraints,
   type PlantingWindow,
 } from '@/lib/succession';
-import { buildDailyClimateTable } from '@/lib/dateUtils';
 import { PlantingList } from '@/components/plantings/PlantingList';
 import { QuantityEstimator } from './QuantityEstimator';
 import styles from './CultivarCard.module.css';
@@ -123,8 +122,7 @@ export function CultivarCard({
         frost,
         climate,
         selectedPlanting.harvestEnd,
-        plantings,
-        climateTable
+        plantings
       );
       nextWindow = windowsAfter[0] ?? null;
     } else {
@@ -132,8 +130,7 @@ export function CultivarCard({
         cultivar,
         frost,
         climate,
-        plantings,
-        climateTable
+        plantings
       );
     }
 
@@ -150,33 +147,22 @@ export function CultivarCard({
     setSelectedPlantingId((prev) => (prev === id ? null : id));
   };
 
-  // Build climate lookup table once per (climate, year) — shared across all memoized calculations.
-  // Manual useMemo is needed because buildDailyClimateTable is expensive (~1,460 interpolations).
-  // The React Compiler can't preserve these because the memoized object may appear mutable to it;
-  // our manual useMemo handles correctness here.
   const year = useMemo(
     () => new Date(frost.lastSpringFrost + 'T00:00:00Z').getUTCFullYear(),
     [frost.lastSpringFrost]
   );
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const climateTable = useMemo(
-    () => ({ table: buildDailyClimateTable(climate, year), year }),
-    [climate, year]
-  );
 
   // Calculate available succession windows to show potential
-  /* eslint-disable react-hooks/preserve-manual-memoization -- climateTable is stable via useMemo above */
   const allWindows = useMemo(
-    () => calculateSuccessionWindows(cultivar, frost, climate, { climateTable }),
-    [cultivar, frost, climate, climateTable]
+    () => calculateSuccessionWindows(cultivar, frost, climate),
+    [cultivar, frost, climate]
   );
 
   // Day-level temperature constraints for display
   const growingConstraints = useMemo(
-    () => getOutdoorGrowingConstraints(cultivar, climate, year, climateTable),
-    [cultivar, climate, year, climateTable]
+    () => getOutdoorGrowingConstraints(cultivar, climate, year),
+    [cultivar, climate, year]
   );
-  /* eslint-enable react-hooks/preserve-manual-memoization */
 
   // Check if a window overlaps with any existing planting's harvest period
   // This is more robust than comparing sowDate, since users can drag plantings
@@ -222,8 +208,7 @@ export function CultivarCard({
         frost,
         climate,
         selectedPlanting.harvestEnd,
-        plantings,
-        climateTable
+        plantings
       )
     : allWindows.windows.filter((w) => !windowOverlapsPlanting(w));
 

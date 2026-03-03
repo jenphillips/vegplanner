@@ -1,5 +1,5 @@
 import type { Cultivar, Climate, FrostWindow, SowMethod, Planting, HarvestStyle } from './types';
-import { toDate, addDays, ensureNumber, getInterpolatedClimate, lookupDailyClimate, buildDailyClimateTable } from './dateUtils';
+import { toDate, addDays, ensureNumber, lookupDailyClimate, getClimateTable } from './dateUtils';
 import type { ClimateTable, DailyClimate } from './dateUtils';
 
 // ============================================
@@ -25,11 +25,11 @@ function getDefaultHarvestDuration(harvestStyle?: HarvestStyle): number {
 // between optimalTemp and minGrowing/maxGrowing ranges.
 const DEFAULT_TEMP_MARGIN_C = 1;
 
-/** Resolve daily climate: O(1) table lookup when available, interpolation fallback. */
+/** Resolve daily climate: O(1) table lookup, building/caching the table on first use. */
 function resolveClimate(date: string, climate: Climate, ct?: ClimateTable): DailyClimate {
-  return ct
-    ? lookupDailyClimate(ct.table, ct.year, date, climate)
-    : getInterpolatedClimate(date, climate);
+  const year = parseInt(date.slice(0, 4), 10);
+  const table = ct ?? getClimateTable(climate, year);
+  return lookupDailyClimate(table.table, table.year, date, climate);
 }
 
 /**
@@ -68,7 +68,7 @@ export const FROST_BUFFER_DAYS = 4;
  * Frost-tolerant crops: typical frost plus 21 days.
  */
 export function calculateFrostDeadline(
-  cultivar: Pick<Cultivar, 'frostSensitive'>,
+  cultivar: Pick<Cultivar, 'frostSensitive' | 'minGrowingTempC'>,
   frostWindow: FrostWindow,
   climate?: Climate
 ): string {
@@ -82,7 +82,29 @@ export function calculateFrostDeadline(
     const typicalFrost = climate?.firstFallFrost?.typical
       ? `${year}-${climate.firstFallFrost.typical}`
       : frostWindow.firstFallFrost;
-    return addDays(typicalFrost, 21);
+    const fallbackDeadline = addDays(typicalFrost, 21);
+
+    // For frost-tolerant crops with known cold tolerance, extend the deadline
+    // past frost+21 if soil temps remain above the crop's minimum. This allows
+    // cold-hardy crops (spinach at 2°C, kale at 4°C) to have fall growing
+    // windows that extend well past first frost.
+    if (climate && cultivar.minGrowingTempC != null) {
+      const effectiveMin = cultivar.minGrowingTempC + DEFAULT_TEMP_MARGIN_C;
+      let date = addDays(fallbackDeadline, 1);
+      const endOfYear = `${year}-12-31`;
+      while (date <= endOfYear) {
+        const interpolated = resolveClimate(date, climate);
+        const soilTemp = interpolated.soil_avg_c
+          ?? (interpolated.tavg_c != null ? interpolated.tavg_c - 2 : null);
+        if (soilTemp != null && soilTemp < effectiveMin) {
+          return addDays(date, -1);
+        }
+        date = addDays(date, 1);
+      }
+      return endOfYear;
+    }
+
+    return fallbackDeadline;
   }
 }
 
@@ -139,7 +161,6 @@ function isGrowingPeriodViable(
   climate: Climate,
   options?: {
     checkHeatOnly?: boolean;
-    climateTable?: ClimateTable;
     method?: SowMethod;
     establishmentDays?: number;
     minEstablishedGrowthTempC?: number;
@@ -157,7 +178,7 @@ function isGrowingPeriodViable(
 
   let date = startDate;
   while (date <= endDate) {
-    const interpolated = resolveClimate(date, climate, options?.climateTable);
+    const interpolated = resolveClimate(date, climate);
 
     // Heat check - always applies (even frost-tolerant crops bolt in heat)
     if (maxGrowing != null && interpolated.tmax_c != null) {
@@ -309,8 +330,7 @@ export function clearConstraintsCache(): void {
 export function getOutdoorGrowingConstraints(
   cultivar: Cultivar,
   climate: Climate,
-  year: number,
-  climateTable?: ClimateTable
+  year: number
 ): GrowingConstraint[] {
   // Invalidate entire cache if climate data changed (e.g., location switch)
   if (climate !== constraintsCacheClimateRef) {
@@ -339,7 +359,7 @@ export function getOutdoorGrowingConstraints(
   let date = `${year}-01-01`;
 
   while (date <= yearEnd) {
-    const interpolated = resolveClimate(date, climate, climateTable);
+    const interpolated = resolveClimate(date, climate);
 
     let dayType: 'hot' | 'cold' | null = null;
     let reason = '';
@@ -437,7 +457,6 @@ export function calculateSuccessionWindows(
   options?: {
     maxSuccessions?: number;
     targetQuantity?: number;
-    climateTable?: ClimateTable;
   }
 ): SuccessionResult {
   // Early exit for perennials - they don't have succession windows
@@ -465,15 +484,8 @@ export function calculateSuccessionWindows(
       ? (cultivar.preferredMethod ?? 'direct')
       : cultivar.sowMethod;
 
-  // Build or reuse climate lookup table for O(1) daily temperature checks
-  const year = new Date(`${frostWindow.firstFallFrost}T00:00:00Z`).getUTCFullYear();
-  const ct = options?.climateTable ?? {
-    table: buildDailyClimateTable(climate, year),
-    year,
-  };
-
   // Calculate earliest sow date
-  const earliestSowDate = calculateEarliestSowDate(cultivar, frostWindow, method, climate, ct);
+  const earliestSowDate = calculateEarliestSowDate(cultivar, frostWindow, method, climate);
 
   // Calculate latest possible sow date (must harvest before first fall frost)
   const fallDeadline = calculateFrostDeadline(cultivar, frostWindow, climate);
@@ -515,7 +527,6 @@ export function calculateSuccessionWindows(
       cultivar,
       climate,
       {
-        climateTable: ct,
         method,
         establishmentDays: getEstablishmentDays(cultivar, method),
         minEstablishedGrowthTempC: cultivar.minEstablishedGrowthTempC ?? undefined,
@@ -662,7 +673,6 @@ function getClimateSeasonStart(
   cultivar: Cultivar,
   climate: Climate,
   year: number,
-  climateTable?: ClimateTable,
   method?: SowMethod
 ): string {
   const threshold = (getEffectiveMinTemp(cultivar, method) ?? 0) + DEFAULT_TEMP_MARGIN_C;
@@ -670,7 +680,7 @@ function getClimateSeasonStart(
   let date = `${year}-01-01`;
 
   while (date <= yearEnd) {
-    const interpolated = resolveClimate(date, climate, climateTable);
+    const interpolated = resolveClimate(date, climate);
 
     if (cultivar.frostSensitive) {
       if (interpolated.tavg_c != null && interpolated.tavg_c >= threshold) {
@@ -700,12 +710,11 @@ function calculateEarliestSowDate(
   cultivar: Cultivar,
   frostWindow: FrostWindow,
   method: SowMethod,
-  climate: Climate,
-  climateTable?: ClimateTable
+  climate: Climate
 ): string {
   const springFrost = frostWindow.lastSpringFrost;
   const year = new Date(`${springFrost}T00:00:00Z`).getUTCFullYear();
-  const seasonStart = getClimateSeasonStart(cultivar, climate, year, climateTable, method);
+  const seasonStart = getClimateSeasonStart(cultivar, climate, year, method);
 
   if (method === 'direct') {
     const frostBasedStart = addDays(springFrost, ensureNumber(cultivar.directAfterLsfDays, 0));
@@ -914,20 +923,12 @@ export function calculateNextSuccession(
   cultivar: Cultivar,
   frostWindow: FrostWindow,
   climate: Climate,
-  existingPlantings: Planting[],
-  climateTable?: ClimateTable
+  existingPlantings: Planting[]
 ): PlantingWindow | null {
   // Perennials don't have succession plantings
   if (cultivar.isPerennial) {
     return null;
   }
-
-  // Build or reuse climate lookup table
-  const year = new Date(`${frostWindow.firstFallFrost}T00:00:00Z`).getUTCFullYear();
-  const ct = climateTable ?? {
-    table: buildDailyClimateTable(climate, year),
-    year,
-  };
 
   const cultivarPlantings = existingPlantings
     .filter((p) => p.cultivarId === cultivar.id)
@@ -935,7 +936,7 @@ export function calculateNextSuccession(
 
   // If no existing plantings, return first viable window
   if (cultivarPlantings.length === 0) {
-    const result = calculateSuccessionWindows(cultivar, frostWindow, climate, { climateTable: ct });
+    const result = calculateSuccessionWindows(cultivar, frostWindow, climate);
     return result.windows[0] ?? null;
   }
 
@@ -1007,7 +1008,6 @@ export function calculateNextSuccession(
       cultivar,
       climate,
       {
-        climateTable: ct,
         method,
         establishmentDays: getEstablishmentDays(cultivar, method),
         minEstablishedGrowthTempC: cultivar.minEstablishedGrowthTempC ?? undefined,
@@ -1056,16 +1056,8 @@ export function calculateAvailableWindowsAfter(
   frostWindow: FrostWindow,
   climate: Climate,
   afterHarvestEnd: string,
-  existingPlantings: Planting[],
-  climateTable?: ClimateTable
+  existingPlantings: Planting[]
 ): PlantingWindow[] {
-  // Build or reuse climate lookup table
-  const year = new Date(`${frostWindow.firstFallFrost}T00:00:00Z`).getUTCFullYear();
-  const ct = climateTable ?? {
-    table: buildDailyClimateTable(climate, year),
-    year,
-  };
-
   const cultivarPlantings = existingPlantings.filter(
     (p) => p.cultivarId === cultivar.id
   );
@@ -1136,7 +1128,6 @@ export function calculateAvailableWindowsAfter(
       cultivar,
       climate,
       {
-        climateTable: ct,
         method,
         establishmentDays: getEstablishmentDays(cultivar, method),
         minEstablishedGrowthTempC: cultivar.minEstablishedGrowthTempC ?? undefined,
@@ -1224,8 +1215,7 @@ export function recalculatePlantingForMethodChange(
   cultivar: Cultivar,
   frostWindow: FrostWindow,
   climate?: Climate,
-  previousHarvestEnd?: string,
-  climateTable?: ClimateTable
+  previousHarvestEnd?: string
 ): MethodChangeResult {
   // Determine the new sow date based on the method switch direction
   let newSowDate: string;
@@ -1260,7 +1250,6 @@ export function recalculatePlantingForMethodChange(
 
   if (climate && !skipTempCheck) {
     const tempCheck = isGrowingPeriodViable(outdoorStart, dates.harvestStart, cultivar, climate, {
-      climateTable,
       method: newMethod,
       establishmentDays: getEstablishmentDays(cultivar, newMethod),
       minEstablishedGrowthTempC: cultivar.minEstablishedGrowthTempC ?? undefined,
@@ -1271,7 +1260,7 @@ export function recalculatePlantingForMethodChange(
       // or extended growing period hitting heat limits). Scan outward from the
       // transplant date in both directions to find the nearest viable direct sow date.
       const latestSow = calculateLatestSowDate(cultivar, frostWindow, climate);
-      const earliestSow = calculateEarliestSowDate(cultivar, frostWindow, 'direct', climate, climateTable);
+      const earliestSow = calculateEarliestSowDate(cultivar, frostWindow, 'direct', climate);
       let foundSowDate: string | null = null;
 
       for (let dist = 1; dist <= 180; dist++) {
@@ -1280,7 +1269,6 @@ export function recalculatePlantingForMethodChange(
         if (fwd <= latestSow) {
           const fwdHarvest = addDays(fwd, cultivar.maturityDays);
           if (isGrowingPeriodViable(fwd, fwdHarvest, cultivar, climate, {
-            climateTable,
             method: 'direct',
             establishmentDays: getEstablishmentDays(cultivar, 'direct'),
             minEstablishedGrowthTempC: cultivar.minEstablishedGrowthTempC ?? undefined,
@@ -1295,7 +1283,6 @@ export function recalculatePlantingForMethodChange(
         if (bwd >= earliestSow) {
           const bwdHarvest = addDays(bwd, cultivar.maturityDays);
           if (isGrowingPeriodViable(bwd, bwdHarvest, cultivar, climate, {
-            climateTable,
             method: 'direct',
             establishmentDays: getEstablishmentDays(cultivar, 'direct'),
             minEstablishedGrowthTempC: cultivar.minEstablishedGrowthTempC ?? undefined,

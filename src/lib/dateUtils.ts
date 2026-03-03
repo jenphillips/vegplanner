@@ -117,6 +117,26 @@ export type ClimateTable = {
 };
 
 /**
+ * Module-level cache for the climate table. Since climate data and year are
+ * static for a session, this avoids rebuilding the table on every call.
+ */
+let cachedClimateTable: { climate: Climate; ct: ClimateTable } | null = null;
+
+/**
+ * Get or build a cached climate lookup table for the given climate and year.
+ * Returns the same table instance when called with the same climate reference
+ * and year, avoiding redundant interpolation work.
+ */
+export function getClimateTable(climate: Climate, year: number): ClimateTable {
+  if (cachedClimateTable && cachedClimateTable.ct.year === year && cachedClimateTable.climate === climate) {
+    return cachedClimateTable.ct;
+  }
+  const ct: ClimateTable = { table: buildDailyClimateTable(climate, year), year };
+  cachedClimateTable = { climate, ct };
+  return ct;
+}
+
+/**
  * Get interpolated climate data for a specific date.
  * Returns all temperature fields interpolated between monthly midpoints.
  */
