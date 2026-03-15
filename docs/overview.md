@@ -111,6 +111,7 @@ src/
 │   ├── dateUtils.ts          # Date manipulation utilities
 │   ├── succession.ts         # Succession window calculation
 │   ├── tasks.ts              # Task generation from plantings
+│   ├── propagationLabels.ts  # Propagation-type-aware task labels
 │   └── gardenLayout.ts       # Layout, collision, and spacing logic
 └── hooks/
     ├── useDataFile.ts        # Generic JSON file access
@@ -125,7 +126,9 @@ data/
 ├── plantings.json            # User's plantings
 ├── tasks.json                # Task completion state
 ├── garden-beds.json          # Bed definitions
-└── placements.json           # Planting placements in beds
+├── placements.json           # Planting placements in beds
+├── plans.json                # Annual planting plans
+└── cultivar-library.json     # User's cultivar library
 ```
 
 ## Key Features

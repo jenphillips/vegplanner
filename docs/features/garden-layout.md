@@ -87,6 +87,8 @@ For containers, plants use optimal packing patterns:
 | 7 | Center + hexagon ring |
 | 8+ | Concentric rings |
 
+`calculateMaxPlantsInContainer()` uses circle-in-circle packing ratios to determine how many plants of a given spacing fit in a container of a given diameter.
+
 ### Growth Visualization
 Plant dots grow over time to show maturity:
 - At planting: 15% of mature radius
@@ -122,6 +124,9 @@ Placements only truly conflict if they occupy the same space at the same time. A
 // - Spatial overlap exists AND
 // - Date ranges overlap (a.start <= b.end AND b.start <= a.end)
 ```
+
+### Bed Overflow
+Plants can overhang bed edges by up to 20% of their footprint's smaller dimension (`BED_OVERFLOW_FRACTION = 0.2`). This allows realistic placement of plants near the edges of beds without forcing them fully inside.
 
 ### Collision Resolution
 When dragging, the canvas finds the nearest valid position using a spiral search pattern:
@@ -178,6 +183,7 @@ The date range spans from the earliest sow date to the latest harvest end across
 ### Drag Operations
 - **Drag planting from sidebar**: Create new placement in bed
 - **Drag placement within bed**: Reposition (with collision avoidance)
+- **Drag placement between beds**: Move a placement from one bed to another on the canvas
 - **Drag bed on canvas**: Reposition the entire bed
 - **Resize placement**: Change grid layout (snaps to valid configurations)
 

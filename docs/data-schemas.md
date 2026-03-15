@@ -28,7 +28,7 @@ type Cultivar = {
   id: string;                    // Unique identifier (e.g., "tomato-san-marzano")
   crop: string;                  // Crop name (e.g., "Tomato")
   variety: string;               // Variety name (e.g., "San Marzano")
-  plantType: PlantType;          // "vegetable" or "flower" (required)
+  plantType: PlantType;          // "vegetable", "herb", or "flower" (required)
 
   // Required timing
   germDaysMin: number;           // Minimum germination days
@@ -40,6 +40,7 @@ type Cultivar = {
   // Optional identification
   family?: string;               // Botanical family for rotation (e.g., "Solanaceae")
   vendor?: string;               // Seed vendor
+  propagationType?: PropagationType; // How the plant is propagated (default: 'seed')
 
   // Method-specific timing (required based on sowMethod)
   preferredMethod?: "direct" | "transplant";  // Default for "either" crops
@@ -77,7 +78,8 @@ type Cultivar = {
 #### Enums
 
 ```typescript
-type PlantType = "vegetable" | "flower";
+type PlantType = "vegetable" | "herb" | "flower";
+type PropagationType = "seed" | "corm" | "bulb" | "tuber" | "division";
 type SowMethod = "direct" | "transplant" | "either";
 type MaturityBasis = "from_sow" | "from_transplant";
 type HarvestStyle = "single" | "continuous";

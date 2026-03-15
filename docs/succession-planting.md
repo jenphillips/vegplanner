@@ -88,12 +88,12 @@ Earliest Sow Date:
 │     Season start = first date where interpolated soil temp >= minGrowingTempC (or >= 0°C if no min set).
 │     Monthly averages are linearly interpolated (midpoint = 15th of each month).
 │     This is fully data-driven — warmer zones get earlier starts, colder zones later.
-├── Frost-tolerant transplant: same climate-derived start for outdoor date, minus indoor lead weeks
+├── Frost-tolerant transplant: same climate-derived start for outdoor date, minus indoorLeadWeeksMax
 ├── Frost-sensitive direct sow: last spring frost + directAfterLsfDays
-└── Frost-sensitive transplant: (last spring frost + transplantAfterLsfDays) - indoor lead weeks
+└── Frost-sensitive transplant: (last spring frost + transplantAfterLsfDays) - indoorLeadWeeksMax
 
 Latest Sow Date:
-├── Frost-sensitive: earliest fall frost - buffer - maturity days
+├── Frost-sensitive: typical (p50) fall frost - maturity days
 └── Frost-tolerant: frost deadline - maturity days
     ├── Default: typical fall frost + 21 days
     └── With minGrowingTempC: extended until soil drops below threshold (see below)
@@ -235,7 +235,7 @@ Options:
 - `minEstablishedGrowthTempC: number` — Lower cold threshold after establishment
 
 ### `calculateFrostDeadline(cultivar, frostWindow, climate?)`
-Calculate the latest date a crop can continue growing in fall. For frost-sensitive crops, returns `earliestFallFrost - 4 days`. For frost-tolerant crops, returns `typicalFallFrost + 21 days` as a baseline, extended further when `minGrowingTempC` is set and soil temps remain above the threshold.
+Calculate the latest date a crop can continue growing in fall. For frost-sensitive crops, returns the typical (p50) first fall frost date — using p50 rather than earliest frost because the day-by-day temperature viability check already rejects windows where temps are too cold to grow. For frost-tolerant crops, returns `typicalFallFrost + 21 days` as a baseline, extended further when `minGrowingTempC` is set and soil temps remain above the threshold.
 
 ### `renumberPlantingsForCrop(allPlantings, cropName, cultivarId, variety?)`
 Renumber succession numbers to match chronological sow date order. Called automatically when plantings are added or dates change.
@@ -279,7 +279,7 @@ Uses `tmax_c` (average daily high) against `maxGrowingTempC - 1°C margin`. Only
 Monthly averages are linearly interpolated to estimate daily values. Each monthly average is assigned to the 15th of its month (midpoint), and values between midpoints are linearly interpolated. This produces smooth temperature transitions instead of abrupt month-boundary changes. For example, if May tmax is 17°C and June tmax is 21°C, the interpolated tmax on June 1 is ~19.1°C rather than jumping from 17 to 21 at the month boundary. December-January wraps are handled correctly. Interpolation utilities are in `src/lib/dateUtils.ts` (`interpolateClimateValue`, `getInterpolatedClimate`).
 
 ### Frost Handling
-- Frost-sensitive crops: must finish harvest before earliest probable frost (minus 4-day buffer)
+- Frost-sensitive crops: must finish harvest before typical (p50) fall frost date
 - Frost-tolerant crops: deadline depends on cold tolerance (see below)
 
 ### Temperature-Aware Frost Deadlines
@@ -298,7 +298,7 @@ This means cold-hardy crops can have fall succession windows that weren't previo
 
 **Spring (supported):** Set `transplantAfterLsfDays` or `directAfterLsfDays` to a negative number to start earlier than the last spring frost. For example, `transplantAfterLsfDays: -14` means "transplant 2 weeks before last frost," representing use of row covers, cold frames, or cloches. For frost-tolerant crops, the algorithm takes the earlier of the frost-based start and the climate-derived season start (when soil/air temp meets `minGrowingTempC`), so negative frost offsets are effective when the temperature threshold is already met.
 
-**Fall (not yet supported per-cultivar):** Frost-sensitive crops end at `earliestFallFrost - 4 days` with no per-cultivar extension. Possible future approaches:
+**Fall (not yet supported per-cultivar):** Frost-sensitive crops end at the typical (p50) fall frost date with no per-cultivar extension. Possible future approaches:
 - A `fallFrostExtensionDays` cultivar field for crops grown under protection
 - Adjusting `firstFallFrost` dates in the climate data (affects all crops globally)
 
@@ -373,7 +373,7 @@ This means cold-hardy crops can have fall succession windows that weren't previo
 
 **Third window (sow July 20):**
 - Harvest start: Sept 8
-- Harvest end: Sept 22 (capped at frost deadline - 4 days)
+- Harvest end: Sept 22 (capped at typical fall frost date)
 
 **Result:** 3 plantings through summer, no gaps (beans thrive in heat)
 
@@ -402,14 +402,14 @@ Step by step:
 2. Earliest sow date: April 13 (June 8 - 8 weeks using `indoorLeadWeeksMax`)
 3. Actual transplant date: May 25 (April 13 + 6 weeks using `indoorLeadWeeksMin`)
 4. Harvest start: July 21 (May 25 + 57 days from transplant)
-5. Harvest end: Sept 11 (earliest frost Sept 15 - 4 day buffer)
+5. Harvest end: Sept 22 (typical fall frost date)
 
 **Temperature check:**
 - Only check from transplant (May 25) through harvest start (July 21)
 - Indoor period (April 13 - May 25) not checked
 - May/June/July all within 10-33°C range → OK ✓
 
-**Result:** Single planting provides continuous harvest July 21 - Sept 11. No succession needed because `harvestDurationDays: null` means it produces until frost.
+**Result:** Single planting provides continuous harvest July 21 - Sept 22. No succession needed because `harvestDurationDays: null` means it produces until frost.
 
 > **Note:** The use of `indoorLeadWeeksMax` for earliest sow allows gardeners to start seeds earlier if desired (up to 8 weeks before transplant), while `indoorLeadWeeksMin` ensures transplants aren't set out too young (minimum 6 weeks old).
 
@@ -530,6 +530,5 @@ All monthly values are linearly interpolated between midpoints (15th of each mon
 | `monthlyAvgC[month].tmax_c` | Heat check - avg daily high (interpolated) |
 | `monthlyAvgC[month].tavg_c` | Cold check for frost-sensitive crops - avg daily temp (interpolated) |
 | `monthlyAvgC[month].soil_avg_c` | Cold check for frost-tolerant crops - avg soil temp at 10cm (interpolated) |
-| `firstFallFrost.earliest` | Frost deadline for frost-sensitive crops |
-| `firstFallFrost.typical` | Extended season end for frost-tolerant crops |
+| `firstFallFrost.typical` | Frost deadline for all crops (frost-sensitive: used directly; frost-tolerant: baseline for +21 day extension) |
 | `lastSpringFrost.typical` | Not used (algorithm uses `frostWindow.lastSpringFrost` instead) |

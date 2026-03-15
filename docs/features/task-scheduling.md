@@ -139,6 +139,10 @@ const displaySowDate = planting.sowDateOverride ?? planting.sowDate;
 
 This ensures the sow_indoor task reflects the user's chosen date rather than the calculated optimal date.
 
+## Propagation-Aware Labels
+
+Task titles and descriptions are propagation-type-aware via `getPropagationLabels()` from `src/lib/propagationLabels.ts`. For cultivars with a non-seed `propagationType`, labels are adjusted accordingly (e.g., "Plant corms" instead of "Direct sow" for gladiolus, "Plant tubers" instead of "Sow seeds" for potatoes).
+
 ## Quantity in Descriptions
 
 Task descriptions include quantity when known:

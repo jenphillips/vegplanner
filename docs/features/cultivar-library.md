@@ -16,7 +16,8 @@ type Cultivar = {
   crop: string;              // "Tomato", "Spinach"
   variety: string;           // "Early Girl", "Bloomsdale"
   family?: string;           // Botanical family for rotation
-  plantType?: PlantType;     // 'vegetable' | 'flower'
+  plantType?: PlantType;     // 'vegetable' | 'herb' | 'flower'
+  propagationType?: PropagationType; // 'seed' | 'corm' | 'bulb' | 'tuber' | 'division'
   vendor?: string;           // Seed source
 
   // Germination & Maturity
