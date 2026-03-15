@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
+import { useMemo, useRef, useState, useCallback, useEffect, useLayoutEffect } from 'react';
 import { Scissors, Copy, Pencil, Trash2 } from 'lucide-react';
 import {
   calculateFootprint,
@@ -12,6 +12,7 @@ import {
   findOverlappingPlacements,
   findNearestValidPosition,
   fitsInBed,
+  BED_OVERFLOW_FRACTION,
   isPlantingInHarvest,
   calculateGrowthFactor,
   calculatePlantDotRadius,
@@ -154,19 +155,22 @@ export function UnifiedGardenCanvas({
     xCm: number;
     yCm: number;
     valid: boolean;
+    targetBedId?: string;
   } | null>(null);
   // Track the last committed move to prevent flash-back during async update
   const [committedMove, setCommittedMove] = useState<{
     placementId: string;
     xCm: number;
     yCm: number;
+    bedId?: string;
   } | null>(null);
 
   // Clear committedMove once the placement data has been updated.
   // Uses the "adjust state during render" pattern instead of useEffect.
   if (committedMove) {
     const placement = placements.find((p) => p.id === committedMove.placementId);
-    if (placement && placement.xCm === committedMove.xCm && placement.yCm === committedMove.yCm) {
+    if (placement && placement.xCm === committedMove.xCm && placement.yCm === committedMove.yCm &&
+        (!committedMove.bedId || placement.bedId === committedMove.bedId)) {
       setCommittedMove(null);
     }
   }
@@ -230,10 +234,20 @@ export function UnifiedGardenCanvas({
   const DRAG_THRESHOLD = 3;
   const justFinishedInteraction = useRef(false);
 
+  // Keep a ref to the current scale so the wheel handler always reads the latest value
+  const scaleRef = useRef(scale);
+  scaleRef.current = scale;
+
+  // Pending scroll position for after zoom render
+  const pendingScrollRef = useRef<{ left: number; top: number } | null>(null);
+
   // Mouse wheel zoom handler - must be native event for passive: false to work
   useEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper || !onZoomChange) return;
+
+    let rafId: number | null = null;
+    let pendingScale: number | null = null;
 
     const handleWheel = (e: WheelEvent) => {
       // Only zoom if Ctrl/Cmd is held (trackpad pinch sets ctrlKey automatically)
@@ -242,6 +256,7 @@ export function UnifiedGardenCanvas({
       e.preventDefault();
       e.stopPropagation();
 
+      const currentScale = scaleRef.current;
       const rect = wrapper.getBoundingClientRect();
 
       // Get mouse position relative to wrapper viewport
@@ -249,36 +264,58 @@ export function UnifiedGardenCanvas({
       const mouseY = e.clientY - rect.top;
 
       // Calculate the point in content coordinates before zoom
-      const contentX = (wrapper.scrollLeft + mouseX) / scale;
-      const contentY = (wrapper.scrollTop + mouseY) / scale;
+      const contentX = (wrapper.scrollLeft + mouseX) / currentScale;
+      const contentY = (wrapper.scrollTop + mouseY) / currentScale;
 
       // Calculate smooth continuous zoom (no snapping)
       const zoomMultiplier = 1 - (e.deltaY * 0.002);
       const minScale = ZOOM_LEVELS[0] * BASE_SCALE;
       const maxScale = ZOOM_LEVELS[ZOOM_LEVELS.length - 1] * BASE_SCALE;
-      const newScale = Math.max(minScale, Math.min(maxScale, scale * zoomMultiplier));
+      const newScale = Math.max(minScale, Math.min(maxScale, currentScale * zoomMultiplier));
 
       // Only update if scale changed meaningfully
-      if (Math.abs(newScale - scale) < 0.001) return;
+      if (Math.abs(newScale - currentScale) < 0.001) return;
 
-      // Calculate new scroll position to keep mouse point stable
-      const newScrollLeft = contentX * newScale - mouseX;
-      const newScrollTop = contentY * newScale - mouseY;
+      // Update ref immediately so next event reads the correct value
+      scaleRef.current = newScale;
 
-      // Update zoom
-      onZoomChange(newScale);
+      // Store scroll target for after render
+      pendingScrollRef.current = {
+        left: Math.max(0, contentX * newScale - mouseX),
+        top: Math.max(0, contentY * newScale - mouseY),
+      };
 
-      // After React re-renders, adjust scroll position
-      requestAnimationFrame(() => {
-        wrapper.scrollLeft = Math.max(0, newScrollLeft);
-        wrapper.scrollTop = Math.max(0, newScrollTop);
-      });
+      // Throttle React state updates to one per animation frame
+      pendingScale = newScale;
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          if (pendingScale !== null) {
+            onZoomChange(pendingScale);
+          }
+          rafId = null;
+          pendingScale = null;
+        });
+      }
     };
 
     // Must use passive: false to allow preventDefault() on wheel events
     wrapper.addEventListener('wheel', handleWheel, { passive: false });
-    return () => wrapper.removeEventListener('wheel', handleWheel);
-  }, [scale, onZoomChange]);
+    return () => {
+      wrapper.removeEventListener('wheel', handleWheel);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, [onZoomChange]);
+
+  // Apply pending scroll position after React re-renders with new scale
+  useLayoutEffect(() => {
+    const wrapper = wrapperRef.current;
+    const pending = pendingScrollRef.current;
+    if (wrapper && pending) {
+      wrapper.scrollLeft = pending.left;
+      wrapper.scrollTop = pending.top;
+      pendingScrollRef.current = null;
+    }
+  }, [scale]);
 
   // Build lookup maps
   const plantingMap = useMemo(
@@ -486,8 +523,9 @@ export function UnifiedGardenCanvas({
 
     const candidate = { xCm, yCm, widthCm, heightCm };
 
-    // Check bed bounds
-    if (!fitsInBed(candidate, { widthCm: bed.widthCm, lengthCm: bed.lengthCm })) {
+    // Check bed bounds (allow small overhang for plants in narrow beds/planters)
+    const overflowCm = BED_OVERFLOW_FRACTION * Math.min(widthCm, heightCm);
+    if (!fitsInBed(candidate, { widthCm: bed.widthCm, lengthCm: bed.lengthCm }, overflowCm)) {
       return false;
     }
 
@@ -925,13 +963,17 @@ export function UnifiedGardenCanvas({
 
       if (isDragging || hasDragged) {
         const { xCm, yCm } = getPositionCm(e);
-        const bed = beds.find((b) => b.id === movingPlacement.bedId);
+
+        // Check if cursor is over a different bed
+        const targetBed = findBedAtPoint(xCm, yCm);
+        const targetBedId = targetBed?.id ?? movingPlacement.bedId;
+        const bed = beds.find((b) => b.id === targetBedId);
         if (!bed) return;
 
         const bedX = bed.positionX ?? 0;
         const bedY = bed.positionY ?? 0;
 
-        // Calculate new position relative to bed
+        // Calculate new position relative to target bed
         const newAbsX = xCm - movingPlacement.offsetXCm;
         const newAbsY = yCm - movingPlacement.offsetYCm;
         const newRelX = snapToGrid(newAbsX - bedX, SNAP_CM);
@@ -942,7 +984,7 @@ export function UnifiedGardenCanvas({
         const clampedY = Math.max(0, Math.min(newRelY, bed.lengthCm - movingPlacement.heightCm));
 
         const valid = isPlacementValid(
-          movingPlacement.bedId,
+          targetBedId,
           clampedX,
           clampedY,
           movingPlacement.widthCm,
@@ -951,7 +993,7 @@ export function UnifiedGardenCanvas({
           movingPlacement.dateRange
         );
 
-        setMovePreview({ xCm: clampedX, yCm: clampedY, valid });
+        setMovePreview({ xCm: clampedX, yCm: clampedY, valid, targetBedId });
       }
     }
 
@@ -1064,14 +1106,15 @@ export function UnifiedGardenCanvas({
     if (movingPlacement && movePreview && hasDragged) {
       let finalX = movePreview.xCm;
       let finalY = movePreview.yCm;
+      const finalBedId = movePreview.targetBedId ?? movingPlacement.bedId;
 
       // If the position is invalid (collision), find the nearest valid position
       if (!movePreview.valid && !allowOverlap) {
-        const bed = beds.find((b) => b.id === movingPlacement.bedId);
+        const bed = beds.find((b) => b.id === finalBedId);
         if (bed) {
           // Get existing placements in this bed for collision check
           const bedPlacements = footprints
-            .filter((f) => f.placement.bedId === movingPlacement.bedId)
+            .filter((f) => f.placement.bedId === finalBedId)
             .map((f) => ({
               id: f.placement.id,
               xCm: f.placement.xCm,
@@ -1083,7 +1126,7 @@ export function UnifiedGardenCanvas({
           // Build date ranges map
           const existingDateRanges = new Map<string, { start: string; end: string }>();
           for (const f of footprints) {
-            if (f.placement.bedId === movingPlacement.bedId && f.dateRange) {
+            if (f.placement.bedId === finalBedId && f.dateRange) {
               existingDateRanges.set(f.placement.id, f.dateRange);
             }
           }
@@ -1121,10 +1164,12 @@ export function UnifiedGardenCanvas({
         placementId: movingPlacement.id,
         xCm: finalX,
         yCm: finalY,
+        bedId: finalBedId !== movingPlacement.bedId ? finalBedId : undefined,
       });
       onPlacementUpdate(movingPlacement.id, {
         xCm: finalX,
         yCm: finalY,
+        ...(finalBedId !== movingPlacement.bedId ? { bedId: finalBedId } : {}),
       });
     }
 
@@ -1634,8 +1679,14 @@ export function UnifiedGardenCanvas({
             let dispCols = cols, dispRows = rows;
 
             if (isBeingMoved && movePreview && hasDragged) {
-              absX = bedX + movePreview.xCm;
-              absY = bedY + movePreview.yCm;
+              // When dragging to a different bed, use that bed's position
+              const targetBed = movePreview.targetBedId && movePreview.targetBedId !== bed.id
+                ? beds.find((b) => b.id === movePreview.targetBedId)
+                : null;
+              const moveBedX = targetBed ? (targetBed.positionX ?? 0) : bedX;
+              const moveBedY = targetBed ? (targetBed.positionY ?? 0) : bedY;
+              absX = moveBedX + movePreview.xCm;
+              absY = moveBedY + movePreview.yCm;
               dispWidth = widthCm;
               dispHeight = heightCm;
             } else if (isBeingResized && resizePreview) {
@@ -1647,8 +1698,13 @@ export function UnifiedGardenCanvas({
               dispRows = resizePreview.rows;
             } else if (committedMove && committedMove.placementId === placement.id) {
               // Use committed position while waiting for async update to complete
-              absX = bedX + committedMove.xCm;
-              absY = bedY + committedMove.yCm;
+              const commitBed = committedMove.bedId
+                ? beds.find((b) => b.id === committedMove.bedId)
+                : null;
+              const commitBedX = commitBed ? (commitBed.positionX ?? 0) : bedX;
+              const commitBedY = commitBed ? (commitBed.positionY ?? 0) : bedY;
+              absX = commitBedX + committedMove.xCm;
+              absY = commitBedY + committedMove.yCm;
               dispWidth = widthCm;
               dispHeight = heightCm;
             } else {
@@ -1753,8 +1809,8 @@ export function UnifiedGardenCanvas({
                             r={plantRadius}
                             fill={isInvalid ? '#ef4444' : color}
                             fillOpacity={isInteracting ? 0.5 : 0.6}
-                            stroke={isInvalid ? '#ef4444' : color}
-                            strokeWidth={2}
+                            stroke={isInteracting ? (isInvalid ? '#ef4444' : color) : 'none'}
+                            strokeWidth={isInteracting ? 2 : 0}
                             strokeDasharray={isInteracting ? '4 2' : 'none'}
                             style={{ pointerEvents: 'none' }}
                           />
@@ -1775,6 +1831,22 @@ export function UnifiedGardenCanvas({
                             style={{ pointerEvents: 'none' }}
                           />
                         ))}
+
+                        {/* Container label */}
+                        {planting && containerRadius > 20 && (
+                          <text
+                            x={containerCenterX}
+                            y={containerCenterY}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fill="#333"
+                            fontSize={Math.min(11, containerRadius * 0.35)}
+                            fontWeight={700}
+                            style={{ pointerEvents: 'none' }}
+                          >
+                            {footprint.cultivar?.crop ?? planting.label.split(' ')[0]}
+                          </text>
+                        )}
                       </>
                     );
                   })()
@@ -1804,8 +1876,8 @@ export function UnifiedGardenCanvas({
                       height={height}
                       fill={isInvalid ? '#ef4444' : color}
                       fillOpacity={isInteracting ? 0.4 : 0.3}
-                      stroke={isInvalid ? '#ef4444' : color}
-                      strokeWidth={2}
+                      stroke={isInteracting ? (isInvalid ? '#ef4444' : color) : 'none'}
+                      strokeWidth={isInteracting ? 2 : 0}
                       strokeDasharray={isInteracting ? '4 2' : 'none'}
                       rx={4}
                       style={{ cursor: isInteracting ? 'grabbing' : 'grab' }}
@@ -1842,20 +1914,57 @@ export function UnifiedGardenCanvas({
                     ))}
 
                     {/* Label */}
-                    {planting && width > 40 && height > 20 && (
-                      <text
-                        x={svgX + width / 2}
-                        y={svgY + height / 2}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fill={isInvalid ? '#ef4444' : color}
-                        fontSize={Math.min(12, height * 0.3)}
-                        fontWeight={600}
-                        style={{ pointerEvents: 'none' }}
-                      >
-                        {footprint.cultivar ? `${footprint.cultivar.crop} ${footprint.cultivar.variety}` : planting.label.split(' ')[0]} {placement.quantity} of {planting.quantity ?? 1}
-                      </text>
-                    )}
+                    {planting && width > 40 && height > 20 && (() => {
+                      const labelColor = isInvalid ? '#b91c1c' : '#333';
+                      const cropName = footprint.cultivar?.crop ?? planting.label.split(' ')[0];
+                      const varietyName = footprint.cultivar?.variety;
+                      const qtyText = `${placement.quantity} of ${planting.quantity ?? 1}`;
+                      const fontSize = Math.min(13, Math.max(9, height * 0.25));
+                      const smallFontSize = fontSize * 0.85;
+                      const showTwoLines = height > 32 && varietyName;
+                      const noEventsStyle: React.CSSProperties = { pointerEvents: 'none' };
+                      return showTwoLines ? (
+                        <text
+                          x={svgX + width / 2}
+                          y={svgY + height / 2}
+                          textAnchor="middle"
+                          style={noEventsStyle}
+                        >
+                          <tspan
+                            x={svgX + width / 2}
+                            dy="-0.45em"
+                            fill={labelColor}
+                            fontSize={fontSize}
+                            fontWeight={700}
+                          >
+                            {cropName}
+                          </tspan>
+                          <tspan
+                            x={svgX + width / 2}
+                            dy="1.25em"
+                            fill={labelColor}
+                            fontSize={smallFontSize}
+                            fontWeight={500}
+                            opacity={0.7}
+                          >
+                            {varietyName} · {qtyText}
+                          </tspan>
+                        </text>
+                      ) : (
+                        <text
+                          x={svgX + width / 2}
+                          y={svgY + height / 2}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fill={labelColor}
+                          fontSize={fontSize}
+                          fontWeight={600}
+                          style={noEventsStyle}
+                        >
+                          {cropName} · {qtyText}
+                        </text>
+                      );
+                    })()}
                   </>
                 )}
 
@@ -2055,21 +2164,54 @@ export function UnifiedGardenCanvas({
                     fillOpacity={0.35}
                   />
                 ))}
-                {planting && width > 40 && height > 20 && (
-                  <text
-                    x={svgX + width / 2}
-                    y={svgY + height / 2}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill={color}
-                    fontSize={Math.min(12, height * 0.3)}
-                    fontWeight={600}
-                    opacity={0.7}
-                    style={{ pointerEvents: 'none' }}
-                  >
-                    {cultivar ? `${cultivar.crop} ${cultivar.variety}` : planting.label.split(' ')[0]} ({suggestion.quantity})
-                  </text>
-                )}
+                {planting && width > 40 && height > 20 && (() => {
+                  const cropName = cultivar?.crop ?? planting.label.split(' ')[0];
+                  const varietyName = cultivar?.variety;
+                  const fontSize = Math.min(13, Math.max(9, height * 0.25));
+                  const smallFontSize = fontSize * 0.85;
+                  const showTwoLines = height > 32 && varietyName;
+                  const noEventsStyle: React.CSSProperties = { pointerEvents: 'none', opacity: 0.7 };
+                  return showTwoLines ? (
+                    <text
+                      x={svgX + width / 2}
+                      y={svgY + height / 2}
+                      textAnchor="middle"
+                      style={noEventsStyle}
+                    >
+                      <tspan
+                        x={svgX + width / 2}
+                        dy="-0.45em"
+                        fill="#333"
+                        fontSize={fontSize}
+                        fontWeight={700}
+                      >
+                        {cropName}
+                      </tspan>
+                      <tspan
+                        x={svgX + width / 2}
+                        dy="1.25em"
+                        fill="#333"
+                        fontSize={smallFontSize}
+                        fontWeight={500}
+                      >
+                        {varietyName} · {suggestion.quantity}
+                      </tspan>
+                    </text>
+                  ) : (
+                    <text
+                      x={svgX + width / 2}
+                      y={svgY + height / 2}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#333"
+                      fontSize={fontSize}
+                      fontWeight={600}
+                      style={noEventsStyle}
+                    >
+                      {cropName} ({suggestion.quantity})
+                    </text>
+                  );
+                })()}
               </g>
             );
           })}
