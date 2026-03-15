@@ -735,7 +735,7 @@ function calculateEarliestSowDate(
     }
 
     // Calculate when to start seeds indoors (before transplant date)
-    const leadWeeks = ensureNumber(cultivar.indoorLeadWeeksMax, 6);
+    const leadWeeks = ensureNumber(cultivar.indoorLeadWeeksMin, 6);
     return addDays(transplantDate, -leadWeeks * 7);
   }
 

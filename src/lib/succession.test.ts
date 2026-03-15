@@ -153,18 +153,17 @@ describe('calculateSuccessionWindows', () => {
       expect(result.windows[0].transplantDate).toBeDefined();
     });
 
-    it('calculates sow date based on indoor lead weeks (uses indoorLeadWeeksMax for earliest)', () => {
+    it('calculates sow date based on indoor lead weeks (uses indoorLeadWeeksMin)', () => {
       const result = calculateSuccessionWindows(
         tomatoCultivar,
         defaultFrostWindow,
         sussexClimate
       );
 
-      // Code uses indoorLeadWeeksMax (8 weeks) for calculating earliest sow date
       // Transplant = June 8 (June 1 + 7 days)
-      // Sow = Transplant - 8 weeks = April 13
-      const expectedTransplant = '2025-05-25'; // April 13 + 6 weeks (indoorLeadWeeksMin used in calculatePlantingDates)
-      const expectedSow = '2025-04-13';
+      // Sow = Transplant - 6 weeks (indoorLeadWeeksMin) = April 27
+      const expectedTransplant = '2025-06-08';
+      const expectedSow = '2025-04-27';
 
       expect(result.windows[0].sowDate).toBe(expectedSow);
       expect(result.windows[0].transplantDate).toBe(expectedTransplant);
@@ -177,9 +176,9 @@ describe('calculateSuccessionWindows', () => {
         sussexClimate
       );
 
-      // Sow: April 13, Transplant: May 25 (April 13 + 6 weeks)
-      // Harvest start: May 25 + 57 days = July 21
-      expect(result.windows[0].harvestStart).toBe('2025-07-21');
+      // Sow: April 13, Transplant: June 8 (April 13 + 8 weeks)
+      // Harvest start: June 8 + 57 days = August 4
+      expect(result.windows[0].harvestStart).toBe('2025-08-04');
     });
   });
 
@@ -404,23 +403,21 @@ describe('Example 3: Tomato Sungold (transplant, harvest until frost)', () => {
     expect(result.windows.length).toBe(1);
   });
 
-  it('sows indoors using indoorLeadWeeksMax for earliest calculation', () => {
-    // Code uses indoorLeadWeeksMax (8 weeks) for calculating earliest sow
+  it('sows indoors using indoorLeadWeeksMin', () => {
     // Transplant after = 7 days from June 1 = June 8
-    // But earliest sow = June 8 - 8 weeks = April 13
-    // Then transplantDate calculated with indoorLeadWeeksMin = April 13 + 6 weeks = May 25
-    expect(result.windows[0].sowDate).toBe('2025-04-13');
+    // Sow = June 8 - 6 weeks (indoorLeadWeeksMin) = April 27
+    expect(result.windows[0].sowDate).toBe('2025-04-27');
   });
 
   it('transplants based on indoorLeadWeeksMin from sow date', () => {
-    // Sow April 13 + 6 weeks = May 25
-    expect(result.windows[0].transplantDate).toBe('2025-05-25');
+    // Sow April 27 + 6 weeks = June 8
+    expect(result.windows[0].transplantDate).toBe('2025-06-08');
   });
 
   it('starts harvest based on maturityDays from transplant', () => {
-    // Transplant: May 25, maturity: 57 days from transplant
-    // Harvest start: May 25 + 57 = July 21
-    expect(result.windows[0].harvestStart).toBe('2025-07-21');
+    // Transplant: June 8, maturity: 57 days from transplant
+    // Harvest start: June 8 + 57 = August 4
+    expect(result.windows[0].harvestStart).toBe('2025-08-04');
   });
 
   it('ends harvest at frost deadline (Oct 1)', () => {
@@ -450,8 +447,8 @@ describe('Example 4: Gai Lan (frost-tolerant, heat-sensitive, transplant)', () =
     // With 1°C margin, soil must reach 8°C
     // Interpolated soil reaches 8°C between Apr 15 (soil=5) and May 15 (soil=10)
     // t = (8-5)/(10-5) = 0.6 → Apr 15 + 18 = May 3
-    // Season start = May 3, transplant from May 3, sow = May 3 - 6 weeks = Mar 22
-    expect(result.diagnostic?.earliestSowDate).toBe('2025-03-22');
+    // Season start = May 3, transplant from May 3, sow = May 3 - 4 weeks (indoorLeadWeeksMin) = Apr 5
+    expect(result.diagnostic?.earliestSowDate).toBe('2025-04-05');
   });
 
   it('does not produce gaps starting before March', () => {
