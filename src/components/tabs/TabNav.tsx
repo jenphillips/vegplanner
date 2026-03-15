@@ -52,7 +52,7 @@ export function TabNav({ activeTab, onTabChange }: TabNavProps) {
         className={`${styles.tab} ${activeTab === 'garden' ? styles.active : ''}`}
         onClick={() => onTabChange('garden')}
       >
-        Garden
+        Layout
       </button>
     </nav>
   );

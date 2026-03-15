@@ -49,7 +49,7 @@ const daysBetweenExclusive = (startIso: string, endIso: string) => {
 // ============================================
 
 export default function Home() {
-  const [expandAll, setExpandAll] = useState(true);
+  const [expandAll, setExpandAll] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('vegetables');
   const {
     plantings,
