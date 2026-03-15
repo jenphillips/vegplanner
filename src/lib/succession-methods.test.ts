@@ -75,8 +75,8 @@ describe('recalculatePlantingForMethodChange', () => {
 
       // Old sowDate (outdoor day) becomes new transplantDate
       expect(updates.transplantDate).toBe('2025-04-01');
-      // New indoor sowDate = transplantDate - 4 weeks (indoorLeadWeeksMax)
-      expect(updates.sowDate).toBe('2025-03-04');
+      // New indoor sowDate = transplantDate - 3 weeks (indoorLeadWeeksMin)
+      expect(updates.sowDate).toBe('2025-03-11');
     });
 
     it('recalculates harvestStart based on maturityBasis', () => {
@@ -103,8 +103,8 @@ describe('recalculatePlantingForMethodChange', () => {
       ));
 
       // maturityBasis is 'from_sow', so harvestStart = sowDate + maturityDays
-      // New sowDate is 2025-03-04 + 45 days = 2025-04-18
-      expect(updates.harvestStart).toBe('2025-04-18');
+      // New sowDate is 2025-03-11 + 45 days = 2025-04-25
+      expect(updates.harvestStart).toBe('2025-04-25');
     });
 
     it('clears sowDateOverride', () => {
@@ -257,10 +257,10 @@ describe('recalculatePlantingForMethodChange', () => {
       ));
 
       // With new behavior: outdoor timing preserved
-      // transplantDate = 2025-04-01 (old sowDate), sowDate = 2025-03-04
-      // harvestStart = 2025-03-04 + 45 = 2025-04-18 (maturityBasis is from_sow)
-      // harvestEnd = harvestStart + harvestDurationDays (21) = 2025-04-18 + 21 = 2025-05-09
-      expect(updates.harvestEnd).toBe('2025-05-09');
+      // transplantDate = 2025-04-01 (old sowDate), sowDate = 2025-03-11
+      // harvestStart = 2025-03-11 + 45 = 2025-04-25 (maturityBasis is from_sow)
+      // harvestEnd = harvestStart + harvestDurationDays (21) = 2025-04-25 + 21 = 2025-05-16
+      expect(updates.harvestEnd).toBe('2025-05-16');
     });
 
     it('caps harvestEnd at frost deadline for frost-sensitive crops', () => {

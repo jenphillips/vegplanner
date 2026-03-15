@@ -128,7 +128,7 @@ describe('LayoutCalendarView', () => {
   });
 
   describe('no plantings in ground', () => {
-    it('shows message when no plantings are in ground on selected date', () => {
+    it('shows out-of-ground plantings as inactive when showAll is true (default)', () => {
       // Create a planting that is NOT in ground on the selected date
       const planting = createPlanting({
         sowDate: '2025-04-01',
@@ -136,7 +136,7 @@ describe('LayoutCalendarView', () => {
         harvestEnd: '2025-07-30', // Ends before selected date
       });
 
-      render(
+      const { container } = render(
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
@@ -149,7 +149,10 @@ describe('LayoutCalendarView', () => {
         />
       );
 
-      expect(screen.getByText(/no plantings in ground on/i)).toBeInTheDocument();
+      // With showAll=true (default), the planting is shown but with inactive class
+      expect(screen.getByText('Tomato #1')).toBeInTheDocument();
+      const plantingRow = container.querySelector('[class*="plantingRow"]');
+      expect(plantingRow?.className).toContain('inactive');
     });
   });
 
@@ -476,7 +479,7 @@ describe('LayoutCalendarView', () => {
   });
 
   describe('filtering by in-ground date', () => {
-    it('filters to only show plantings in ground on selected date', () => {
+    it('shows all plantings by default, with out-of-ground ones marked inactive', () => {
       const plantings = [
         createPlanting({
           id: '1',
@@ -501,7 +504,7 @@ describe('LayoutCalendarView', () => {
         createCultivar({ id: 'cultivar-2' }),
       ];
 
-      render(
+      const { container } = render(
         <LayoutCalendarView
           plantings={plantings}
           cultivars={cultivars}
@@ -514,8 +517,22 @@ describe('LayoutCalendarView', () => {
         />
       );
 
+      // With showAll=true (default), both plantings are shown
       expect(screen.getByText('In Ground')).toBeInTheDocument();
-      expect(screen.queryByText('Harvested')).not.toBeInTheDocument();
+      expect(screen.getByText('Harvested')).toBeInTheDocument();
+
+      // The harvested planting should have the inactive class
+      const plantingRows = container.querySelectorAll('[class*="plantingRow"]');
+      const harvestedRow = Array.from(plantingRows).find((row) =>
+        row.querySelector('[class*="label"]')?.textContent === 'Harvested'
+      );
+      expect(harvestedRow?.className).toContain('inactive');
+
+      // The in-ground planting should NOT have the inactive class
+      const inGroundRow = Array.from(plantingRows).find((row) =>
+        row.querySelector('[class*="label"]')?.textContent === 'In Ground'
+      );
+      expect(inGroundRow?.className).not.toContain('inactive');
     });
 
     it('includes plantings that start on selected date', () => {

@@ -14,7 +14,7 @@ describe('TabNav', () => {
     expect(screen.getByRole('button', { name: /flowers/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /calendar/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /tasks/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /garden/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /layout/i })).toBeInTheDocument();
   });
 
   it.each(tabs)('calls onTabChange with "%s" when clicked', async (tab) => {
@@ -22,7 +22,7 @@ describe('TabNav', () => {
     const onTabChange = vi.fn();
     render(<TabNav activeTab="vegetables" onTabChange={onTabChange} />);
 
-    const tabName = tab.charAt(0).toUpperCase() + tab.slice(1);
+    const tabName = tab === 'garden' ? 'Layout' : tab.charAt(0).toUpperCase() + tab.slice(1);
     await user.click(screen.getByRole('button', { name: tabName }));
 
     expect(onTabChange).toHaveBeenCalledWith(tab);
@@ -33,7 +33,7 @@ describe('TabNav', () => {
     const onTabChange = vi.fn();
     render(<TabNav activeTab={tab} onTabChange={onTabChange} />);
 
-    const tabName = tab.charAt(0).toUpperCase() + tab.slice(1);
+    const tabName = tab === 'garden' ? 'Layout' : tab.charAt(0).toUpperCase() + tab.slice(1);
     const button = screen.getByRole('button', { name: tabName });
 
     expect(button.className).toContain('active');

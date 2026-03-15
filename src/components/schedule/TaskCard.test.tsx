@@ -48,8 +48,8 @@ describe('TaskCard', () => {
   });
 
   it.each([
-    ['sow_indoor', 'Start Indoors'],
-    ['sow_direct', 'Direct Sow'],
+    ['sow_indoor', 'Transplant'],
+    ['sow_direct', 'Direct sow'],
     ['harden_off', 'Harden Off'],
     ['transplant', 'Transplant'],
     ['harvest_start', 'Harvest'],

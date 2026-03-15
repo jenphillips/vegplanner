@@ -288,26 +288,23 @@ describe('LibraryView', () => {
   });
 
   describe('default entry support', () => {
-    it('shows default option when crop row is expanded', async () => {
-      const user = userEvent.setup();
+    it('uses baseline cultivar data for crop header details', () => {
       const cultivars = [
         createCultivar({ id: 'c1', crop: 'Spinach', variety: 'Bloomsdale' }),
       ];
       const baselines = [
-        createCultivar({ id: 'baseline-spinach', crop: 'Spinach', variety: 'Baseline' }),
+        createCultivar({ id: 'baseline-spinach', crop: 'Spinach', variety: 'Baseline', maturityDays: 40 }),
       ];
 
       render(
         <LibraryView cultivars={cultivars} plans={[]} {...defaultProps} baselines={baselines} />
       );
 
-      await user.click(screen.getByText('Spinach'));
-
-      expect(screen.getByText('Default')).toBeInTheDocument();
-      expect(screen.getByText('Bloomsdale')).toBeInTheDocument();
+      // Baseline data is used to display header details like maturity days
+      expect(screen.getByText('40d')).toBeInTheDocument();
     });
 
-    it('shows explanatory hint when default entry exists', async () => {
+    it('shows cultivar cards when expanded (no separate default section)', async () => {
       const user = userEvent.setup();
       const cultivars = [
         createCultivar({ id: 'c1', crop: 'Spinach', variety: 'Bloomsdale' }),
@@ -322,7 +319,8 @@ describe('LibraryView', () => {
 
       await user.click(screen.getByText('Spinach'));
 
-      expect(screen.getByText(/Don't see your variety/)).toBeInTheDocument();
+      // Cultivar cards are shown directly, no "Default" section
+      expect(screen.getByText('Bloomsdale')).toBeInTheDocument();
     });
   });
 
