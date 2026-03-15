@@ -1,1 +1,672 @@
-[]
+[
+  {
+    "plantingId": "1074368b-8e91-469f-8523-4edbaa101e9a",
+    "bedId": "c212ce87-f22e-432a-a06a-9fbe9c1291b0",
+    "xCm": 45,
+    "yCm": 0,
+    "spacingCm": 30,
+    "cols": 1,
+    "quantity": 1,
+    "id": "0c46ab8a-4c7b-4c35-af09-1711ec34c20a"
+  },
+  {
+    "plantingId": "d840decd-9050-425f-a37a-3edc0618383e",
+    "bedId": "c212ce87-f22e-432a-a06a-9fbe9c1291b0",
+    "xCm": 60,
+    "yCm": 5,
+    "spacingCm": 10,
+    "cols": 2,
+    "quantity": 4,
+    "id": "a1279612-9d81-4bd6-814e-4cc04fec3f53"
+  },
+  {
+    "plantingId": "4a54115c-2496-4d93-9e36-7d5bace0827a",
+    "bedId": "f529ee09-5c22-4cb7-ab14-5ae96c8c4ca0",
+    "xCm": 10,
+    "yCm": 5,
+    "spacingCm": 20,
+    "cols": 2,
+    "quantity": 2,
+    "id": "243ca59e-52aa-4c6e-b9b1-7fdd3f7d6ab0"
+  },
+  {
+    "plantingId": "bd516011-7171-45e9-babf-624bd9243d82",
+    "bedId": "ec67c0cb-b35c-4c50-8aed-67554e01cba6",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 60,
+    "cols": 1,
+    "quantity": 5,
+    "id": "7cb0f71b-65e1-41de-9d99-d799bded7be1"
+  },
+  {
+    "plantingId": "c6a130b7-2829-419f-b13a-c4ba5796b8eb",
+    "bedId": "c5b84767-e442-480b-bb9e-9d9235478055",
+    "xCm": 0,
+    "yCm": 5,
+    "spacingCm": 12,
+    "cols": 1,
+    "quantity": 17,
+    "id": "52877fff-d019-4853-b538-a6b7d3d1e6a9"
+  },
+  {
+    "plantingId": "a9c13efb-6b8a-4604-8fd8-4ad500b71bf0",
+    "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
+    "xCm": 65,
+    "yCm": 90,
+    "spacingCm": 5,
+    "cols": 5,
+    "quantity": 120,
+    "id": "b81f469f-b400-492e-b18f-42a95d32ccb3"
+  },
+  {
+    "plantingId": "677ee6dd-5e0d-4a33-a461-3e11a73b80d5",
+    "bedId": "3733de2c-174c-4f9c-8f2e-0c8a649e75f2",
+    "xCm": 10,
+    "yCm": 0,
+    "spacingCm": 40,
+    "cols": 1,
+    "quantity": 3,
+    "id": "b576dd0f-0d66-4797-a43c-36f3f6fae034"
+  },
+  {
+    "plantingId": "51536c0c-ded8-4b57-b347-3f3e1027ec2b",
+    "bedId": "3733de2c-174c-4f9c-8f2e-0c8a649e75f2",
+    "xCm": 10,
+    "yCm": 125,
+    "spacingCm": 38,
+    "cols": 1,
+    "quantity": 2,
+    "id": "24144563-165a-4143-825b-7d4cd1e322e5"
+  },
+  {
+    "plantingId": "c5c19482-8bc2-4232-b601-c6244fd3d15e",
+    "bedId": "3733de2c-174c-4f9c-8f2e-0c8a649e75f2",
+    "xCm": 45,
+    "yCm": 0,
+    "spacingCm": 45,
+    "cols": 1,
+    "quantity": 3,
+    "id": "b0abd8c8-b7c7-4ab4-8a61-27cdab4128da"
+  },
+  {
+    "plantingId": "b2c1f404-f458-4656-8e26-13335ea25851",
+    "bedId": "2628ba69-7f1c-42fa-a97c-ebda08fff750",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 15,
+    "cols": 5,
+    "quantity": 10,
+    "id": "a9f77903-d148-486d-8226-bdecfb14b470"
+  },
+  {
+    "plantingId": "b2c1f404-f458-4656-8e26-13335ea25851",
+    "bedId": "e19fe887-fd76-4974-9ae0-1ba8c41c092a",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 15,
+    "cols": 5,
+    "quantity": 10,
+    "id": "94079d79-cceb-4d4c-8d0b-b17143634bb0"
+  },
+  {
+    "plantingId": "b2c1f404-f458-4656-8e26-13335ea25851",
+    "bedId": "f9d01e7d-4daf-4f31-9828-a7d2d15bf0ae",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 15,
+    "cols": 5,
+    "quantity": 10,
+    "id": "b2fac728-64b8-4b02-9eed-b79beb852182"
+  },
+  {
+    "plantingId": "1f7f5847-3b2b-443b-8243-9531ad96ea6c",
+    "bedId": "bcb1b421-485e-4d92-b1a0-5cbba65d5f33",
+    "xCm": 5,
+    "yCm": 0,
+    "spacingCm": 25,
+    "cols": 1,
+    "quantity": 1,
+    "id": "0b0598f9-1b54-4ed6-98e7-0e749cc09d1c"
+  },
+  {
+    "plantingId": "bb42574d-ad87-44ed-a3b3-b44cde7f8af6",
+    "bedId": "c5b84767-e442-480b-bb9e-9d9235478055",
+    "xCm": 61,
+    "yCm": 180,
+    "spacingCm": 10,
+    "cols": 3,
+    "quantity": 9,
+    "id": "465be6b4-3918-4a32-976c-a219a188a7a4"
+  },
+  {
+    "plantingId": "ffdccab6-d344-40da-b3b5-5c52975fa57a",
+    "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
+    "xCm": 5,
+    "yCm": 150,
+    "spacingCm": 60,
+    "cols": 1,
+    "quantity": 1,
+    "id": "f43290f2-8b71-4ff3-97c1-09dea309af44"
+  },
+  {
+    "plantingId": "29f81ca3-8018-4f98-9f2f-59f7b8f080c5",
+    "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 90,
+    "cols": 1,
+    "quantity": 1,
+    "id": "df3a6c0f-acc4-4f47-af91-f07b6928ea64"
+  },
+  {
+    "plantingId": "c17a0e0d-b9da-4f58-89ce-bf5167633f8e",
+    "bedId": "c5b84767-e442-480b-bb9e-9d9235478055",
+    "xCm": 15,
+    "yCm": 0,
+    "spacingCm": 30,
+    "cols": 1,
+    "quantity": 7,
+    "id": "ba62f342-2856-40ca-87ea-47739e78fcd6"
+  },
+  {
+    "plantingId": "0f9e3da0-c84d-4cad-bf78-86ebcf4d4d6f",
+    "bedId": "c5b84767-e442-480b-bb9e-9d9235478055",
+    "xCm": 60,
+    "yCm": 0,
+    "spacingCm": 30,
+    "cols": 1,
+    "quantity": 6,
+    "id": "925cb47e-868f-43d9-9d2d-550a0535419b"
+  },
+  {
+    "plantingId": "d654e2e6-478f-42b3-a840-8f11ce2150ec",
+    "bedId": "c5b84767-e442-480b-bb9e-9d9235478055",
+    "xCm": 45,
+    "yCm": 10,
+    "spacingCm": 15,
+    "cols": 1,
+    "quantity": 13,
+    "id": "aa09caed-51be-43a4-8110-8d0241a3220c"
+  },
+  {
+    "plantingId": "176fc069-a412-4416-8607-48d6a7292f91",
+    "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
+    "xCm": 5,
+    "yCm": 95,
+    "spacingCm": 10,
+    "cols": 5,
+    "quantity": 30,
+    "id": "610dfc86-99f7-4680-a788-ec4349d0ed62"
+  },
+  {
+    "plantingId": "67f02561-86da-461d-bf1a-03df05ff1dd8",
+    "bedId": "3e295255-0634-477a-8499-4d0d68200d68",
+    "xCm": 5,
+    "yCm": 5,
+    "spacingCm": 10,
+    "cols": 2,
+    "quantity": 4,
+    "id": "1d7792fe-b884-4932-8178-5c7bc33a30d3"
+  },
+  {
+    "plantingId": "7fa5be5b-12a6-402a-bf61-b7ae5aa974c8",
+    "bedId": "c67bc02e-9f1f-45e1-a2dc-3e2be3c19acb",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 8,
+    "cols": 10,
+    "quantity": 20,
+    "id": "590784e2-19a6-4150-97ca-f49705f3e133"
+  },
+  {
+    "plantingId": "5f7c2349-29f1-47d6-aa5f-a388611571a4",
+    "bedId": "08c9e4ff-a772-41b1-9d9c-87dd60e57deb",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 20,
+    "cols": 2,
+    "quantity": 2,
+    "id": "1238f659-df72-4619-b40a-57fff885dd4b"
+  },
+  {
+    "plantingId": "0ad03baa-5ad8-43d5-8ea5-0fe9a176fb7f",
+    "bedId": "bcb1b421-485e-4d92-b1a0-5cbba65d5f33",
+    "xCm": 0,
+    "yCm": 15,
+    "spacingCm": 8,
+    "cols": 4,
+    "quantity": 4,
+    "id": "e0ca4b5a-c876-46a3-82aa-e84f06eb8292"
+  },
+  {
+    "plantingId": "6893018b-e287-430f-a3d3-cf2ed87afe3a",
+    "bedId": "cd53958c-d6ca-4794-b3fb-55c97b8945de",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 15,
+    "cols": 2,
+    "quantity": 4,
+    "id": "49e0d7aa-47f1-426d-b567-d7fd2cbc31fa"
+  },
+  {
+    "plantingId": "fe966adc-7065-44a7-a91b-9dea61a59903",
+    "bedId": "c212ce87-f22e-432a-a06a-9fbe9c1291b0",
+    "xCm": 40,
+    "yCm": 15,
+    "spacingCm": 10,
+    "cols": 4,
+    "quantity": 4,
+    "id": "2111b992-9c21-44ff-8653-d13067788431"
+  },
+  {
+    "plantingId": "d186f75d-af7a-4a4f-8573-9e3684a6d075",
+    "bedId": "c212ce87-f22e-432a-a06a-9fbe9c1291b0",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 20,
+    "cols": 2,
+    "quantity": 2,
+    "id": "78f95963-03a3-4572-8d70-e59c509ad360"
+  },
+  {
+    "plantingId": "dbce178f-a4a4-4f66-a1e1-f36d5a8670f7",
+    "bedId": "cd53958c-d6ca-4794-b3fb-55c97b8945de",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 30,
+    "cols": 1,
+    "quantity": 1,
+    "id": "a86f6149-19e5-4498-a870-88e58bb5dcdd"
+  },
+  {
+    "plantingId": "4732ed23-533c-4415-b507-ea479ec41956",
+    "bedId": "ec67c0cb-b35c-4c50-8aed-67554e01cba6",
+    "xCm": 35,
+    "yCm": 0,
+    "spacingCm": 25,
+    "cols": 1,
+    "quantity": 9,
+    "id": "bc30ece5-700e-4d2b-a795-069cfcfcdf95"
+  },
+  {
+    "plantingId": "4560152e-fc37-420f-9967-c35c5ee5172e",
+    "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
+    "xCm": 65,
+    "yCm": 0,
+    "spacingCm": 20,
+    "cols": 1,
+    "quantity": 3,
+    "id": "82522a60-0027-4bc9-8588-25141989481e"
+  },
+  {
+    "plantingId": "98569cb0-a540-460c-b3c0-2c534ba74b38",
+    "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 15,
+    "cols": 4,
+    "quantity": 4,
+    "id": "95dafd35-cca7-4dd5-9a07-0a63c211564a"
+  },
+  {
+    "plantingId": "806c4c46-0d47-4d89-93c9-d5c3c0c5ccbb",
+    "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
+    "xCm": 0,
+    "yCm": 15,
+    "spacingCm": 20,
+    "cols": 1,
+    "quantity": 4,
+    "id": "42de2324-e808-4c04-ab28-d123119610ca"
+  },
+  {
+    "plantingId": "c5a66b87-10b6-4f1c-a9b6-15910cd749b6",
+    "bedId": "3733de2c-174c-4f9c-8f2e-0c8a649e75f2",
+    "xCm": 55,
+    "yCm": 140,
+    "spacingCm": 35,
+    "cols": 1,
+    "quantity": 1,
+    "id": "00e9a4fd-c6f7-4151-b098-a03eff61fcf8"
+  },
+  {
+    "plantingId": "f441ca68-8867-4104-83dd-1ba9e6185b13",
+    "bedId": "c212ce87-f22e-432a-a06a-9fbe9c1291b0",
+    "xCm": 0,
+    "yCm": 15,
+    "spacingCm": 8,
+    "cols": 4,
+    "quantity": 4,
+    "id": "dbd4d06a-c157-4ea9-bdd7-6419b384fde7"
+  },
+  {
+    "plantingId": "e6318f44-8c15-44b6-a62f-1cd38c678561",
+    "bedId": "c212ce87-f22e-432a-a06a-9fbe9c1291b0",
+    "xCm": 0,
+    "yCm": 15,
+    "spacingCm": 8,
+    "cols": 4,
+    "quantity": 4,
+    "id": "2641c44d-dd51-4702-8617-65455780fef3"
+  },
+  {
+    "plantingId": "2301c7b6-db3a-4481-8f3e-cb879d228ec2",
+    "bedId": "f529ee09-5c22-4cb7-ab14-5ae96c8c4ca0",
+    "xCm": 45,
+    "yCm": 15,
+    "spacingCm": 8,
+    "cols": 4,
+    "quantity": 4,
+    "id": "604a6fdd-818b-4797-948a-bf434cd9075b"
+  },
+  {
+    "plantingId": "acae7aad-d635-417c-8303-05be533f5361",
+    "bedId": "35ca7212-ab5b-44ac-862f-8f1e45845c4a",
+    "xCm": 25,
+    "yCm": 65,
+    "spacingCm": 20,
+    "cols": 3,
+    "quantity": 3,
+    "id": "b1896db2-5346-48f9-a134-123647610da0"
+  },
+  {
+    "plantingId": "6be2e6ac-a38c-479b-a6f4-9f38c30e0b98",
+    "bedId": "2cfe7a12-6d62-4b74-86b1-b485739e7d6a",
+    "xCm": 0,
+    "yCm": 45,
+    "spacingCm": 35,
+    "cols": 1,
+    "quantity": 8,
+    "id": "05e43eb5-dc67-4afe-84f4-3367f449a0d2"
+  },
+  {
+    "plantingId": "0242aa0e-e8f9-44d9-89e8-04309a9a41df",
+    "bedId": "c5b84767-e442-480b-bb9e-9d9235478055",
+    "xCm": 50,
+    "yCm": 0,
+    "spacingCm": 12,
+    "cols": 1,
+    "quantity": 17,
+    "id": "75de506f-0e8e-4d5f-b85e-7850e9cc1b8d"
+  },
+  {
+    "plantingId": "00f0233f-da7d-46e4-8f97-4f43435ca8a1",
+    "bedId": "c5b84767-e442-480b-bb9e-9d9235478055",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 15,
+    "cols": 1,
+    "quantity": 14,
+    "id": "c2cd0ba8-963a-46f5-a2c4-7f2e9493aa27"
+  },
+  {
+    "plantingId": "e7e325a9-c388-4a15-8855-91f7cd8321e2",
+    "bedId": "3733de2c-174c-4f9c-8f2e-0c8a649e75f2",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 15,
+    "cols": 1,
+    "quantity": 14,
+    "id": "3d8fd86d-e39d-4799-9e85-0e398aa3b15c"
+  },
+  {
+    "plantingId": "f2351465-854f-4f86-9eb1-c262f4ae943d",
+    "bedId": "3733de2c-174c-4f9c-8f2e-0c8a649e75f2",
+    "xCm": 50,
+    "yCm": 180,
+    "spacingCm": 10,
+    "cols": 4,
+    "quantity": 12,
+    "id": "8c03b11a-d52c-4596-bfd6-4980db246a50"
+  },
+  {
+    "plantingId": "97d6aa96-984c-48a2-bad9-c7093864e34f",
+    "bedId": "08c9e4ff-a772-41b1-9d9c-87dd60e57deb",
+    "xCm": 0,
+    "yCm": 10,
+    "spacingCm": 15,
+    "cols": 3,
+    "quantity": 3,
+    "id": "951d179a-e293-4585-8013-ce3cd94b31ff"
+  },
+  {
+    "plantingId": "b2c1f404-f458-4656-8e26-13335ea25851",
+    "bedId": "3e295255-0634-477a-8499-4d0d68200d68",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 15,
+    "cols": 5,
+    "quantity": 10,
+    "id": "1e92a45b-2b89-4f47-9949-4c04193582be"
+  },
+  {
+    "plantingId": "d5f724e3-c20c-40d5-a57b-916abaa38368",
+    "bedId": "cd53958c-d6ca-4794-b3fb-55c97b8945de",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 30,
+    "cols": 1,
+    "quantity": 1,
+    "id": "00f0b4fa-952e-4f67-b519-094e92492562"
+  },
+  {
+    "plantingId": "0f0789fa-fff5-4b12-9a74-1c57c97bf61b",
+    "bedId": "f529ee09-5c22-4cb7-ab14-5ae96c8c4ca0",
+    "xCm": 10,
+    "yCm": 0,
+    "spacingCm": 30,
+    "cols": 2,
+    "quantity": 2,
+    "id": "74c5ce1b-10d2-46ba-8c9f-f2f9e0b190c2"
+  },
+  {
+    "plantingId": "8d9bed14-a96a-4425-80e3-38b39ad431a6",
+    "bedId": "f529ee09-5c22-4cb7-ab14-5ae96c8c4ca0",
+    "xCm": 0,
+    "yCm": 5,
+    "spacingCm": 25,
+    "cols": 3,
+    "quantity": 3,
+    "id": "bc911ea9-bc2d-4ce0-932b-1376d70c0b4d"
+  },
+  {
+    "plantingId": "bd8bcd02-0516-4a44-8303-5e7338d9520c",
+    "bedId": "f9d01e7d-4daf-4f31-9828-a7d2d15bf0ae",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 15,
+    "cols": 1,
+    "quantity": 4,
+    "id": "db9cd8f6-4132-4bf0-8c8c-07cd25518bd8"
+  },
+  {
+    "plantingId": "bff88d07-859f-4da3-a939-e02a2cb9b674",
+    "bedId": "08c9e4ff-a772-41b1-9d9c-87dd60e57deb",
+    "xCm": 40,
+    "yCm": 0,
+    "spacingCm": 20,
+    "cols": 2,
+    "quantity": 2,
+    "id": "ac4d7388-698a-442a-8c1b-ea35899f2547"
+  },
+  {
+    "plantingId": "79dd3597-ffac-4525-85b6-2b570f1c9f99",
+    "bedId": "c212ce87-f22e-432a-a06a-9fbe9c1291b0",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 20,
+    "cols": 2,
+    "quantity": 2,
+    "id": "c8cb4b7b-8cab-4a63-9c98-43758c8cd21c"
+  },
+  {
+    "plantingId": "bdbc6f8c-770b-497c-8444-3f50e7b37136",
+    "bedId": "d5dcc565-c001-4d42-99dd-21fd5817475c",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 30,
+    "cols": 1,
+    "quantity": 1,
+    "id": "5d9060f3-c56a-41cb-8a3c-f4aedaa4dae1"
+  },
+  {
+    "plantingId": "68c4d8ec-9916-418b-b1f6-f036be7dec58",
+    "bedId": "c67bc02e-9f1f-45e1-a2dc-3e2be3c19acb",
+    "xCm": 0,
+    "yCm": 5,
+    "spacingCm": 20,
+    "cols": 4,
+    "quantity": 4,
+    "id": "739b8ebf-4669-4a81-86f1-0267105a6e72"
+  },
+  {
+    "plantingId": "9aca83ec-2e7e-42e0-8fd3-88a11913c858",
+    "bedId": "9589613f-3361-42b1-b55c-b1899ec73a32",
+    "xCm": 5,
+    "yCm": 160,
+    "spacingCm": 25,
+    "cols": 1,
+    "quantity": 8,
+    "id": "a83610ca-3255-41c5-8c69-79d6d891f07d"
+  },
+  {
+    "plantingId": "c0927da1-97f5-401c-8415-fa8cd5f42968",
+    "bedId": "25c54d10-fc04-43fb-804c-0ba537cd4eed",
+    "xCm": 5,
+    "yCm": 10,
+    "spacingCm": 25,
+    "cols": 1,
+    "quantity": 1,
+    "id": "8814d008-fe55-45f8-a860-d82d5eb394d4"
+  },
+  {
+    "plantingId": "d16f29a1-481b-4e27-a2c7-fbc413261202",
+    "bedId": "c67bc02e-9f1f-45e1-a2dc-3e2be3c19acb",
+    "xCm": 10,
+    "yCm": 0,
+    "spacingCm": 30,
+    "cols": 2,
+    "quantity": 2,
+    "id": "31866336-b153-444d-b4cc-5f68849b8deb"
+  },
+  {
+    "plantingId": "d16f29a1-481b-4e27-a2c7-fbc413261202",
+    "bedId": "08c9e4ff-a772-41b1-9d9c-87dd60e57deb",
+    "xCm": 10,
+    "yCm": 0,
+    "spacingCm": 30,
+    "cols": 2,
+    "quantity": 2,
+    "id": "52a6c909-18c9-4443-a670-1171b7915e30"
+  },
+  {
+    "plantingId": "63c196c5-63d8-4cd5-a896-9b4485b7c0a5",
+    "bedId": "25c54d10-fc04-43fb-804c-0ba537cd4eed",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 25,
+    "cols": 1,
+    "quantity": 2,
+    "id": "b9b20a08-f2c9-4e5f-b4de-bae0b46b0a62"
+  },
+  {
+    "plantingId": "3eaca8f0-d28e-4779-9037-9153aa7d581d",
+    "bedId": "c212ce87-f22e-432a-a06a-9fbe9c1291b0",
+    "xCm": 0,
+    "yCm": 5,
+    "spacingCm": 10,
+    "cols": 4,
+    "quantity": 4,
+    "id": "4edde6fd-ddb5-4037-b316-fd15dea224e6"
+  },
+  {
+    "plantingId": "54fe970e-d89c-4be4-b577-26266660df46",
+    "bedId": "f529ee09-5c22-4cb7-ab14-5ae96c8c4ca0",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 20,
+    "cols": 4,
+    "quantity": 4,
+    "id": "a5a00f58-2ae3-4e2a-878e-6f4a6ac07574"
+  },
+  {
+    "plantingId": "6925cdb1-0f8a-4330-87db-f6a4eeb6e71d",
+    "bedId": "f529ee09-5c22-4cb7-ab14-5ae96c8c4ca0",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 20,
+    "cols": 2,
+    "quantity": 2,
+    "id": "9034206b-bd24-4403-9752-e97200b8404a"
+  },
+  {
+    "plantingId": "5f866bc9-e0a4-433c-be96-4dfe57986d8e",
+    "bedId": "f529ee09-5c22-4cb7-ab14-5ae96c8c4ca0",
+    "xCm": 31,
+    "yCm": 0,
+    "spacingCm": 25,
+    "cols": 2,
+    "quantity": 2,
+    "id": "427c9323-4781-48af-90d9-39872d74df72"
+  },
+  {
+    "plantingId": "4671e9d0-eae3-425b-bf7d-9b82378c7276",
+    "bedId": "2628ba69-7f1c-42fa-a97c-ebda08fff750",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 10,
+    "cols": 1,
+    "quantity": 4,
+    "id": "31f3d045-f6a4-4a99-8b60-571e4cd35c9d"
+  },
+  {
+    "plantingId": "644003ac-c013-4753-b0ff-72d4b4462d27",
+    "bedId": "25c54d10-fc04-43fb-804c-0ba537cd4eed",
+    "xCm": 0,
+    "yCm": 0,
+    "spacingCm": 25,
+    "cols": 1,
+    "quantity": 1,
+    "id": "b6f6d233-a428-4cc2-9a4b-be079035ae95"
+  },
+  {
+    "plantingId": "59aef56d-0d5a-400f-b291-cb0de0bc62a7",
+    "bedId": "3e295255-0634-477a-8499-4d0d68200d68",
+    "xCm": 5,
+    "yCm": 0,
+    "spacingCm": 15,
+    "cols": 1,
+    "quantity": 3,
+    "id": "4d70dac6-0541-40b8-994e-ab10bb1bdf8d"
+  },
+  {
+    "plantingId": "59aef56d-0d5a-400f-b291-cb0de0bc62a7",
+    "bedId": "f9d01e7d-4daf-4f31-9828-a7d2d15bf0ae",
+    "xCm": 0,
+    "yCm": 10,
+    "spacingCm": 15,
+    "cols": 3,
+    "quantity": 3,
+    "id": "675f54d1-269e-4b73-a9ad-e9c81ae749b5"
+  },
+  {
+    "plantingId": "59aef56d-0d5a-400f-b291-cb0de0bc62a7",
+    "bedId": "e19fe887-fd76-4974-9ae0-1ba8c41c092a",
+    "xCm": 0,
+    "yCm": 5,
+    "spacingCm": 15,
+    "cols": 3,
+    "quantity": 3,
+    "id": "fd328bb0-d575-40cc-8896-7a2fe647d5de"
+  },
+  {
+    "plantingId": "59aef56d-0d5a-400f-b291-cb0de0bc62a7",
+    "bedId": "2628ba69-7f1c-42fa-a97c-ebda08fff750",
+    "xCm": 0,
+    "yCm": 5,
+    "spacingCm": 15,
+    "cols": 3,
+    "quantity": 3,
+    "id": "aa4e4a92-6f54-48bb-b131-c3504faeb03f"
+  }
+]

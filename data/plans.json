@@ -81,15 +81,6 @@
     ]
   },
   {
-    "id": "plan-cucumber-tendergreen-burpless",
-    "cultivarId": "cucumber-tendergreen-burpless",
-    "frostWindowId": "default-frost",
-    "season": "spring",
-    "successionOffsetsDays": [
-      0
-    ]
-  },
-  {
     "id": "plan-tomato-cherry-falls",
     "cultivarId": "tomato-cherry-falls",
     "frostWindowId": "default-frost",
@@ -180,35 +171,8 @@
     ]
   },
   {
-    "id": "plan-baseline-watermelon",
-    "cultivarId": "baseline-watermelon",
-    "frostWindowId": "default-frost",
-    "season": "spring",
-    "successionOffsetsDays": [
-      0
-    ]
-  },
-  {
-    "id": "plan-bean-scarlet-runner",
-    "cultivarId": "bean-scarlet-runner",
-    "frostWindowId": "default-frost",
-    "season": "spring",
-    "successionOffsetsDays": [
-      0
-    ]
-  },
-  {
     "id": "plan-baseline-basil",
     "cultivarId": "baseline-basil",
-    "frostWindowId": "default-frost",
-    "season": "spring",
-    "successionOffsetsDays": [
-      0
-    ]
-  },
-  {
-    "id": "plan-baseline-lemongrass",
-    "cultivarId": "baseline-lemongrass",
     "frostWindowId": "default-frost",
     "season": "spring",
     "successionOffsetsDays": [
@@ -225,8 +189,8 @@
     ]
   },
   {
-    "id": "plan-baseline-shiso",
-    "cultivarId": "baseline-shiso",
+    "id": "plan-baseline-stevia",
+    "cultivarId": "baseline-stevia",
     "frostWindowId": "default-frost",
     "season": "spring",
     "successionOffsetsDays": [
@@ -234,8 +198,260 @@
     ]
   },
   {
-    "id": "plan-baseline-stevia",
-    "cultivarId": "baseline-stevia",
+    "id": "plan-baseline-chamomile",
+    "cultivarId": "baseline-chamomile",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-dill",
+    "cultivarId": "baseline-dill",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-parsley",
+    "cultivarId": "baseline-parsley",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-bok-choy",
+    "cultivarId": "baseline-bok-choy",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-arugula-astro",
+    "cultivarId": "arugula-astro",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-potato-yukon-gold",
+    "cultivarId": "potato-yukon-gold",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-potato-kennebec",
+    "cultivarId": "potato-kennebec",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-cucumber-patio-snacker",
+    "cultivarId": "cucumber-patio-snacker",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-gladiolus",
+    "cultivarId": "baseline-gladiolus",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-eggplant-patio-baby",
+    "cultivarId": "eggplant-patio-baby",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-fennel-orion",
+    "cultivarId": "fennel-orion",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-kale",
+    "cultivarId": "baseline-kale",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-baseline-leek",
+    "cultivarId": "baseline-leek",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-lettuce-black-seeded-simpson",
+    "cultivarId": "lettuce-black-seeded-simpson",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-mustard-mizuna",
+    "cultivarId": "mustard-mizuna",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-parsnip-harris-model",
+    "cultivarId": "parsnip-harris-model",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-turnip-tokyo-cross",
+    "cultivarId": "turnip-tokyo-cross",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-watermelon-sugar-baby",
+    "cultivarId": "watermelon-sugar-baby",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-broccolini-aspabroc",
+    "cultivarId": "broccolini-aspabroc",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-potato-russet-burbank",
+    "cultivarId": "potato-russet-burbank",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-shallot-conservor",
+    "cultivarId": "shallot-conservor",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-celery-tango",
+    "cultivarId": "celery-tango",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-cilantro-calypso",
+    "cultivarId": "cilantro-calypso",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-garlic-spring",
+    "cultivarId": "garlic-spring",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-parsley-root-arat",
+    "cultivarId": "parsley-root-arat",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-pansy-coolwave",
+    "cultivarId": "pansy-coolwave",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-petunia-easy-wave",
+    "cultivarId": "petunia-easy-wave",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-snapdragon-rocket-mix",
+    "cultivarId": "snapdragon-rocket-mix",
+    "frostWindowId": "default-frost",
+    "season": "spring",
+    "successionOffsetsDays": [
+      0
+    ]
+  },
+  {
+    "id": "plan-sweet-alyssum-carpet-of-snow",
+    "cultivarId": "sweet-alyssum-carpet-of-snow",
     "frostWindowId": "default-frost",
     "season": "spring",
     "successionOffsetsDays": [
