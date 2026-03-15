@@ -165,21 +165,25 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
     });
   }, [plantings, plantTypeFilter, cultivarMap]);
 
-  // Filter plantings to those in ground on selected date, then by plant type
+  // Filter plantings to those in ground on selected date (unfiltered by plant type for canvas)
   const inGroundPlantings = useMemo(() => {
-    const inGround = filterPlantingsInGround(filteredPlantings, selectedDate);
-    return inGround;
-  }, [filteredPlantings, selectedDate]);
+    return filterPlantingsInGround(plantings, selectedDate);
+  }, [plantings, selectedDate]);
 
-  // Get plantings with remaining plants to place (either no placements or partial placement)
+  // Get plantings with remaining plants to place (filtered by plant type)
   const plantingsWithRemaining = useMemo(
     () => inGroundPlantings.filter((p) => {
       // If no quantity set, nothing to place
       if (p.quantity == null || p.quantity === 0) return false;
+      // Apply plant type filter
+      if (plantTypeFilter !== 'all') {
+        const cultivar = cultivarMap.get(p.cultivarId);
+        if (cultivar?.plantType !== plantTypeFilter) return false;
+      }
       const remaining = getRemainingQuantity(p, placements);
       return remaining > 0;
     }),
-    [inGroundPlantings, placements]
+    [inGroundPlantings, placements, plantTypeFilter, cultivarMap]
   );
 
   // Filter placements to only those for in-ground plantings
@@ -499,22 +503,6 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
 
   return (
     <div className={styles.container}>
-      {/* Plant List Toolbar */}
-      <div className={styles.toolbar}>
-        <span className={styles.toolbarLabel}>Filter Plant List:</span>
-        <PlantTypeFilter value={plantTypeFilter} onChange={setPlantTypeFilter} />
-      </div>
-
-      {/* Calendar Timeline */}
-      <LayoutCalendarView
-        plantings={filteredPlantings}
-        cultivars={cultivars}
-        frost={frost}
-        climate={climate}
-        selectedDate={selectedDate}
-        onDateChange={setSelectedDate}
-      />
-
       {/* Auto-Layout Confirmation Bar */}
       {autoLayoutSuggestions && (
         <div className={styles.autoLayoutBar}>
@@ -748,6 +736,19 @@ export function GardenView({ plantings, cultivars, frost, climate, loading, onUp
           )}
         </div>
       </div>
+
+      {/* Calendar Timeline */}
+      <LayoutCalendarView
+        plantings={filteredPlantings}
+        cultivars={cultivars}
+        placements={placements}
+        frost={frost}
+        climate={climate}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        plantTypeFilter={plantTypeFilter}
+        onPlantTypeFilterChange={setPlantTypeFilter}
+      />
 
       {/* Bed Editor Modal */}
       {isEditorOpen && (
