@@ -1,14 +1,18 @@
 'use client';
 
+import type { PropagationType } from '@/lib/types';
+import { getPropagationLabels } from '@/lib/propagationLabels';
 import styles from './MethodToggle.module.css';
 
 type MethodToggleProps = {
   currentMethod: 'direct' | 'transplant';
   onChange: (method: 'direct' | 'transplant') => void;
   disabled?: boolean;
+  propagationType?: PropagationType;
 };
 
-export function MethodToggle({ currentMethod, onChange, disabled }: MethodToggleProps) {
+export function MethodToggle({ currentMethod, onChange, disabled, propagationType }: MethodToggleProps) {
+  const labels = getPropagationLabels(propagationType);
   return (
     <div className={styles.toggle}>
       <button
@@ -16,7 +20,7 @@ export function MethodToggle({ currentMethod, onChange, disabled }: MethodToggle
         className={`${styles.option} ${currentMethod === 'direct' ? styles.active : ''}`}
         onClick={() => onChange('direct')}
         disabled={disabled || currentMethod === 'direct'}
-        title="Direct sow outdoors"
+        title={labels.directTooltip}
       >
         DS
       </button>
@@ -25,7 +29,7 @@ export function MethodToggle({ currentMethod, onChange, disabled }: MethodToggle
         className={`${styles.option} ${currentMethod === 'transplant' ? styles.active : ''}`}
         onClick={() => onChange('transplant')}
         disabled={disabled || currentMethod === 'transplant'}
-        title="Start indoors, transplant later"
+        title={labels.indoorTooltip}
       >
         TR
       </button>

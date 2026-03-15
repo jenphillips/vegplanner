@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import type { Cultivar, FrostWindow, Climate, Planting, PlacementDetail } from '@/lib/types';
+import { getMethodLabels, getPropagationLabels } from '@/lib/propagationLabels';
 import {
   calculateSuccessionWindows,
   calculateNextSuccession,
@@ -214,12 +215,7 @@ export function CultivarCard({
       )
     : allWindows.windows.filter((w) => !windowOverlapsPlanting(w));
 
-  const methodLabels =
-    cultivar.sowMethod === 'either'
-      ? ['Direct sow', 'Transplant']
-      : cultivar.sowMethod === 'transplant'
-        ? ['Transplant']
-        : ['Direct sow'];
+  const methodLabels = getMethodLabels(cultivar.sowMethod, cultivar.propagationType);
 
   const tempRange =
     cultivar.minGrowingTempC != null && cultivar.maxGrowingTempC != null
@@ -229,7 +225,7 @@ export function CultivarCard({
   // For perennials, show harvest window info instead of maturity days
   const maturityInfo = cultivar.isPerennial
     ? `Harvest: ${cultivar.harvestDurationDays ?? 42} days, ${cultivar.perennialHarvestStartDaysAfterLSF ?? 14}d after last frost`
-    : `${cultivar.maturityDays} days from ${cultivar.sowMethod === 'transplant' ? 'transplant' : 'direct sow'}`;
+    : `${cultivar.maturityDays} days from ${cultivar.sowMethod === 'transplant' ? 'transplant' : getPropagationLabels(cultivar.propagationType).maturityBasisLabel}`;
 
   return (
     <div className={styles.card}>

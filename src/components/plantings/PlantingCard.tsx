@@ -236,6 +236,7 @@ export function PlantingCard({
             <MethodToggle
               currentMethod={planting.method as 'direct' | 'transplant'}
               onChange={handleMethodChange}
+              propagationType={cultivar.propagationType}
             />
           )}
         </div>

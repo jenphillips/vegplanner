@@ -5,6 +5,7 @@
 
 import type { Planting, Task, TaskType, Cultivar } from './types';
 import { addDays } from './dateUtils';
+import { getPropagationLabels } from './propagationLabels';
 
 const HARDEN_OFF_DAYS_BEFORE_TRANSPLANT = 7;
 
@@ -36,6 +37,7 @@ export function generateTasksFromPlanting(
   const displaySowDate = planting.sowDateOverride ?? planting.sowDate;
   // Format quantity for display, handling undefined
   const quantityStr = planting.quantity != null ? String(planting.quantity) : 'some';
+  const propLabels = getPropagationLabels(cultivar.propagationType);
 
   if (planting.method === 'transplant') {
     // Sow indoor task
@@ -45,8 +47,8 @@ export function generateTasksFromPlanting(
       cultivarId: planting.cultivarId,
       type: 'sow_indoor',
       date: displaySowDate,
-      title: `Start ${planting.label} indoors`,
-      description: `Sow ${quantityStr} seeds`,
+      title: propLabels.indoorTaskTitle(planting.label),
+      description: propLabels.indoorDescription(quantityStr),
     });
 
     // Harden off and transplant tasks (only if transplant date exists)
@@ -58,7 +60,7 @@ export function generateTasksFromPlanting(
         type: 'harden_off',
         date: addDays(planting.transplantDate, -HARDEN_OFF_DAYS_BEFORE_TRANSPLANT),
         title: `Harden off ${planting.label}`,
-        description: 'Move seedlings outdoors during the day',
+        description: propLabels.hardenOffDescription,
       });
 
       tasks.push({
@@ -68,19 +70,19 @@ export function generateTasksFromPlanting(
         type: 'transplant',
         date: planting.transplantDate,
         title: `Transplant ${planting.label}`,
-        description: `Plant out ${quantityStr} seedlings`,
+        description: propLabels.transplantDescription(quantityStr),
       });
     }
   } else {
-    // Direct sow task
+    // Direct sow/plant task
     tasks.push({
       id: `${planting.id}-sow_direct`,
       plantingId: planting.id,
       cultivarId: planting.cultivarId,
       type: 'sow_direct',
       date: displaySowDate,
-      title: `Direct sow ${planting.label}`,
-      description: `Sow ${quantityStr} seeds outdoors`,
+      title: propLabels.directTaskTitle(planting.label),
+      description: propLabels.directDescription(quantityStr),
     });
   }
 

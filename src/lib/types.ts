@@ -11,6 +11,7 @@ export type MaturityBasis = 'from_sow' | 'from_transplant';
 export type Season = 'spring' | 'fall';
 export type HarvestStyle = 'single' | 'continuous';
 export type PlantType = 'vegetable' | 'herb' | 'flower';
+export type PropagationType = 'seed' | 'corm' | 'bulb' | 'tuber' | 'division';
 
 // Yield categories for quantity estimation (more granular for accuracy)
 export type YieldCategory =
@@ -67,6 +68,7 @@ export type Cultivar = {
   variety: string;
   family?: string; // Botanical family (e.g., 'Solanaceae', 'Brassicaceae') for crop rotation
   plantType?: PlantType; // 'vegetable' (default) or 'flower'
+  propagationType?: PropagationType; // 'seed' (default), 'corm', 'bulb', 'tuber', 'division'
   vendor?: string;
   germDaysMin: number;
   germDaysMax: number;

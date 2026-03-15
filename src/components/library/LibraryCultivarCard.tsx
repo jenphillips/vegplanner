@@ -1,6 +1,7 @@
 'use client';
 
 import type { Cultivar } from '@/lib/types';
+import { getMethodLabels } from '@/lib/propagationLabels';
 import styles from './LibraryCultivarCard.module.css';
 
 type LibraryCultivarCardProps = {
@@ -20,12 +21,7 @@ export function LibraryCultivarCard({
   showCropName = true,
   displayName,
 }: LibraryCultivarCardProps) {
-  const methodLabels =
-    cultivar.sowMethod === 'either'
-      ? ['Direct sow', 'Transplant']
-      : cultivar.sowMethod === 'transplant'
-        ? ['Transplant']
-        : ['Direct sow'];
+  const methodLabels = getMethodLabels(cultivar.sowMethod, cultivar.propagationType);
 
   const tempRange =
     cultivar.minGrowingTempC != null && cultivar.maxGrowingTempC != null

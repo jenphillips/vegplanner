@@ -1,6 +1,7 @@
 'use client';
 
-import type { Task, Cultivar, TaskType } from '@/lib/types';
+import type { Task, Cultivar, TaskType, PropagationType } from '@/lib/types';
+import { getPropagationLabels } from '@/lib/propagationLabels';
 import styles from './TaskCard.module.css';
 
 type TaskCardProps = {
@@ -9,13 +10,16 @@ type TaskCardProps = {
   onToggleComplete: (taskId: string) => void;
 };
 
-const TASK_TYPE_LABELS: Record<TaskType, string> = {
-  sow_indoor: 'Start Indoors',
-  sow_direct: 'Direct Sow',
-  harden_off: 'Harden Off',
-  transplant: 'Transplant',
-  harvest_start: 'Harvest',
-};
+function getTaskTypeLabel(type: TaskType, propagationType?: PropagationType): string {
+  if (type === 'sow_direct') return getPropagationLabels(propagationType).directMethodLabel;
+  if (type === 'sow_indoor') return getPropagationLabels(propagationType).indoorMethodLabel;
+  const staticLabels: Partial<Record<TaskType, string>> = {
+    harden_off: 'Harden Off',
+    transplant: 'Transplant',
+    harvest_start: 'Harvest',
+  };
+  return staticLabels[type] ?? type;
+}
 
 const TASK_TYPE_STYLES: Record<TaskType, string> = {
   sow_indoor: 'sow',
@@ -35,7 +39,7 @@ function formatDate(iso: string): string {
   });
 }
 
-export function TaskCard({ task, onToggleComplete }: TaskCardProps) {
+export function TaskCard({ task, cultivar, onToggleComplete }: TaskCardProps) {
   const colorClass = styles[TASK_TYPE_STYLES[task.type]];
 
   return (
@@ -50,7 +54,7 @@ export function TaskCard({ task, onToggleComplete }: TaskCardProps) {
       <div className={styles.content}>
         <div className={styles.row}>
           <span className={`${styles.badge} ${colorClass}`}>
-            {TASK_TYPE_LABELS[task.type]}
+            {getTaskTypeLabel(task.type, cultivar?.propagationType)}
           </span>
           <span className={styles.date}>{formatDate(task.date)}</span>
         </div>
