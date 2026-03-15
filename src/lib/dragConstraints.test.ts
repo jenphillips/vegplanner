@@ -251,8 +251,8 @@ describe('calculateShiftBounds', () => {
 
       // Beets are frost-tolerant, so frost constraint should NOT apply
       // The only constraint should be season start (March 1)
-      // Sow date is March 15, so can go back 14 days to March 1
-      expect(result.minShift).toBe(-14);
+      // Transplant date is May 1, so can go back 61 days to March 1
+      expect(result.minShift).toBe(-61);
       expect(result.minShiftReason).toBe('season');
     });
 

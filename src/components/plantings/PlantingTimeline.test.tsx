@@ -414,13 +414,13 @@ describe('PlantingTimeline', () => {
   });
 
   describe('transplant drag functionality', () => {
-    it('marks sow bar as draggable for transplant with onUpdateSowDate', () => {
+    it('marks sow bar as draggable for transplant-only crops with onShiftPlanting', () => {
       const { container } = render(
         <PlantingTimeline
           planting={createTransplantPlanting()}
           frost={createFrostWindow()}
           cultivar={createTransplantCultivar()}
-          onUpdateSowDate={vi.fn()}
+          onShiftPlanting={vi.fn()}
         />
       );
 
@@ -428,64 +428,51 @@ describe('PlantingTimeline', () => {
       expect(sowBar?.className).toContain('Draggable');
     });
 
-    it('shows drag bounds during transplant sow date drag', () => {
+    it('enters dragging state during transplant-only crop drag', () => {
       const { container } = render(
         <PlantingTimeline
           planting={createTransplantPlanting()}
           frost={createFrostWindow()}
           cultivar={createTransplantCultivar()}
-          onUpdateSowDate={vi.fn()}
+          onShiftPlanting={vi.fn()}
         />
       );
 
       const sowBar = container.querySelector('[class*="barSow"]');
-      const track = container.querySelector('[class*="track"]');
-
-      // Mock getBoundingClientRect for the track element
-      const mockRect = {
-        left: 0,
-        right: 500,
-        width: 500,
-        top: 0,
-        bottom: 30,
-        height: 30,
-        x: 0,
-        y: 0,
-        toJSON: () => {},
-      };
-      vi.spyOn(track as HTMLElement, 'getBoundingClientRect').mockReturnValue(mockRect);
 
       fireEvent.mouseDown(sowBar!);
 
-      const dragBounds = container.querySelector('[class*="dragBounds"]');
-      expect(dragBounds).toBeInTheDocument();
+      // Track should have dragging class
+      const track = container.querySelector('[class*="track"]');
+      expect(track?.className).toContain('Dragging');
 
       // Clean up drag state
       fireEvent.mouseUp(document);
     });
 
-    it('shows drag handle for transplant crops', () => {
+    it('does not show drag handle for transplant-only crops (uses shift-based drag instead)', () => {
       const { container } = render(
         <PlantingTimeline
           planting={createTransplantPlanting()}
           frost={createFrostWindow()}
           cultivar={createTransplantCultivar()}
-          onUpdateSowDate={vi.fn()}
+          onShiftPlanting={vi.fn()}
         />
       );
 
+      // Drag handle is only for "either" crops in transplant mode (sow date adjustment)
       const dragHandle = container.querySelector('[class*="dragHandle"]');
-      expect(dragHandle).toBeInTheDocument();
+      expect(dragHandle).not.toBeInTheDocument();
     });
 
-    it('calls onUpdateSowDate with new dates on drag completion', () => {
-      const onUpdateSowDate = vi.fn();
+    it('calls onShiftPlanting with shift days on drag completion', () => {
+      const onShiftPlanting = vi.fn();
       const { container } = render(
         <PlantingTimeline
           planting={createTransplantPlanting()}
           frost={createFrostWindow()}
           cultivar={createTransplantCultivar()}
-          onUpdateSowDate={onUpdateSowDate}
+          onShiftPlanting={onShiftPlanting}
         />
       );
 
@@ -506,17 +493,14 @@ describe('PlantingTimeline', () => {
       };
       vi.spyOn(track as HTMLElement, 'getBoundingClientRect').mockReturnValue(mockRect);
 
-      // Simulate drag sequence - drag within the track bounds
-      // Position at ~40% of track width which maps to roughly mid-June for a March-November range
+      // Simulate drag sequence - drag right to shift later
       fireEvent.mouseDown(sowBar!, { clientX: 100 });
       fireEvent.mouseMove(document, { clientX: 200 });
       fireEvent.mouseUp(document);
 
-      expect(onUpdateSowDate).toHaveBeenCalledWith(
+      expect(onShiftPlanting).toHaveBeenCalledWith(
         'test-planting-1',
-        expect.any(String), // new sow date
-        expect.any(String), // new harvest start
-        expect.any(String)  // new harvest end
+        expect.any(Number) // shift days
       );
     });
   });

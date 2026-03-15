@@ -14,7 +14,7 @@ export type ShiftBoundsInput = {
   frost: FrostWindow;
   climate?: Climate;
   previousHarvestEnd?: string;
-  isTransplantMode: boolean; // true for transplant "either" crops, false for direct sow
+  isTransplantMode: boolean; // true for any transplant planting, false for direct sow
 };
 
 /**
@@ -48,9 +48,14 @@ export function calculateShiftBounds(input: ShiftBoundsInput): ShiftBounds {
     minShiftReason = 'succession';
   } else {
     // First planting: constrain to season start
+    // For transplant crops, use the transplant (outdoor) date — indoor sowing
+    // before March 1 is normal for crops with long lead times
     const seasonStart = new Date(`${year}-03-01T00:00:00Z`);
+    const constrainedDate = isTransplantMode && planting.transplantDate
+      ? new Date(`${planting.transplantDate}T00:00:00Z`)
+      : sowDate;
     maxShiftEarlier = Math.floor(
-      (sowDate.getTime() - seasonStart.getTime()) / (1000 * 60 * 60 * 24)
+      (constrainedDate.getTime() - seasonStart.getTime()) / (1000 * 60 * 60 * 24)
     );
     minShiftReason = 'season';
   }

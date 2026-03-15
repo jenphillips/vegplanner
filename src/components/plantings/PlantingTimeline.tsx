@@ -43,11 +43,12 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
   const isEitherCrop = cultivar?.sowMethod === 'either';
 
   // Traditional transplant drag (fixed transplant date, adjust sow within lead-week range)
-  const canDragTransplant = isTransplant && cultivar && onUpdateSowDate && !isEitherCrop;
+  // Only for "either" crops — pure transplant crops use shift-based dragging instead
+  const canDragTransplant = isTransplant && cultivar && onUpdateSowDate && isEitherCrop;
 
-  // Shift-based drag for direct sow OR "either" crops in transplant mode
+  // Shift-based drag for direct sow OR any transplant crop
   const canDragDirectSow = isDirectSow && onShiftPlanting;
-  const canDragTransplantShift = isTransplant && isEitherCrop && onShiftPlanting;
+  const canDragTransplantShift = isTransplant && onShiftPlanting;
 
   // Calculate drag bounds based on indoor lead weeks (for transplants)
   const dragBounds = useMemo(() => {
@@ -123,6 +124,30 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
     // Close final range if we ended in a viable position
     if (rangeStart !== null) {
       ranges.push({ minShift: rangeStart, maxShift: shiftBounds.maxShift });
+    }
+
+    // If current position (shift=0) isn't in any viable range, extend the nearest
+    // range to include it. The planting is already here — temperature constraints
+    // should prevent dragging INTO bad zones, not snap away from the starting position.
+    if (!currentViable && ranges.length > 0) {
+      let nearestIdx = 0;
+      let nearestDist = Infinity;
+      for (let i = 0; i < ranges.length; i++) {
+        const dist = ranges[i].minShift > 0
+          ? ranges[i].minShift
+          : ranges[i].maxShift < 0
+            ? -ranges[i].maxShift
+            : 0;
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearestIdx = i;
+        }
+      }
+      if (ranges[nearestIdx].minShift > 0) {
+        ranges[nearestIdx].minShift = 0;
+      } else if (ranges[nearestIdx].maxShift < 0) {
+        ranges[nearestIdx].maxShift = 0;
+      }
     }
 
     return {
@@ -491,9 +516,8 @@ export function PlantingTimeline({ planting, frost, climate, cultivar, previousH
   const barPositions = useMemo(() => {
     const { clampPct } = staticTimeline;
 
-    // For direct sow shifting, calculate shifted dates during drag
-    // For both direct sow and transplant "either" crops, apply shift during drag
-    const isShifting = (isDirectSow || (isTransplant && isEitherCrop)) && shiftDays !== 0;
+    // Apply shift during drag for direct sow and all transplant crops
+    const isShifting = (isDirectSow || isTransplant) && shiftDays !== 0;
     const shiftedSowDate = isShifting ? addDays(planting.sowDate, shiftDays) : planting.sowDate;
     const shiftedTransplantDate = isShifting && planting.transplantDate ? addDays(planting.transplantDate, shiftDays) : planting.transplantDate;
     const shiftedHarvestStart = isShifting ? addDays(planting.harvestStart, shiftDays) : planting.harvestStart;
