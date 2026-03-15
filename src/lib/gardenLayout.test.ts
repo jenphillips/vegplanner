@@ -9,6 +9,7 @@ import {
   findOverlappingPlacements,
   findNearestValidPosition,
   fitsInBed,
+  BED_OVERFLOW_FRACTION,
   getCropColor,
   getSeasonDateRange,
   autoLayout,
@@ -285,6 +286,41 @@ describe('fitsInBed', () => {
     expect(fitsInBed({ xCm: -10, yCm: 0, widthCm: 60, heightCm: 60 }, bed)).toBe(
       false
     );
+  });
+
+  describe('with overflow tolerance', () => {
+    // Narrow planter: 81cm long × 25cm wide (like a window box)
+    const narrowBed = { widthCm: 25, lengthCm: 81 };
+
+    it('allows 30cm plant in 25cm-wide bed with overflow', () => {
+      const plant = { xCm: 0, yCm: 0, widthCm: 30, heightCm: 30 };
+      const overflowCm = BED_OVERFLOW_FRACTION * 30; // 6cm
+      // Without overflow: 30 > 25, fails
+      expect(fitsInBed(plant, narrowBed)).toBe(false);
+      // With overflow: 30 <= 25 + 6 = 31, passes
+      expect(fitsInBed(plant, narrowBed, overflowCm)).toBe(true);
+    });
+
+    it('rejects 60cm plant in 25cm-wide bed even with overflow', () => {
+      const plant = { xCm: 0, yCm: 0, widthCm: 60, heightCm: 60 };
+      const overflowCm = BED_OVERFLOW_FRACTION * 60; // 12cm
+      // 60 > 25 + 12 = 37, still fails
+      expect(fitsInBed(plant, narrowBed, overflowCm)).toBe(false);
+    });
+
+    it('allows small negative positions within overflow', () => {
+      const plant = { xCm: -3, yCm: 0, widthCm: 30, heightCm: 30 };
+      const overflowCm = BED_OVERFLOW_FRACTION * 30; // 6cm
+      // -3 >= -6, passes
+      expect(fitsInBed(plant, narrowBed, overflowCm)).toBe(true);
+    });
+
+    it('does not affect placements that already fit', () => {
+      const plant = { xCm: 0, yCm: 0, widthCm: 20, heightCm: 20 };
+      const overflowCm = BED_OVERFLOW_FRACTION * 20; // 4cm
+      expect(fitsInBed(plant, narrowBed)).toBe(true);
+      expect(fitsInBed(plant, narrowBed, overflowCm)).toBe(true);
+    });
   });
 });
 
@@ -1344,48 +1380,55 @@ describe('calculateMaxPlantsInContainer', () => {
     expect(calculateMaxPlantsInContainer(-10, 30)).toBe(0);
   });
 
-  it('returns 1 for container barely fitting one plant', () => {
-    // 30cm container, 30cm spacing = 1 plant
-    expect(calculateMaxPlantsInContainer(30, 30)).toBe(1);
+  it('returns 0 when plant is too large for container even with tolerance', () => {
+    // 10cm container, 15cm spacing: effectiveRatio = 0.8
+    expect(calculateMaxPlantsInContainer(10, 15)).toBe(0);
   });
 
-  it('returns 1 for small ratio', () => {
-    // Container diameter < 1.5x plant spacing
+  it('returns 1 for container fitting one plant', () => {
+    // 30cm container, 30cm spacing: effectiveRatio = 1.2
+    expect(calculateMaxPlantsInContainer(30, 30)).toBe(1);
+    // 40cm container, 30cm spacing: effectiveRatio = 1.6
     expect(calculateMaxPlantsInContainer(40, 30)).toBe(1);
   });
 
-  it('returns 2 for ratio between 1.5 and 2.2', () => {
-    // 60cm container, 30cm spacing = ratio 2.0
-    expect(calculateMaxPlantsInContainer(60, 30)).toBe(2);
+  it('returns 2 for effectiveRatio between 2.0 and 2.1', () => {
+    // 50cm container, 30cm spacing: effectiveRatio = 2.0
+    expect(calculateMaxPlantsInContainer(50, 30)).toBe(2);
   });
 
-  it('returns 3 for ratio between 2.2 and 2.8', () => {
-    // 75cm container, 30cm spacing = ratio 2.5
-    expect(calculateMaxPlantsInContainer(75, 30)).toBe(3);
+  it('returns 3 for effectiveRatio between 2.1 and 2.4', () => {
+    // 55cm container, 30cm spacing: effectiveRatio = 2.2
+    expect(calculateMaxPlantsInContainer(55, 30)).toBe(3);
   });
 
-  it('returns 4 for ratio between 2.8 and 3.2', () => {
-    // 90cm container, 30cm spacing = ratio 3.0
-    expect(calculateMaxPlantsInContainer(90, 30)).toBe(4);
+  it('returns 4 for 12-inch pot with 15cm spacing', () => {
+    // 30cm container, 15cm spacing: effectiveRatio = 2.4
+    expect(calculateMaxPlantsInContainer(30, 15)).toBe(4);
+    // 60cm container, 30cm spacing: effectiveRatio = 2.4
+    expect(calculateMaxPlantsInContainer(60, 30)).toBe(4);
   });
 
-  it('returns 5 for ratio between 3.2 and 3.8', () => {
-    // 105cm container, 30cm spacing = ratio 3.5
-    expect(calculateMaxPlantsInContainer(105, 30)).toBe(5);
+  it('returns 5 for effectiveRatio between 2.6 and 3.0', () => {
+    // 70cm container, 30cm spacing: effectiveRatio = 2.8
+    expect(calculateMaxPlantsInContainer(70, 30)).toBe(5);
   });
 
-  it('returns 6 for ratio between 3.8 and 4.2', () => {
-    // 120cm container, 30cm spacing = ratio 4.0
-    expect(calculateMaxPlantsInContainer(120, 30)).toBe(6);
+  it('returns 7 for effectiveRatio between 3.0 and 3.3 (hex ring + center)', () => {
+    // 82cm container, 30cm spacing: effectiveRatio = 3.28
+    expect(calculateMaxPlantsInContainer(82, 30)).toBe(7);
   });
 
-  it('returns 7 for ratio between 4.2 and 5.0', () => {
-    // 140cm container, 30cm spacing = ratio ~4.67
-    expect(calculateMaxPlantsInContainer(140, 30)).toBe(7);
+  it('respects custom tolerance factor', () => {
+    // 30cm container, 15cm spacing, no tolerance: ratio = 2.0
+    expect(calculateMaxPlantsInContainer(30, 15, 1.0)).toBe(2);
+    // With tolerance 1.4: effectiveRatio = 2.8 → 5
+    expect(calculateMaxPlantsInContainer(30, 15, 1.4)).toBe(5);
+    // With tolerance 1.5: effectiveRatio = 3.0 → 7 (hex + center)
+    expect(calculateMaxPlantsInContainer(30, 15, 1.5)).toBe(7);
   });
 
   it('returns area-based estimate for large containers', () => {
-    // Very large container should use area calculation
     const result = calculateMaxPlantsInContainer(300, 30);
     expect(result).toBeGreaterThan(7);
     // Should be roughly (pi * 150^2) / (pi * 15^2) * 0.9 ≈ 90

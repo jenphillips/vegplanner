@@ -8,6 +8,9 @@ import type {
   Cultivar,
 } from './types';
 
+/** Fraction of plant diameter allowed to overhang bed edges (20%) */
+export const BED_OVERFLOW_FRACTION = 0.2;
+
 /**
  * Calculate the footprint (dimensions) of a planting based on quantity and spacing.
  * Uses a square-ish grid arrangement.
@@ -320,19 +323,19 @@ export function findOverlappingPlacements(
 
 /**
  * Check if a placement fits within bed boundaries.
- * For containers (circles), uses bounding box check - strict circular
- * bounds checking is deferred for simplicity.
+ * Accepts an optional overflowCm to allow plants to overhang edges
+ * (e.g. in narrow planters where plants drape over the sides).
  */
 export function fitsInBed(
   placement: { xCm: number; yCm: number; widthCm: number; heightCm: number },
-  bed: { widthCm: number; lengthCm: number; shape?: 'bed' | 'container' }
+  bed: { widthCm: number; lengthCm: number; shape?: 'bed' | 'container' },
+  overflowCm: number = 0
 ): boolean {
-  // For containers, lengthCm equals widthCm (diameter), so this works as a square bounding box
   return (
-    placement.xCm >= 0 &&
-    placement.yCm >= 0 &&
-    placement.xCm + placement.widthCm <= bed.widthCm &&
-    placement.yCm + placement.heightCm <= bed.lengthCm
+    placement.xCm >= -overflowCm &&
+    placement.yCm >= -overflowCm &&
+    placement.xCm + placement.widthCm <= bed.widthCm + overflowCm &&
+    placement.yCm + placement.heightCm <= bed.lengthCm + overflowCm
   );
 }
 
@@ -351,14 +354,17 @@ function findFirstValidPosition(
   }>,
   step: number = 5
 ): { xCm: number; yCm: number } | null {
-  for (let y = 0; y <= bed.lengthCm - footprint.heightCm; y += step) {
-    for (let x = 0; x <= bed.widthCm - footprint.widthCm; x += step) {
+  const overflowCm = BED_OVERFLOW_FRACTION * Math.min(footprint.widthCm, footprint.heightCm);
+  for (let y = 0; y <= bed.lengthCm - footprint.heightCm + overflowCm; y += step) {
+    for (let x = 0; x <= bed.widthCm - footprint.widthCm + overflowCm; x += step) {
       const candidate = {
         xCm: x,
         yCm: y,
         widthCm: footprint.widthCm,
         heightCm: footprint.heightCm,
       };
+
+      if (!fitsInBed(candidate, bed, overflowCm)) continue;
 
       // Check against existing footprints (no id needed for collision check)
       const existingWithIds = existingFootprints.map((f, i) => ({
@@ -1004,10 +1010,10 @@ export function getCirclePackingPositions(
 
 /**
  * Calculate how many plants of a given size can fit in a container.
- * Uses the ratio of container diameter to plant spacing.
+ * Uses optimal circle-in-circle packing ratios with edge tolerance.
  *
  * @param containerDiameter - Container diameter in cm
- * @param plantSpacing - Plant spacing in cm
+ * @param plantSpacing - Plant spacing in cm (center-to-center)
  * @param toleranceFactor - How much plants can overlap edges (default 1.2 = 20%)
  * @returns Maximum number of plants that fit
  */
@@ -1018,24 +1024,22 @@ export function calculateMaxPlantsInContainer(
 ): number {
   if (plantSpacing <= 0 || containerDiameter <= 0) return 0;
 
-  // Available radius for plant centers (accounting for plant size)
-  const usableRadius = (containerDiameter / 2) * toleranceFactor - plantSpacing / 2;
+  // Apply tolerance: plants near edges can overhang the container rim.
+  // This gives us the effective packing ratio.
+  const effectiveRatio = (containerDiameter / plantSpacing) * toleranceFactor;
 
-  if (usableRadius <= 0) {
-    // Only room for 1 plant at center (which can spill over)
-    return plantSpacing <= containerDiameter * toleranceFactor ? 1 : 0;
-  }
+  if (effectiveRatio < 1.0) return 0;
 
-  // How many plant radii fit in the usable space?
-  const ratio = containerDiameter / plantSpacing;
-
-  if (ratio < 1.5) return 1;
-  if (ratio < 2.2) return 2;
-  if (ratio < 2.8) return 3;
-  if (ratio < 3.2) return 4;
-  if (ratio < 3.8) return 5;
-  if (ratio < 4.2) return 6;
-  if (ratio < 5.0) return 7;
+  // Thresholds derived from optimal circle-in-circle packing ratios (D/d):
+  //   N=2: 2.000, N=3: 2.155, N=4: 2.414, N=5: 2.613, N=6: 3.000, N=7: 3.000
+  // Thresholds are rounded down slightly since spacing is a guideline, not rigid.
+  // At ratio 3.0, both 6 and 7 circles fit (hex ring + center), so we skip to 7.
+  if (effectiveRatio < 2.0) return 1;
+  if (effectiveRatio < 2.1) return 2;
+  if (effectiveRatio < 2.4) return 3;
+  if (effectiveRatio < 2.6) return 4;
+  if (effectiveRatio < 3.0) return 5;
+  if (effectiveRatio < 3.3) return 7; // hex ring + center
 
   // For large containers, estimate based on area
   const containerArea = Math.PI * Math.pow(containerDiameter / 2, 2);
