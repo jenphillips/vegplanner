@@ -39,19 +39,81 @@
 
 .quantity {
   flex-shrink: 0;
+  width: 32px;
   font-size: 11px;
   color: var(--muted, #5f6653);
   background: #e8e8e4;
-  padding: 1px 6px;
+  padding: 1px 0;
   border-radius: 999px;
   white-space: nowrap;
-  min-width: 24px;
   text-align: center;
 }
 
 .quantityUnset {
   color: var(--muted, #999);
   font-style: normal;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.searchInput {
+  flex: 1;
+  max-width: 240px;
+  padding: 4px 8px;
+  border: 1px solid var(--border, #e5e5de);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--text, #1f2614);
+  background: var(--background, #fff);
+  outline: none;
+}
+
+.searchInput:focus {
+  border-color: var(--accent, #2f6f4e);
+}
+
+.showAllToggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted, #5f6653);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.showAllToggle input {
+  accent-color: var(--accent, #2f6f4e);
+}
+
+/* Placed indicators */
+.placedStatus {
+  flex-shrink: 0;
+  width: 36px;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.placedCheck {
+  composes: placedStatus;
+  color: var(--accent, #2f6f4e);
+}
+
+.placedPartial {
+  composes: placedStatus;
+  color: var(--muted, #5f6653);
+}
+
+/* Inactive (not in ground) rows */
+.plantingRow.inactive {
+  opacity: 0.4;
 }
 
 /* Empty States */

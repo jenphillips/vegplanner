@@ -14,12 +14,14 @@
   gap: 12px;
 }
 
-/* Info section - matches LayoutCalendarView row */
+/* Info section - width matches LayoutCalendarView planting row fixed columns:
+   label(180) + gap(12) + quantity(32) + gap(12) + placedStatus(36) = 272px */
 .info {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  width: 272px;
 }
 
 .dateLabel {
@@ -161,10 +163,10 @@
   gap: 12px;
 }
 
-/* Spacer matches info section: 180px label + 12px gap + ~36px quantity badge */
+/* Spacer matches info section width (272px) */
 .labelsSpacer {
   flex-shrink: 0;
-  width: 228px;
+  width: 272px;
 }
 
 .labels {

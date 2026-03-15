@@ -97,9 +97,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-06-15"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -111,9 +114,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-06-15"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -134,9 +140,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-09-01" // After harvest ends
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -157,9 +166,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01" // During harvest period
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -176,9 +188,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -195,9 +210,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -222,9 +240,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={plantings}
           cultivars={cultivars}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -243,9 +264,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar({ id: 'different-cultivar' })]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -261,9 +285,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -287,9 +314,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={plantings}
           cultivars={cultivars}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -306,9 +336,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -324,9 +357,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -369,9 +405,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={plantings}
           cultivars={cultivars}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -414,9 +453,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={plantings}
           cultivars={cultivars}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -463,9 +505,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={plantings}
           cultivars={cultivars}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -484,9 +529,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -504,9 +552,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -522,10 +573,13 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           climate={createClimate()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -541,9 +595,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -562,9 +619,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[createCultivar()]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={onDateChange}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -600,9 +660,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={plantings}
           cultivars={cultivars}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
@@ -618,9 +681,12 @@ describe('LayoutCalendarView', () => {
         <LayoutCalendarView
           plantings={[planting]}
           cultivars={[]}
+          placements={[]}
           frost={createFrostWindow()}
           selectedDate="2025-08-01"
           onDateChange={vi.fn()}
+          plantTypeFilter="all"
+          onPlantTypeFilterChange={vi.fn()}
         />
       );
 
